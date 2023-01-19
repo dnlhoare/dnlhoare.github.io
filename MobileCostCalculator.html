@@ -1,0 +1,75 @@
+<form>
+  <label for="monthly-cost">Monthly cost:</label>
+  <input type="number" id="monthly-cost" oninput="calculateTotalCost()">
+
+  <label for="cpi2023">Expected CPI % increase 2023:</label>
+  <input type="number" id="cpi2023" oninput="calculateTotalCost()">
+
+  <label for="cpi2024">Expected CPI % increase 2024:</label>
+  <input type="number" id="cpi2024" oninput="calculateTotalCost()">
+
+  <br>
+  <label for="total-cost">Advertised Total cost over 2 years:</label>
+  <span id="adv-total-cost-output"></span>
+  <br>
+  <label for="total-cost">Total cost over 2 years:</label>
+  <span id="total-cost-output"></span>
+</form>
+
+<script>
+function calculateTotalCost() {
+  var monthlyCost = document.getElementById("monthly-cost").value;
+  var cpi2023 = Number(document.getElementById("cpi2023").value);
+  var cpi2024 = Number(document.getElementById("cpi2024").value);
+  var months = 24;
+  var startMonth = 2;
+  
+  var yearOneIncrease = 1.0 + ((3.9+cpi2023)/100);
+  var yearTwoIncrease = yearOneIncrease * (1.0 + ((3.9+cpi2024)/100));
+  var totalCost = monthlyCost * startMonth + (12 * monthlyCost * yearOneIncrease) + ((12-startMonth) * monthlyCost * yearTwoIncrease);
+  
+  var totalAdvCost = monthlyCost * 24;
+  
+  document.getElementById("total-cost-output").innerHTML = totalCost.toFixed(2);
+  document.getElementById("adv-total-cost-output").innerHTML = totalAdvCost.toFixed(2);
+  
+}
+
+</script>
+
+<style>
+form {
+  width: 60%;
+  margin: 0 auto;
+  padding: 20px;
+  background: #1f1f1f;
+  color: #fff;
+  text-align: center;
+  font-size: 1.2em;
+  border-radius: 10px;
+}
+
+label {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: block;
+}
+
+input[type="number"] {
+  padding: 10px;
+  width: 100%;
+  margin-bottom: 20px;
+  background: #ff0000;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+}
+
+#total-cost-output {
+  font-size: 1.2em;
+  margin-top: 20px;
+  display: block;
+}
+
+</style>
