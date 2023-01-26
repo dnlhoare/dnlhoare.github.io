@@ -24,9 +24,9 @@ def ChatGPTQuery(queryIn,maxTokensIn=2000):
 
     return response.choices[0].text
 
-def WriteBook(title):
+def WriteBook(title,numChapters=8):
     bookTopic = title
-    query = "Give a list of 8 chapter titles for a book about {}".format(bookTopic)
+    query = "Give a list of {} chapter titles for a book about {}".format(numChapters,bookTopic)
     maxTokens = modelMaxTokens[currentModel] - len(query)
     chaptersText = ChatGPTQuery(query,maxTokens)
     print("Chapter Titles Query Results:")
@@ -76,5 +76,14 @@ import sys
 
 if __name__ == "__main__":
     print(f"Arguments count: {len(sys.argv)}")
+    bookTopic = ""
+    numChapters = 8
     for i, arg in enumerate(sys.argv):
         print(i,arg)
+        if i == 1:
+            bookTopic = arg
+        elif i == 2:
+            numChapters = int(arg)
+
+    WriteBook(bookTopic,numChapters)
+    
