@@ -2,7 +2,9 @@ import os
 import openai
 import json
 
-openai.api_key = "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"#os.getenv("OPENAI_API_KEY")
+openai.api_key = "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"
+openai.api_key = "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"
+#os.getenv("OPENAI_API_KEY")
 
 modelMaxTokens = {
     "text-ada-001": 2049,
@@ -86,4 +88,4 @@ if __name__ == "__main__":
             numChapters = int(arg)
 
     WriteBook(bookTopic,numChapters)
-    
+
