@@ -4,7 +4,7 @@ import json
 
 openai.api_key = "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"
 openai.api_key = "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"
-#os.getenv("OPENAI_API_KEY")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 modelMaxTokens = {
     "text-ada-001": 2049,
@@ -87,5 +87,12 @@ if __name__ == "__main__":
         elif i == 2:
             numChapters = int(arg)
 
+    if len(bookTopic) == 0:
+        print("No book topic given")
+        randomTopic = ChatGPTQuery("Give me a random topic for a book")
+        print("Using an AI random generated one instead: {}".format(randomTopic))
+        bookTopic = randomTopic
+
     WriteBook(bookTopic,numChapters)
+
 
