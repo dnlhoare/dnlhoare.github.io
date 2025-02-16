@@ -23,22 +23,26 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
+            display: block;
         }
-        body {
+        .overlay-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             color: white;
             font-size: 3rem;
             font-family: Arial, sans-serif;
             text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
-            position: relative;
             z-index: 10;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
-    DJHDev.co.uk
+    <div class="overlay-text">DJHDev.co.uk</div>
     <canvas id="webglCanvas"></canvas>
     <script>
         let scene, camera, renderer, texture, depthTexture, material, mesh;
@@ -52,7 +56,7 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
             
-            const geometry = new THREE.PlaneGeometry(2, 2);
+            const geometry = new THREE.PlaneGeometry(window.innerWidth / window.innerHeight * 2, 2);
             const loader = new THREE.TextureLoader();
             texture = loader.load('scene01.webp');
             depthTexture = loader.load('f038d901-d44e-46f7-a5c0-5a9c95b6201f.png');
@@ -87,6 +91,7 @@
             mesh = new THREE.Mesh(geometry, material);
             scene.add(mesh);
             
+            window.addEventListener('resize', onWindowResize);
             window.addEventListener('mousemove', (event) => {
                 material.uniforms.uMouse.value.x = event.clientX / window.innerWidth;
                 material.uniforms.uMouse.value.y = 1.0 - event.clientY / window.innerHeight;
@@ -98,6 +103,12 @@
             });
             
             animate();
+        }
+        
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         }
         
         function animate() {
