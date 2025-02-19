@@ -21,9 +21,9 @@
         let depthScale = 10; // Adjust for depth effect
         let geometry = new THREE.PlaneGeometry(2, 2, 100, 100);
         let loader = new THREE.TextureLoader();
-        
-        loader.load('image.jpg', (texture) => {
-            loader.load('depth.jpg', (depthTexture) => {
+
+        loader.load('scene01.webp', (texture) => {
+            loader.load('f038d901-d44e-46f7-a5c0-5a9c95b6201f.png', (depthTexture) => {
                 let ctx = document.createElement('canvas').getContext('2d');
                 let depthWidth = depthTexture.image.width;
                 let depthHeight = depthTexture.image.height;
