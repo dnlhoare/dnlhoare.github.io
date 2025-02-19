@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Depth Image Mesh</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script>
+        let scene = new THREE.Scene();
+        let camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        let renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        
+        let depthScale = 10; // Adjust for depth effect
+        let geometry = new THREE.PlaneGeometry(2, 2, 100, 100);
+        let loader = new THREE.TextureLoader();
+        
+        loader.load('image.jpg', (texture) => {
+            loader.load('depth.jpg', (depthTexture) => {
+                let ctx = document.createElement('canvas').getContext('2d');
+                let depthWidth = depthTexture.image.width;
+                let depthHeight = depthTexture.image.height;
+                ctx.canvas.width = depthWidth;
+                ctx.canvas.height = depthHeight;
+                ctx.drawImage(depthTexture.image, 0, 0);
+                let depthData = ctx.getImageData(0, 0, depthWidth, depthHeight).data;
+                
+                let vertices = geometry.attributes.position.array;
+                for (let i = 0; i < vertices.length; i += 3) {
+                    let x = ((vertices[i] + 1) / 2) * depthWidth;
+                    let y = ((1 - (vertices[i + 1] + 1) / 2)) * depthHeight;
+                    let index = (Math.floor(y) * depthWidth + Math.floor(x)) * 4;
+                    let depthValue = depthData[index] / 255;
+                    vertices[i + 2] = depthValue * depthScale;
+                }
+                geometry.attributes.position.needsUpdate = true;
+                
+                let material = new THREE.MeshBasicMaterial({ map: texture });
+                let mesh = new THREE.Mesh(geometry, material);
+                scene.add(mesh);
+                
+                camera.position.z = 3;
+                
+                let mouseX = 0, mouseY = 0;
+                document.addEventListener('mousemove', (event) => {
+                    mouseX = (event.clientX / window.innerWidth - 0.5) * 2;
+                    mouseY = (event.clientY / window.innerHeight - 0.5) * 2;
+                });
+                
+                function animate() {
+                    requestAnimationFrame(animate);
+                    camera.position.x = mouseX * 0.2;
+                    camera.position.y = -mouseY * 0.2;
+                    camera.lookAt(scene.position);
+                    renderer.render(scene, camera);
+                }
+                animate();
+            });
+        });
+    </script>
+</body>
+</html>
