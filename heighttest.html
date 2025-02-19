@@ -18,7 +18,7 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
         
-        let depthScale = 1; // Adjust for depth effect
+        let depthScale = 0.1f; // Adjust for depth effect
         let geometry = new THREE.PlaneGeometry(1.75, 1, 100, 100);
         let loader = new THREE.TextureLoader();
 
@@ -37,7 +37,7 @@
                     let x = ((vertices[i] + 1) / 2) * depthWidth;
                     let y = ((1 - (vertices[i + 1] + 1) / 2)) * depthHeight;
                     let index = (Math.floor(y) * depthWidth + Math.floor(x)) * 4;
-                    let depthValue = depthData[index] / 255;
+                    let depthValue = depthData[index] / 255.0f;
                     vertices[i + 2] = depthValue * depthScale;
                 }
                 geometry.attributes.position.needsUpdate = true;
