@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Mobile Device & Foldable Comparison Tool</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Three.js OrbitControls -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #0b0f19;
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card-hover:hover {
+            border-color: rgba(56, 189, 248, 0.3);
+            background: rgba(30, 41, 59, 0.85);
+        }
+        .dimension-label {
+            position: absolute;
+            transform: translate(-50%, -100%);
+            pointer-events: none;
+            z-index: 20;
+            background: rgba(15, 23, 42, 0.88);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            backdrop-filter: blur(8px);
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 11px;
+            white-space: nowrap;
+            transition: opacity 0.15s ease;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#0b0f19]">
+    <!-- Navigation Header -->
+    <header class="glass-card sticky top-0 z-40 border-b border-slate-800/80 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20">
+                <i class="fa-solid fa-mobile-screen-button text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-base text-slate-100 leading-tight">Foldable & Mobile 3D Studio</h1>
+                <p class="text-[11px] text-cyan-400 font-medium">Real-scale Screen & Device Dimensions Engine</p>
+            </div>
+        </div>
+
+        <!-- View Controls & Toolbar -->
+        <div class="flex items-center flex-wrap gap-2 text-xs">
+            <!-- Texture Selector -->
+            <div class="flex items-center space-x-1.5 bg-slate-900/90 border border-slate-800 rounded-xl px-2.5 py-1.5">
+                <i class="fa-solid fa-image text-slate-400 text-xs"></i>
+                <span class="text-slate-400 hidden sm:inline text-[11px]">Screen Texture:</span>
+                <select id="screenTextureSelect" class="bg-transparent text-slate-200 font-medium focus:outline-none cursor-pointer text-xs">
+                    <option value="os-mockup" class="bg-slate-900">Mobile OS UI</option>
+                    <option value="grid" class="bg-slate-900">Scale Grid (mm)</option>
+                    <option value="neon" class="bg-slate-900">Neon Wave</option>
+                    <option value="dark" class="bg-slate-900">OLED Dark</option>
+                </select>
+            </div>
+
+            <!-- Overlay / Side-by-Side Toggle -->
+            <label class="flex items-center space-x-2 bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-1.5 cursor-pointer hover:border-slate-700 transition">
+                <input type="checkbox" id="toggleArrangement" class="rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0">
+                <span class="text-slate-300 font-medium text-xs">Center Overlay</span>
+            </label>
+
+            <!-- Annotation Labels Toggle -->
+            <label class="flex items-center space-x-2 bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-1.5 cursor-pointer hover:border-slate-700 transition">
+                <input type="checkbox" id="toggleAnnotations" checked class="rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0">
+                <span class="text-slate-300 font-medium text-xs">Dimensions</span>
+            </label>
+
+            <!-- Camera Presets -->
+            <div class="flex items-center bg-slate-900/90 border border-slate-800 rounded-xl p-0.5 space-x-0.5">
+                <button data-view="perspective" class="view-preset-btn px-2.5 py-1 rounded-lg font-medium text-white bg-blue-600 transition">3D</button>
+                <button data-view="top" class="view-preset-btn px-2.5 py-1 rounded-lg font-medium text-slate-300 hover:bg-slate-800 transition">Top</button>
+                <button data-view="front" class="view-preset-btn px-2.5 py-1 rounded-lg font-medium text-slate-300 hover:bg-slate-800 transition">Front</button>
+            </div>
+
+            <!-- Projection Mode Switcher -->
+            <button id="toggleProjectionBtn" class="bg-slate-900/90 border border-slate-800 hover:border-slate-700 text-slate-300 px-3 py-1.5 rounded-xl font-medium text-xs flex items-center space-x-1.5 transition" title="Toggle Perspective / Orthographic Camera Projection">
+                <i id="projectionIcon" class="fa-solid fa-cube text-cyan-400 text-xs"></i>
+                <span id="projectionLabel">Perspective</span>
+            </button>
+
+            <!-- 2D SVG Scale Overlay Modal Toggle -->
+            <button id="toggleOverlay2DBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-3 py-1.5 rounded-xl flex items-center space-x-1.5 transition shadow-lg shadow-indigo-600/20">
+                <i class="fa-solid fa-layer-group text-xs"></i>
+                <span>2D Scale Outlines</span>
+            </button>
+
+            <!-- Reset Camera -->
+            <button id="resetCamBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-1.5 rounded-xl transition" title="Reset Camera View">
+                <i class="fa-solid fa-rotate text-xs"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Workspace -->
+    <main class="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden relative">
+        <!-- 3D Viewport Container -->
+        <div class="flex-1 relative flex flex-col bg-slate-950/60 min-h-[450px] lg:min-h-0">
+            <!-- 3D Canvas Holder -->
+            <div id="canvasContainer" class="w-full h-full absolute inset-0 cursor-grab active:cursor-grabbing"></div>
+
+            <!-- Floating 2D Annotations Container -->
+            <div id="dimensionLabelsContainer" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+
+            <!-- Quick Fold State Action Bar -->
+            <div id="foldTogglesBar" class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex flex-wrap gap-2 justify-center px-3 py-2 rounded-2xl glass-card border border-slate-700/60 shadow-2xl">
+                <!-- Dynamic fold toggles populate here -->
+            </div>
+        </div>
+
+        <!-- Right Control & Specs Sidebar -->
+        <aside class="w-full lg:w-96 glass-card border-t lg:border-t-0 lg:border-l border-slate-800/80 flex flex-col overflow-y-auto">
+            <!-- Active Selected Devices Panel -->
+            <div class="p-4 border-b border-slate-800/80">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="font-bold text-xs uppercase tracking-wider text-slate-400 flex items-center">
+                        <i class="fa-solid fa-cubes text-cyan-400 mr-2"></i>
+                        Active Comparison (<span id="selectedCount">0</span>/4)
+                    </h2>
+                    <button id="clearAllBtn" class="text-[11px] text-slate-400 hover:text-red-400 transition font-medium">Clear All</button>
+                </div>
+                <div id="activeDeviceSlots" class="space-y-2">
+                    <!-- Active selected device cards render here -->
+                </div>
+            </div>
+
+            <!-- Specs Comparison Matrix -->
+            <div class="p-4 border-b border-slate-800/80">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="font-bold text-xs uppercase tracking-wider text-slate-400 flex items-center">
+                        <i class="fa-solid fa-table-cells text-indigo-400 mr-2"></i>
+                        Display & Dimension Specs
+                    </h2>
+                    <span id="matrixDeviceCount" class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full font-medium">0 Devices</span>
+                </div>
+                <div id="specMatrixContainer">
+                    <!-- Spec Matrix table renders here -->
+                </div>
+            </div>
+
+            <!-- Device Library Browser -->
+            <div class="p-4 flex-1">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="font-bold text-xs uppercase tracking-wider text-slate-400 flex items-center">
+                        <i class="fa-solid fa-mobile-button text-blue-400 mr-2"></i>
+                        Device Library
+                    </h2>
+                    <button id="addDeviceBtn" class="text-xs bg-blue-600 hover:bg-blue-500 text-white font-semibold px-2.5 py-1 rounded-lg transition flex items-center space-x-1">
+                        <i class="fa-solid fa-plus text-[10px]"></i>
+                        <span>Add Custom</span>
+                    </button>
+                </div>
+
+                <div class="mb-3">
+                    <input type="text" id="librarySearch" placeholder="Search devices by name or brand..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition">
+                </div>
+
+                <div id="libraryList" class="space-y-2 max-h-96 overflow-y-auto pr-1">
+                    <!-- Preset Library List renders here -->
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- 2D Scale Overlay Drawer / Modal -->
+    <div id="overlay2DDrawer" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="glass-card border border-slate-700/80 rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+            <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-layer-group text-indigo-400 text-lg"></i>
+                    <div>
+                        <h3 class="font-bold text-sm text-slate-100">2D Scale-Calibrated Footprint Overlay</h3>
+                        <p class="text-[11px] text-slate-400">Direct visual comparison of screen areas and physical outlines</p>
+                    </div>
+                </div>
+                <button id="close2DOverlayBtn" class="text-slate-400 hover:text-slate-100 p-1.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="p-6 flex-1 overflow-y-auto flex flex-col items-center justify-center bg-slate-950/40">
+                <div id="svgOverlayContainer" class="w-full max-w-xl flex items-center justify-center min-h-[300px]"></div>
+                <div id="svgLegend" class="w-full grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Device Creation Modal -->
+    <div id="deviceModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="glass-card border border-slate-700/80 rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+            <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+                <h3 id="modalTitle" class="font-bold text-sm text-slate-100 flex items-center">
+                    <i class="fa-solid fa-mobile text-cyan-400 mr-2"></i>Add Custom Device
+                </h3>
+                <button id="closeModalBtn" class="text-slate-400 hover:text-slate-100 p-1.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form id="deviceForm" class="p-4 space-y-4 overflow-y-auto text-xs">
+                <input type="hidden" id="editDeviceId">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-400 font-medium mb-1">Brand</label>
+                        <input type="text" id="brandInput" required placeholder="e.g. Samsung" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-slate-200 focus:outline-none focus:border-cyan-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 font-medium mb-1">Model Name</label>
+                        <input type="text" id="nameInput" required placeholder="e.g. Galaxy Z Fold 7" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-slate-200 focus:outline-none focus:border-cyan-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-slate-400 font-medium mb-1">Form Factor</label>
+                        <select id="typeInput" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2 py-1.5 text-slate-200 focus:outline-none focus:border-cyan-500">
+                            <option value="foldable-book">Book Foldable</option>
+                            <option value="foldable-flip">Flip Foldable</option>
+                            <option value="bar">Standard Bar</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 font-medium mb-1">Weight (g)</label>
+                        <input type="number" id="weightInput" step="1" value="230" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-slate-200 focus:outline-none focus:border-cyan-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 font-medium mb-1">Color Theme</label>
+                        <input type="color" id="colorInput" value="#3b82f6" class="w-full h-8 bg-slate-900 border border-slate-800 rounded-xl p-0.5 cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- Unfolded Body & Display Dimensions -->
+                <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 space-y-2">
+                    <div class="font-semibold text-cyan-400 uppercase tracking-wider text-[10px]">Unfolded / Main Display Dimensions</div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-[10px] text-slate-400">Height (mm)</label>
+                            <input type="number" id="unfoldedH" step="0.1" value="153.5" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-slate-200 focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-400">Width (mm)</label>
+                            <input type="number" id="unfoldedW" step="0.1" value="132.6" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-slate-200 focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-400">Depth (mm)</label>
+                            <input type="number" id="unfoldedD" step="0.1" value="5.6" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-slate-200 focus:outline-none focus:border-cyan-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-400">Main Screen Diagonal (inches)</label>
+                        <input type="number" id="innerDiagInput" step="0.01" value="7.6" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-slate-200 focus:outline-none focus:border-cyan-500">
+                    </div>
+                </div>
+
+                <!-- Folded Body & Display Dimensions -->
+                <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 space-y-2">
+                    <div class="font-semibold text-indigo-400 uppercase tracking-wider text-[10px]">Folded / Cover Display Dimensions</div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-[10px] text-slate-400">Height (mm)</label>
+                            <input type="number" id="foldedH" step="0.1" value="153.5" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-slate-200 focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-400">Width (mm)</label>
+                            <input type="number" id="foldedW" step="0.1" value="68.1" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-slate-200 focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-400">Depth (mm)</label>
+                            <input type="number" id="foldedD" step="0.1" value="12.1" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-slate-200 focus:outline-none focus:border-cyan-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-400">Outer Screen Diagonal (inches)</label>
+                        <input type="number" id="outerDiagInput" step="0.01" value="6.3" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-slate-200 focus:outline-none focus:border-cyan-500">
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" id="cancelModalBtn" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium rounded-xl transition">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl transition shadow-lg shadow-blue-600/20">Save Device</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Preset Device Library Database
+        const INITIAL_DEVICES = [
+            {
+                id: 'z-fold-6',
+                brand: 'Samsung',
+                name: 'Galaxy Z Fold 6',
+                type: 'foldable-book',
+                weight: 239,
+                color: '#3b82f6',
+                unfolded: { h: 153.5, w: 132.6, d: 5.6 },
+                folded: { h: 153.5, w: 68.1, d: 12.1 },
+                innerDiagonal: 7.6,
+                outerDiagonal: 6.3,
+                bezel: 2.0,
+                cornerBevel: 3.5,
+                displayType: 'Dynamic AMOLED 2X 120Hz'
+            },
+            {
+                id: 'pixel-9-pro-fold',
+                brand: 'Google',
+                name: 'Pixel 9 Pro Fold',
+                type: 'foldable-book',
+                weight: 257,
+                color: '#06b6d4',
+                unfolded: { h: 155.2, w: 150.2, d: 5.1 },
+                folded: { h: 155.2, w: 77.1, d: 10.5 },
+                innerDiagonal: 8.0,
+                outerDiagonal: 6.3,
+                bezel: 2.2,
+                cornerBevel: 3.5,
+                displayType: 'Super Actua Flex OLED'
+            },
+            {
+                id: 'oneplus-open',
+                brand: 'OnePlus',
+                name: 'OnePlus Open',
+                type: 'foldable-book',
+                weight: 239,
+                color: '#10b981',
+                unfolded: { h: 153.4, w: 143.1, d: 5.8 },
+                folded: { h: 153.4, w: 73.3, d: 11.7 },
+                innerDiagonal: 7.82,
+                outerDiagonal: 6.31,
+                bezel: 2.0,
+                cornerBevel: 3.5,
+                displayType: 'Flexi-fluid AMOLED 120Hz'
+            },
+            {
+                id: 'magic-v3',
+                brand: 'Honor',
+                name: 'Magic V3',
+                type: 'foldable-book',
+                weight: 226,
+                color: '#f59e0b',
+                unfolded: { h: 156.6, w: 145.3, d: 4.35 },
+                folded: { h: 156.6, w: 74.0, d: 9.2 },
+                innerDiagonal: 7.92,
+                outerDiagonal: 6.43,
+                bezel: 1.8,
+                cornerBevel: 3.5,
+                displayType: 'LTPO OLED 120Hz'
+            },
+            {
+                id: 'z-flip-6',
+                brand: 'Samsung',
+                name: 'Galaxy Z Flip 6',
+                type: 'foldable-flip',
+                weight: 187,
+                color: '#ec4899',
+                unfolded: { h: 165.1, w: 71.9, d: 6.9 },
+                folded: { h: 85.1, w: 71.9, d: 14.9 },
+                innerDiagonal: 6.7,
+                outerDiagonal: 3.4,
+                bezel: 2.0,
+                cornerBevel: 3.5,
+                displayType: 'Dynamic AMOLED 2X 120Hz'
+            },
+            {
+                id: 'razr-50-ultra',
+                brand: 'Motorola',
+                name: 'Razr 50 Ultra',
+                type: 'foldable-flip',
+                weight: 189,
+                color: '#8b5cf6',
+                unfolded: { h: 170.8, w: 74.0, d: 7.1 },
+                folded: { h: 88.1, w: 74.0, d: 15.3 },
+                innerDiagonal: 6.9,
+                outerDiagonal: 4.0,
+                bezel: 2.0,
+                cornerBevel: 3.5,
+                displayType: 'pOLED 165Hz'
+            },
+            {
+                id: 'iphone-16-pro-max',
+                brand: 'Apple',
+                name: 'iPhone 16 Pro Max',
+                type: 'bar',
+                weight: 227,
+                color: '#94a3b8',
+                unfolded: { h: 163.0, w: 77.6, d: 8.25 },
+                folded: { h: 163.0, w: 77.6, d: 8.25 },
+                innerDiagonal: 6.9,
+                outerDiagonal: 6.9,
+                bezel: 1.5,
+                cornerBevel: 4.0,
+                displayType: 'Super Retina XDR OLED'
+            }
+        ];
+
+        // State Store Variables
+        let devicesList = [...INITIAL_DEVICES];
+        let selectedDeviceIds = ['z-fold-6', 'pixel-9-pro-fold'];
+        let foldStates = {
+            'z-fold-6': false,
+            'pixel-9-pro-fold': false
+        };
+        let isOverlayCentered = false;
+        let showAnnotations = true;
+        let currentTextureStyle = 'os-mockup';
+
+        // 3D Engine Globals
+        let scene, camera, perspCamera, orthoCamera, renderer, controls;
+        let isOrthographic = false;
+        let device3DGroupMap = new Map();
+        let labelsMap = new Map();
+        let CANVAS_CONTAINER, LABELS_CONTAINER;
+
+        /**
+         * Procedurally generate dynamic canvas textures for screen displays
+         */
+        function generateScreenTexture(type, brandColor, labelText) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+
+            if (!ctx.roundRect) {
+                ctx.roundRect = function(x, y, w, h, r) {
+                    const radius = typeof r === 'number' ? r : (r[0] || 0);
+                    this.beginPath();
+                    this.moveTo(x + radius, y);
+                    this.lineTo(x + w - radius, y);
+                    this.quadraticCurveTo(x + w, y, x + w, y + radius);
+                    this.lineTo(x + w, y + h - radius);
+                    this.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+                    this.lineTo(x + radius, y + h);
+                    this.quadraticCurveTo(x, y + h, x, y + h - radius);
+                    this.lineTo(x, y + radius);
+                    this.quadraticCurveTo(x, y, x + radius, y);
+                    this.closePath();
+                };
+            }
+
+            if (type === 'dark') {
+                ctx.fillStyle = '#030712';
+                ctx.fillRect(0, 0, 512, 1024);
+                ctx.fillStyle = brandColor || '#38bdf8';
+                ctx.beginPath();
+                ctx.arc(256, 512, 180, 0, Math.PI * 2);
+                ctx.filter = 'blur(60px)';
+                ctx.fill();
+                ctx.filter = 'none';
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 36px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('OLED DARK DISPLAY', 256, 512);
+            } else if (type === 'neon') {
+                const grad = ctx.createLinearGradient(0, 0, 512, 1024);
+                grad.addColorStop(0, '#0f172a');
+                grad.addColorStop(0.5, brandColor || '#2563eb');
+                grad.addColorStop(1, '#020617');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, 512, 1024);
+
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+                ctx.lineWidth = 4;
+                for (let i = 0; i < 10; i++) {
+                    ctx.beginPath();
+                    ctx.arc(256, 512, 50 + i * 40, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 38px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('NEON WAVE', 256, 512);
+            } else if (type === 'grid') {
+                ctx.fillStyle = '#090d16';
+                ctx.fillRect(0, 0, 512, 1024);
+                ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+                ctx.lineWidth = 2;
+                const step = 32;
+                for (let x = 0; x <= 512; x += step) {
+                    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 1024); ctx.stroke();
+                }
+                for (let y = 0; y <= 1024; y += step) {
+                    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(512, y); ctx.stroke();
+                }
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 4;
+                ctx.beginPath(); ctx.moveTo(256 - 40, 512); ctx.lineTo(256 + 40, 512); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(256, 512 - 40); ctx.lineTo(256, 512 + 40); ctx.stroke();
+                ctx.fillStyle = '#f8fafc';
+                ctx.font = 'bold 32px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(labelText || 'SCALE GRID (mm)', 256, 450);
+            } else {
+                const grad = ctx.createLinearGradient(0, 0, 0, 1024);
+                grad.addColorStop(0, '#1e293b');
+                grad.addColorStop(0.6, '#0f172a');
+                grad.addColorStop(1, '#020617');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, 512, 1024);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.85)';
+                ctx.font = 'bold 26px sans-serif';
+                ctx.fillText('9:41', 36, 52);
+
+                ctx.font = 'bold 80px sans-serif';
+                ctx.fillStyle = '#ffffff';
+                ctx.textAlign = 'center';
+                ctx.fillText('09:41', 256, 230);
+                ctx.font = '22px sans-serif';
+                ctx.fillStyle = '#38bdf8';
+                ctx.fillText(labelText || 'Mobile Screen', 256, 275);
+
+                const palette = ['#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#0284c7', '#d97706'];
+                let pIdx = 0;
+                for (let r = 0; r < 4; r++) {
+                    for (let c = 0; c < 4; c++) {
+                        ctx.fillStyle = palette[pIdx % palette.length];
+                        const cx = 82 + c * 115;
+                        const cy = 400 + r * 115;
+                        ctx.beginPath();
+                        ctx.roundRect(cx - 32, cy - 32, 64, 64, 18);
+                        ctx.fill();
+                        pIdx++;
+                    }
+                }
+            }
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.needsUpdate = true;
+            return texture;
+        }
+
+        /**
+         * Create Rounded Box Geometry for realistic device bodies
+         */
+        function createRoundedBoxGeometry(w, h, d, r = 2, smoothness = 4) {
+            const shape = new THREE.Shape();
+            const x = -w / 2, y = -h / 2;
+            shape.moveTo(x + r, y);
+            shape.lineTo(x + w - r, y);
+            shape.quadraticCurveTo(x + w, y, x + w, y + r);
+            shape.lineTo(x + w, y + h - r);
+            shape.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            shape.lineTo(x + r, y + h);
+            shape.quadraticCurveTo(x, y + h, x, y + h - r);
+            shape.lineTo(x, y + r);
+            shape.quadraticCurveTo(x, y, x + r, y);
+
+            const extrudeSettings = {
+                depth: d,
+                bevelEnabled: true,
+                bevelSegments: smoothness,
+                steps: 1,
+                bevelSize: Math.min(r * 0.4, d * 0.2),
+                bevelThickness: Math.min(r * 0.4, d * 0.2)
+            };
+
+            const geom = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+            geom.center();
+            return geom;
+        }
+
+        /**
+         * Create Parametric 3D Mesh for Mobile Phone or Foldable
+         */
+        function createDevice3DMesh(device, isFolded) {
+            const rootGroup = new THREE.Group();
+            rootGroup.userData = { id: device.id };
+
+            const colorHex = parseInt(device.color.replace('#', '0x')) || 0x38bdf8;
+            
+            const bodyMaterial = new THREE.MeshStandardMaterial({
+                color: colorHex,
+                roughness: 0.25,
+                metalness: 0.8,
+                envMapIntensity: 1.0
+            });
+
+            const bezelMaterial = new THREE.MeshBasicMaterial({ color: 0x0a0a0a });
+            
+            const innerTex = generateScreenTexture(currentTextureStyle, device.color, `${device.name} (${device.innerDiagonal}")`);
+            const outerTex = generateScreenTexture(currentTextureStyle, device.color, `${device.name} (${device.outerDiagonal}")`);
+
+            const innerScreenMat = new THREE.MeshStandardMaterial({
+                map: innerTex,
+                roughness: 0.1,
+                metalness: 0.1,
+                emissive: 0xffffff,
+                emissiveMap: innerTex,
+                emissiveIntensity: 0.5
+            });
+
+            const outerScreenMat = new THREE.MeshStandardMaterial({
+                map: outerTex,
+                roughness: 0.1,
+                metalness: 0.1,
+                emissive: 0xffffff,
+                emissiveMap: outerTex,
+                emissiveIntensity: 0.5
+            });
+
+            const hingeMaterial = new THREE.MeshStandardMaterial({
+                color: 0x64748b,
+                metalness: 0.9,
+                roughness: 0.2
+            });
+
+            const isFoldable = device.type.startsWith('foldable');
+
+            if (!isFoldable) {
+                const h = device.unfolded.h;
+                const w = device.unfolded.w;
+                const d = device.unfolded.d;
+                const bevel = Math.min(2.5 * 0.4, d * 0.2);
+
+                const bodyGeo = createRoundedBoxGeometry(w, h, d, 2.5);
+                const bodyMesh = new THREE.Mesh(bodyGeo, bodyMaterial);
+                bodyMesh.castShadow = true;
+                bodyMesh.receiveShadow = true;
+                rootGroup.add(bodyMesh);
+
+                const screenW = w - (device.bezel * 2);
+                const screenH = h - (device.bezel * 2);
+                
+                const bezelGeo = new THREE.PlaneGeometry(w - 0.4, h - 0.4);
+                const bezelMesh = new THREE.Mesh(bezelGeo, bezelMaterial);
+                bezelMesh.position.z = (d / 2) + bevel + 0.05;
+                rootGroup.add(bezelMesh);
+
+                const screenGeo = new THREE.PlaneGeometry(screenW, screenH);
+                const screenMesh = new THREE.Mesh(screenGeo, innerScreenMat);
+                screenMesh.position.z = (d / 2) + bevel + 0.1;
+                rootGroup.add(screenMesh);
+
+            } else {
+                const isBook = device.type === 'foldable-book';
+                
+                const h = isFolded ? device.folded.h : device.unfolded.h;
+                const wHalf = isFolded ? device.folded.w : (device.unfolded.w / 2);
+                const dHalf = isFolded ? (device.folded.d / 2) : device.unfolded.d;
+                const bevel = Math.min(2.0 * 0.4, dHalf * 0.2);
+
+                const panel1Group = new THREE.Group();
+                const panel2Group = new THREE.Group();
+
+                const panelGeo = createRoundedBoxGeometry(wHalf, h, dHalf, 2.0);
+                
+                const mesh1 = new THREE.Mesh(panelGeo, bodyMaterial);
+                mesh1.castShadow = true;
+                mesh1.receiveShadow = true;
+                panel1Group.add(mesh1);
+
+                const mesh2 = new THREE.Mesh(panelGeo, bodyMaterial);
+                mesh2.castShadow = true;
+                mesh2.receiveShadow = true;
+                panel2Group.add(mesh2);
+
+                const innerScreenW = wHalf - device.bezel;
+                const innerScreenH = h - (device.bezel * 2);
+                
+                const geo1 = new THREE.PlaneGeometry(innerScreenW, innerScreenH);
+                const uv1 = geo1.attributes.uv;
+                for (let i = 0; i < uv1.count; i++) {
+                    if (isBook) {
+                        uv1.setX(i, uv1.getX(i) * 0.5);
+                    } else {
+                        uv1.setY(i, 0.5 + uv1.getY(i) * 0.5);
+                    }
+                }
+                geo1.attributes.uv.needsUpdate = true;
+
+                const geo2 = new THREE.PlaneGeometry(innerScreenW, innerScreenH);
+                const uv2 = geo2.attributes.uv;
+                for (let i = 0; i < uv2.count; i++) {
+                    if (isBook) {
+                        uv2.setX(i, 0.5 + uv2.getX(i) * 0.5);
+                    } else {
+                        uv2.setY(i, uv2.getY(i) * 0.5);
+                    }
+                }
+                geo2.attributes.uv.needsUpdate = true;
+
+                const innerScreen1 = new THREE.Mesh(geo1, innerScreenMat);
+                innerScreen1.position.z = (dHalf / 2) + bevel + 0.1;
+                panel1Group.add(innerScreen1);
+
+                const innerScreen2 = new THREE.Mesh(geo2, innerScreenMat);
+                innerScreen2.position.z = (dHalf / 2) + bevel + 0.1;
+                panel2Group.add(innerScreen2);
+
+                const outerScreenGeo = new THREE.PlaneGeometry(wHalf - device.bezel, h - (device.bezel * 2));
+                const outerScreen = new THREE.Mesh(outerScreenGeo, outerScreenMat);
+                outerScreen.position.z = -(dHalf / 2 + bevel + 0.1);
+                outerScreen.rotation.y = Math.PI;
+                panel1Group.add(outerScreen);
+
+                const hingeGeo = new THREE.CylinderGeometry(dHalf / 1.8, dHalf / 1.8, h, 16);
+                const hingeMesh = new THREE.Mesh(hingeGeo, hingeMaterial);
+                
+                if (isBook) {
+                    hingeMesh.position.set(0, 0, 0);
+                    panel1Group.position.x = -wHalf / 2;
+                    panel2Group.position.x = wHalf / 2;
+
+                    if (isFolded) {
+                        panel2Group.position.x = -wHalf / 2;
+                        panel2Group.position.z = dHalf;
+                        panel2Group.rotation.y = Math.PI;
+                    }
+                } else {
+                    hingeMesh.rotation.z = Math.PI / 2;
+                    panel1Group.position.y = -h / 4;
+                    panel2Group.position.y = h / 4;
+
+                    if (isFolded) {
+                        panel2Group.position.y = -h / 4;
+                        panel2Group.position.z = dHalf;
+                        panel2Group.rotation.x = Math.PI;
+                    }
+                }
+
+                rootGroup.add(hingeMesh);
+                rootGroup.add(panel1Group);
+                rootGroup.add(panel2Group);
+            }
+
+            return rootGroup;
+        }
+
+        /**
+         * Create floating 2D HTML labels over 3D coordinates
+         */
+        function createDimensionLabel(id, device, isFolded) {
+            if (!LABELS_CONTAINER) return;
+            const labelEl = document.createElement('div');
+            labelEl.className = 'dimension-label';
+            const dims = isFolded ? device.folded : device.unfolded;
+            
+            const screenDiag = isFolded ? device.outerDiagonal : device.innerDiagonal;
+            const screenW = dims.w - (device.bezel * 2);
+            const screenH = dims.h - (device.bezel * 2);
+            const screenAreaCm2 = (screenW * screenH) / 100;
+
+            labelEl.innerHTML = `
+                <div class="font-bold text-slate-100">${device.name}</div>
+                <div class="text-cyan-400 font-semibold text-[11px] mt-0.5">
+                    <i class="fa-solid fa-expand text-[9px] mr-1"></i>${isFolded ? 'Outer Screen' : 'Main Screen'}: ${screenDiag}"
+                </div>
+                <div class="text-slate-300 font-normal text-[10px]">Body: ${dims.h} × ${dims.w} × ${dims.d} mm</div>
+                <div class="text-slate-400 text-[9px]">Disp Area: ${screenH.toFixed(1)}×${screenW.toFixed(1)} mm (${screenAreaCm2.toFixed(1)} cm²)</div>
+            `;
+            LABELS_CONTAINER.appendChild(labelEl);
+            labelsMap.set(id, labelEl);
+        }
+
+        /**
+         * Render Real-time Spec Comparison Matrix Table
+         */
+        function renderSpecMatrix() {
+            const matrixContainer = document.getElementById('specMatrixContainer');
+            const matrixCountEl = document.getElementById('matrixDeviceCount');
+            if (matrixCountEl) matrixCountEl.textContent = `${selectedDeviceIds.length} Devices`;
+
+            if (!matrixContainer) return;
+
+            if (selectedDeviceIds.length === 0) {
+                matrixContainer.innerHTML = `<div class="text-center text-xs text-slate-500 py-8">Select devices from the library to compare specs</div>`;
+                return;
+            }
+
+            const selectedDevs = selectedDeviceIds.map(id => devicesList.find(d => d.id === id)).filter(Boolean);
+
+            let html = `
+                <div class="space-y-3 text-xs">
+                    <!-- Screen Sizes & Area Breakdown -->
+                    <div class="bg-slate-900/80 rounded-xl p-3 border border-slate-800">
+                        <div class="font-semibold text-cyan-400 mb-2 uppercase tracking-wider text-[10px] flex items-center justify-between">
+                            <span>Main / Unfolded Screen Size</span>
+                            <i class="fa-solid fa-mobile-button text-xs"></i>
+                        </div>
+                        <div class="space-y-2">
+                            ${selectedDevs.map(d => {
+                                const sw = d.unfolded.w - (d.bezel * 2);
+                                const sh = d.unfolded.h - (d.bezel * 2);
+                                const area = (sw * sh) / 100;
+                                return `
+                                    <div class="pb-1.5 border-b border-slate-800/60 last:border-0">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-slate-200 font-semibold">${d.name}</span>
+                                            <span class="text-cyan-400 font-bold">${d.innerDiagonal}" Diagonal</span>
+                                        </div>
+                                        <div class="flex justify-between items-center text-[11px] text-slate-400 mt-0.5">
+                                            <span>Display Size: ${sh.toFixed(1)} × ${sw.toFixed(1)} mm</span>
+                                            <span class="text-slate-300 font-medium">${area.toFixed(1)} cm² Area</span>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Outer / Folded Screen Size -->
+                    <div class="bg-slate-900/80 rounded-xl p-3 border border-slate-800">
+                        <div class="font-semibold text-indigo-400 mb-2 uppercase tracking-wider text-[10px] flex items-center justify-between">
+                            <span>Outer / Cover Screen Size</span>
+                            <i class="fa-solid fa-book-bookmark text-xs"></i>
+                        </div>
+                        <div class="space-y-2">
+                            ${selectedDevs.map(d => {
+                                const sw = d.folded.w - (d.bezel * 2);
+                                const sh = d.folded.h - (d.bezel * 2);
+                                const area = (sw * sh) / 100;
+                                return `
+                                    <div class="pb-1.5 border-b border-slate-800/60 last:border-0">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-slate-200 font-semibold">${d.name}</span>
+                                            <span class="text-indigo-400 font-bold">${d.outerDiagonal}" Diagonal</span>
+                                        </div>
+                                        <div class="flex justify-between items-center text-[11px] text-slate-400 mt-0.5">
+                                            <span>Display Size: ${sh.toFixed(1)} × ${sw.toFixed(1)} mm</span>
+                                            <span class="text-slate-300 font-medium">${area.toFixed(1)} cm² Area</span>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Footprints & Thickness -->
+                    <div class="bg-slate-900/80 rounded-xl p-3 border border-slate-800">
+                        <div class="font-semibold text-slate-400 mb-2 uppercase tracking-wider text-[10px]">Body Footprint & Depth</div>
+                        <div class="space-y-2">
+                            ${selectedDevs.map(d => `
+                                <div class="flex justify-between items-center pb-1 border-b border-slate-800/60 last:border-0">
+                                    <span class="text-slate-300">${d.name}</span>
+                                    <span class="text-slate-200 font-semibold">${d.unfolded.h}×${d.unfolded.w}mm / ${d.folded.d}mm</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            matrixContainer.innerHTML = html;
+        }
+
+        /**
+         * Render 2D SVG Scale-Calibrated Screen & Body Overlays
+         */
+        function render2DOverlay() {
+            const container = document.getElementById('svgOverlayContainer');
+            const legendContainer = document.getElementById('svgLegend');
+            if (!container || !legendContainer) return;
+
+            container.innerHTML = '';
+            legendContainer.innerHTML = '';
+
+            const selectedDevs = selectedDeviceIds.map(id => devicesList.find(d => d.id === id)).filter(Boolean);
+            if (selectedDevs.length === 0) return;
+
+            let maxH = 0, maxW = 0;
+            selectedDevs.forEach(d => {
+                const isFolded = !!foldStates[d.id];
+                const dims = isFolded ? d.folded : d.unfolded;
+                if (dims.h > maxH) maxH = dims.h;
+                if (dims.w > maxW) maxW = dims.w;
+            });
+
+            const svgH = maxH + 40;
+            const svgW = maxW + 40;
+
+            let svgContent = `<svg viewBox="-${svgW/2} -${svgH/2} ${svgW} ${svgH}" class="w-full h-full max-h-[450px]">`;
+
+            selectedDevs.forEach((device, index) => {
+                const isFolded = !!foldStates[device.id];
+                const dims = isFolded ? device.folded : device.unfolded;
+                const w = dims.w;
+                const h = dims.h;
+                const screenW = w - (device.bezel * 2);
+                const screenH = h - (device.bezel * 2);
+                const strokeColor = device.color;
+                const diag = isFolded ? device.outerDiagonal : device.innerDiagonal;
+
+                svgContent += `
+                    <rect x="-${w/2}" y="-${h/2}" width="${w}" height="${h}" rx="6" 
+                          fill="none" stroke="${strokeColor}" stroke-width="2" stroke-dasharray="${index * 2}" opacity="0.85" />
+                    <rect x="-${screenW/2}" y="-${screenH/2}" width="${screenW}" height="${screenH}" rx="4" 
+                          fill="${strokeColor}15" stroke="${strokeColor}" stroke-width="1" stroke-dasharray="3,3" opacity="0.6" />
+                    <circle cx="0" cy="0" r="1.5" fill="#64748b" />
+                `;
+
+                const legendItem = document.createElement('div');
+                legendItem.className = 'glass-card p-3 rounded-xl border border-slate-800 flex items-center justify-between text-xs';
+                legendItem.innerHTML = `
+                    <div class="flex items-center space-x-2.5">
+                        <div class="w-3.5 h-3.5 rounded-full border-2" style="border-color: ${device.color}; background-color: ${device.color}33;"></div>
+                        <div>
+                            <div class="font-semibold text-slate-200">${device.name} (${isFolded ? 'Folded' : 'Unfolded'})</div>
+                            <div class="text-cyan-400 font-medium text-[11px]">Screen: ${diag}" (${screenH.toFixed(1)} × ${screenW.toFixed(1)} mm)</div>
+                            <div class="text-[10px] text-slate-400">Body: ${h}mm × ${w}mm • Depth ${dims.d}mm</div>
+                        </div>
+                    </div>
+                `;
+                legendContainer.appendChild(legendItem);
+            });
+
+            svgContent += `</svg>`;
+            container.innerHTML = svgContent;
+        }
+
+        /**
+         * Initialize Three.js 3D Viewport, Lighting & Controls
+         */
+        function init3D() {
+            CANVAS_CONTAINER = document.getElementById('canvasContainer');
+            LABELS_CONTAINER = document.getElementById('dimensionLabelsContainer');
+            if (!CANVAS_CONTAINER) return;
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0b0f19);
+
+            const gridHelper = new THREE.GridHelper(1000, 50, 0x1e293b, 0x0f172a);
+            gridHelper.position.y = -100;
+            scene.add(gridHelper);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambientLight);
+
+            const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight1.position.set(200, 400, 300);
+            scene.add(dirLight1);
+
+            const dirLight2 = new THREE.DirectionalLight(0x38bdf8, 0.5);
+            dirLight2.position.set(-200, -200, -200);
+            scene.add(dirLight2);
+
+            const aspect = CANVAS_CONTAINER.clientWidth / CANVAS_CONTAINER.clientHeight || 1;
+            
+            // Perspective Camera
+            perspCamera = new THREE.PerspectiveCamera(45, aspect, 1, 5000);
+            perspCamera.position.set(0, 150, 400);
+
+            // Orthographic Camera
+            const frustumSize = 350;
+            orthoCamera = new THREE.OrthographicCamera(
+                - (frustumSize * aspect) / 2,
+                (frustumSize * aspect) / 2,
+                frustumSize / 2,
+                - frustumSize / 2,
+                1,
+                5000
+            );
+            orthoCamera.position.set(0, 150, 400);
+
+            // Active camera pointer
+            camera = isOrthographic ? orthoCamera : perspCamera;
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(CANVAS_CONTAINER.clientWidth, CANVAS_CONTAINER.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            CANVAS_CONTAINER.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            window.addEventListener('resize', onWindowResize);
+            
+            // Start 3D Render Loop
+            animate();
+        }
+
+        /**
+         * Continuous Animation Loop
+         */
+        function animate() {
+            requestAnimationFrame(animate);
+            if (controls) controls.update();
+            if (renderer && scene && camera) {
+                renderer.render(scene, camera);
+            }
+            if (showAnnotations) {
+                updateLabelPositions();
+            }
+        }
+
+        /**
+         * Update Floating Annotation Screen Positions
+         */
+        function updateLabelPositions() {
+            if (!LABELS_CONTAINER || !camera) return;
+            labelsMap.forEach((labelEl, id) => {
+                if (!showAnnotations) {
+                    labelEl.style.display = 'none';
+                    return;
+                }
+                const group = device3DGroupMap.get(id);
+                if (!group) {
+                    labelEl.style.display = 'none';
+                    return;
+                }
+                labelEl.style.display = 'block';
+                const vector = new THREE.Vector3();
+                group.getWorldPosition(vector);
+
+                const device = devicesList.find(d => d.id === id);
+                if (device) {
+                    const isFolded = !!foldStates[id];
+                    const h = isFolded ? device.folded.h : device.unfolded.h;
+                    vector.y += (h / 2) + 15;
+                }
+                vector.project(camera);
+
+                const x = (vector.x * 0.5 + 0.5) * CANVAS_CONTAINER.clientWidth;
+                const y = (-(vector.y * 0.5) + 0.5) * CANVAS_CONTAINER.clientHeight;
+
+                labelEl.style.left = `${x}px`;
+                labelEl.style.top = `${y}px`;
+
+                if (vector.z > 1) {
+                    labelEl.style.opacity = '0';
+                } else {
+                    labelEl.style.opacity = '1';
+                }
+            });
+        }
+
+        function onWindowResize() {
+            if (!CANVAS_CONTAINER || !renderer) return;
+            const w = CANVAS_CONTAINER.clientWidth;
+            const h = CANVAS_CONTAINER.clientHeight;
+            const aspect = w / h || 1;
+
+            if (perspCamera) {
+                perspCamera.aspect = aspect;
+                perspCamera.updateProjectionMatrix();
+            }
+
+            if (orthoCamera) {
+                const frustumSize = 350;
+                orthoCamera.left = - (frustumSize * aspect) / 2;
+                orthoCamera.right = (frustumSize * aspect) / 2;
+                orthoCamera.top = frustumSize / 2;
+                orthoCamera.bottom = - frustumSize / 2;
+                orthoCamera.updateProjectionMatrix();
+            }
+
+            renderer.setSize(w, h);
+        }
+
+        function setProjectionMode(ortho) {
+            isOrthographic = ortho;
+            const prevPos = camera.position.clone();
+            const prevTarget = controls.target.clone();
+
+            camera = isOrthographic ? orthoCamera : perspCamera;
+            camera.position.copy(prevPos);
+            controls.object = camera;
+            controls.target.copy(prevTarget);
+            
+            onWindowResize();
+            controls.update();
+
+            const btnLabel = document.getElementById('projectionLabel');
+            const btnIcon = document.getElementById('projectionIcon');
+            if (btnLabel && btnIcon) {
+                btnLabel.textContent = isOrthographic ? 'Orthographic' : 'Perspective';
+                btnIcon.className = isOrthographic ? 'fa-solid fa-ruler-combined text-indigo-400 text-xs' : 'fa-solid fa-cube text-cyan-400 text-xs';
+            }
+        }
+
+        function addDeviceToComparison(id) {
+            if (selectedDeviceIds.length >= 4) return;
+            if (!selectedDeviceIds.includes(id)) {
+                selectedDeviceIds.push(id);
+                update3DScene();
+                renderSidebarUI();
+            }
+        }
+
+        function removeDeviceFromComparison(id) {
+            selectedDeviceIds = selectedDeviceIds.filter(i => i !== id);
+            update3DScene();
+            renderSidebarUI();
+        }
+
+        function toggleDeviceFold(id) {
+            foldStates[id] = !foldStates[id];
+            update3DScene();
+            renderSidebarUI();
+        }
+
+        function editDevice(id) {
+            const device = devicesList.find(d => d.id === id);
+            if (!device) return;
+
+            const modal = document.getElementById('deviceModal');
+            if (!modal) return;
+
+            document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square text-cyan-400 mr-2"></i>Edit Device Specs';
+            document.getElementById('editDeviceId').value = device.id;
+            document.getElementById('brandInput').value = device.brand;
+            document.getElementById('nameInput').value = device.name;
+            document.getElementById('typeInput').value = device.type;
+            document.getElementById('weightInput').value = device.weight;
+            document.getElementById('colorInput').value = device.color;
+
+            document.getElementById('unfoldedH').value = device.unfolded.h;
+            document.getElementById('unfoldedW').value = device.unfolded.w;
+            document.getElementById('unfoldedD').value = device.unfolded.d;
+
+            document.getElementById('foldedH').value = device.folded.h;
+            document.getElementById('foldedW').value = device.folded.w;
+            document.getElementById('foldedD').value = device.folded.d;
+
+            document.getElementById('innerDiagInput').value = device.innerDiagonal;
+            document.getElementById('outerDiagInput').value = device.outerDiagonal;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function renderFoldTogglesBar() {
+            const bar = document.getElementById('foldTogglesBar');
+            if (!bar) return;
+            if (selectedDeviceIds.length === 0) {
+                bar.style.display = 'none';
+                return;
+            }
+            bar.style.display = 'flex';
+
+            const selectedDevs = selectedDeviceIds.map(id => devicesList.find(d => d.id === id)).filter(Boolean);
+            bar.innerHTML = selectedDevs.map(d => {
+                const isFoldable = d.type.startsWith('foldable');
+                if (!isFoldable) return '';
+                const isFolded = !!foldStates[d.id];
+                return `
+                    <button onclick="toggleDeviceFold('${d.id}')" class="px-3 py-1.5 rounded-xl border text-xs font-medium flex items-center space-x-2 transition ${isFolded ? 'bg-slate-800 text-indigo-400 border-indigo-500/40' : 'bg-blue-600/20 text-cyan-400 border-cyan-500/40'}">
+                        <i class="fa-solid ${isFolded ? 'fa-book-open' : 'fa-book'} text-xs"></i>
+                        <span>${d.name}: <strong>${isFolded ? 'Folded (Outer)' : 'Unfolded (Main)'}</strong></span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        /**
+         * Rebuild 3D Meshes in Scene for Active Devices
+         */
+        function update3DScene() {
+            if (!scene) return;
+
+            device3DGroupMap.forEach((group) => scene.remove(group));
+            device3DGroupMap.clear();
+
+            if (LABELS_CONTAINER) LABELS_CONTAINER.innerHTML = '';
+            labelsMap.clear();
+
+            const count = selectedDeviceIds.length;
+            if (count === 0) {
+                renderFoldTogglesBar();
+                renderSpecMatrix();
+                return;
+            }
+
+            const spacing = 180;
+            const startX = isOverlayCentered ? 0 : -((count - 1) * spacing) / 2;
+
+            selectedDeviceIds.forEach((id, index) => {
+                const device = devicesList.find(d => d.id === id);
+                if (!device) return;
+
+                const isFolded = !!foldStates[id];
+                const meshGroup = createDevice3DMesh(device, isFolded);
+
+                if (isOverlayCentered) {
+                    meshGroup.position.set(0, 0, index * 15);
+                } else {
+                    meshGroup.position.set(startX + (index * spacing), 0, 0);
+                }
+
+                scene.add(meshGroup);
+                device3DGroupMap.set(id, meshGroup);
+
+                createDimensionLabel(id, device, isFolded);
+            });
+
+            renderFoldTogglesBar();
+            renderSpecMatrix();
+            updateLabelPositions();
+        }
+
+        /**
+         * Render Active Device Slots & Device Library Sidebar
+         */
+        function renderSidebarUI() {
+            const activeSlots = document.getElementById('activeDeviceSlots');
+            const libraryList = document.getElementById('libraryList');
+            const selectedCount = document.getElementById('selectedCount');
+            const searchVal = (document.getElementById('librarySearch')?.value || '').toLowerCase();
+
+            if (selectedCount) selectedCount.textContent = selectedDeviceIds.length;
+
+            if (activeSlots) {
+                if (selectedDeviceIds.length === 0) {
+                    activeSlots.innerHTML = `<div class="text-xs text-slate-500 text-center py-4 bg-slate-900/40 rounded-xl border border-dashed border-slate-800">No devices selected. Select below to compare.</div>`;
+                } else {
+                    activeSlots.innerHTML = selectedDeviceIds.map(id => {
+                        const d = devicesList.find(item => item.id === id);
+                        if (!d) return '';
+                        const isFolded = !!foldStates[d.id];
+                        const isFoldable = d.type.startsWith('foldable');
+                        return `
+                            <div class="glass-card-hover p-2.5 rounded-xl flex items-center justify-between border border-slate-800 text-xs transition">
+                                <div class="flex items-center space-x-2 min-w-0">
+                                    <div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: ${d.color};"></div>
+                                    <div class="truncate">
+                                        <div class="font-bold text-slate-200 truncate">${d.brand} ${d.name}</div>
+                                        <div class="text-[10px] text-slate-400 truncate">${d.innerDiagonal}" ${isFoldable ? (isFolded ? '(Folded)' : '(Unfolded)') : ''} • ${d.weight}g</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-1 flex-shrink-0">
+                                    ${isFoldable ? `
+                                        <button onclick="toggleDeviceFold('${d.id}')" class="p-1 text-slate-400 hover:text-cyan-400 transition" title="Toggle Fold/Unfold">
+                                            <i class="fa-solid ${isFolded ? 'fa-book-open' : 'fa-book'} text-xs"></i>
+                                        </button>
+                                    ` : ''}
+                                    <button onclick="editDevice('${d.id}')" class="p-1 text-slate-400 hover:text-indigo-400 transition" title="Edit Device Specs">
+                                        <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                    </button>
+                                    <button onclick="removeDeviceFromComparison('${d.id}')" class="p-1 text-slate-400 hover:text-red-400 transition" title="Remove">
+                                        <i class="fa-solid fa-xmark text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            if (libraryList) {
+                const filtered = devicesList.filter(d => 
+                    d.name.toLowerCase().includes(searchVal) || 
+                    d.brand.toLowerCase().includes(searchVal)
+                );
+
+                if (filtered.length === 0) {
+                    libraryList.innerHTML = `<div class="text-xs text-slate-500 text-center py-4">No matching devices found.</div>`;
+                } else {
+                    libraryList.innerHTML = filtered.map(d => {
+                        const isSelected = selectedDeviceIds.includes(d.id);
+                        return `
+                            <div class="p-2.5 rounded-xl border ${isSelected ? 'border-blue-500/50 bg-blue-950/20' : 'border-slate-800/80 bg-slate-900/50'} hover:border-slate-700 transition flex items-center justify-between text-xs">
+                                <div class="min-w-0 pr-2">
+                                    <div class="font-semibold text-slate-200 truncate">${d.brand} ${d.name}</div>
+                                    <div class="text-[10px] text-slate-400 truncate">${d.type.replace('foldable-', '').toUpperCase()} • ${d.innerDiagonal}" / ${d.outerDiagonal}"</div>
+                                </div>
+                                <button onclick="${isSelected ? `removeDeviceFromComparison('${d.id}')` : `addDeviceToComparison('${d.id}')`}" 
+                                        class="px-2.5 py-1 rounded-lg text-[11px] font-medium transition ${isSelected ? 'bg-slate-800 text-red-400 hover:bg-red-950/50' : 'bg-blue-600 hover:bg-blue-500 text-white'}">
+                                    ${isSelected ? 'Remove' : 'Add +'}
+                                </button>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+        }
+
+        /**
+         * Safely setup all DOM Event Listeners after DOM is fully loaded
+         */
+        function setupEventListeners() {
+            document.querySelectorAll('.view-preset-btn').forEach(btn => {
+                btn.onclick = () => {
+                    document.querySelectorAll('.view-preset-btn').forEach(b => {
+                        b.classList.remove('bg-blue-600', 'text-white');
+                        b.classList.add('hover:bg-slate-800', 'text-slate-300');
+                    });
+                    btn.classList.add('bg-blue-600', 'text-white');
+                    btn.classList.remove('hover:bg-slate-800', 'text-slate-300');
+
+                    const view = btn.getAttribute('data-view');
+                    if (view === 'perspective') {
+                        camera.position.set(0, 150, 400);
+                        controls.target.set(0, 0, 0);
+                    } else if (view === 'top') {
+                        camera.position.set(0, 500, 0.1);
+                        controls.target.set(0, 0, 0);
+                    } else if (view === 'front') {
+                        camera.position.set(0, 0, 400);
+                        controls.target.set(0, 0, 0);
+                    }
+                    controls.update();
+                };
+            });
+
+            const toggleProjectionBtn = document.getElementById('toggleProjectionBtn');
+            if (toggleProjectionBtn) {
+                toggleProjectionBtn.onclick = () => {
+                    setProjectionMode(!isOrthographic);
+                };
+            }
+
+            const toggleAnnotations = document.getElementById('toggleAnnotations');
+            if (toggleAnnotations) {
+                toggleAnnotations.onchange = (e) => {
+                    showAnnotations = e.target.checked;
+                    updateLabelPositions();
+                };
+            }
+
+            const resetCamBtn = document.getElementById('resetCamBtn');
+            if (resetCamBtn) {
+                resetCamBtn.onclick = () => {
+                    camera.position.set(0, 150, 400);
+                    controls.target.set(0, 0, 0);
+                    controls.update();
+                };
+            }
+
+            const deviceModal = document.getElementById('deviceModal');
+            const addDeviceBtn = document.getElementById('addDeviceBtn');
+            if (addDeviceBtn && deviceModal) {
+                addDeviceBtn.onclick = () => {
+                    document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-mobile text-cyan-400 mr-2"></i>Add Custom Mobile Device';
+                    document.getElementById('deviceForm').reset();
+                    document.getElementById('editDeviceId').value = '';
+                    deviceModal.classList.remove('hidden');
+                    deviceModal.classList.add('flex');
+                };
+            }
+
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            if (closeModalBtn && deviceModal) {
+                closeModalBtn.onclick = () => {
+                    deviceModal.classList.add('hidden');
+                    deviceModal.classList.remove('flex');
+                };
+            }
+
+            const cancelModalBtn = document.getElementById('cancelModalBtn');
+            if (cancelModalBtn && deviceModal) {
+                cancelModalBtn.onclick = () => {
+                    deviceModal.classList.add('hidden');
+                    deviceModal.classList.remove('flex');
+                };
+            }
+
+            const deviceForm = document.getElementById('deviceForm');
+            if (deviceForm && deviceModal) {
+                deviceForm.onsubmit = (e) => {
+                    e.preventDefault();
+                    const id = document.getElementById('editDeviceId').value || `custom-${Date.now()}`;
+                    const brand = document.getElementById('brandInput').value;
+                    const name = document.getElementById('nameInput').value;
+                    const type = document.getElementById('typeInput').value;
+                    const weight = parseFloat(document.getElementById('weightInput').value) || 200;
+                    const color = document.getElementById('colorInput').value;
+
+                    const unfolded = {
+                        h: parseFloat(document.getElementById('unfoldedH').value) || 150,
+                        w: parseFloat(document.getElementById('unfoldedW').value) || 130,
+                        d: parseFloat(document.getElementById('unfoldedD').value) || 6
+                    };
+
+                    const folded = {
+                        h: parseFloat(document.getElementById('foldedH').value) || unfolded.h,
+                        w: parseFloat(document.getElementById('foldedW').value) || unfolded.w / 2,
+                        d: parseFloat(document.getElementById('foldedD').value) || unfolded.d * 2
+                    };
+
+                    const innerDiagonal = parseFloat(document.getElementById('innerDiagInput').value) || 7.5;
+                    const outerDiagonal = parseFloat(document.getElementById('outerDiagInput').value) || 6.2;
+
+                    const newDevice = {
+                        id, brand, name, type, weight, color, unfolded, folded, innerDiagonal, outerDiagonal,
+                        bezel: 2.0, cornerBevel: 3.5, displayType: 'AMOLED 120Hz'
+                    };
+
+                    const existingIdx = devicesList.findIndex(d => d.id === id);
+                    if (existingIdx >= 0) {
+                        devicesList[existingIdx] = newDevice;
+                    } else {
+                        devicesList.push(newDevice);
+                        if (selectedDeviceIds.length < 4) {
+                            selectedDeviceIds.push(id);
+                        }
+                    }
+
+                    deviceModal.classList.add('hidden');
+                    deviceModal.classList.remove('flex');
+                    update3DScene();
+                    renderSidebarUI();
+                };
+            }
+
+            const screenTextureSelect = document.getElementById('screenTextureSelect');
+            if (screenTextureSelect) {
+                screenTextureSelect.onchange = (e) => {
+                    currentTextureStyle = e.target.value;
+                    update3DScene();
+                };
+            }
+
+            const toggleArrangement = document.getElementById('toggleArrangement');
+            if (toggleArrangement) {
+                toggleArrangement.onchange = (e) => {
+                    isOverlayCentered = e.target.checked;
+                    update3DScene();
+                };
+            }
+
+            const clearAllBtn = document.getElementById('clearAllBtn');
+            if (clearAllBtn) {
+                clearAllBtn.onclick = () => {
+                    selectedDeviceIds = [];
+                    update3DScene();
+                    renderSidebarUI();
+                };
+            }
+
+            const librarySearch = document.getElementById('librarySearch');
+            if (librarySearch) {
+                librarySearch.oninput = () => renderSidebarUI();
+            }
+
+            const overlayDrawer = document.getElementById('overlay2DDrawer');
+            const toggleOverlay2DBtn = document.getElementById('toggleOverlay2DBtn');
+            if (toggleOverlay2DBtn && overlayDrawer) {
+                toggleOverlay2DBtn.onclick = () => {
+                    render2DOverlay();
+                    overlayDrawer.classList.remove('hidden');
+                    overlayDrawer.classList.add('flex');
+                };
+            }
+
+            const close2DOverlayBtn = document.getElementById('close2DOverlayBtn');
+            if (close2DOverlayBtn && overlayDrawer) {
+                close2DOverlayBtn.onclick = () => {
+                    overlayDrawer.classList.add('hidden');
+                    overlayDrawer.classList.remove('flex');
+                };
+            }
+        }
+
+        window.onload = () => {
+            init3D();
+            setupEventListeners();
+            update3DScene();
+            renderSidebarUI();
+        };
+    </script>
+</body>
+</html>
