@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#101510" />
+  <title>Trackside — Virtual Greyhound Racing</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&display=swap');
+    :root{--bg:#101510;--panel:#191f19;--panel2:#202820;--line:#303a30;--muted:#9aa396;--text:#f1f2e9;--lime:#c7f36b;--gold:#f5c969;--red:#f47d69}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:2px solid var(--lime);outline-offset:3px}.shell{max-width:1280px;margin:auto;padding:14px 30px 16px}.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}.brand{display:flex;gap:12px;align-items:center}.brand-mark{width:38px;height:38px;display:grid;place-items:center;background:var(--lime);border-radius:12px;color:#18200e;font-size:22px}.brand-name{font-family:Oswald,sans-serif;font-weight:600;letter-spacing:1.8px;font-size:19px}.brand-sub{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px}.demo-pill{border:1px solid #46503f;border-radius:20px;color:var(--lime);font:11px 'DM Mono',monospace;padding:8px 12px;letter-spacing:.7px}.grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(330px,.8fr);gap:22px;align-items:start}.left{min-width:0}.eyebrow{font:11px 'DM Mono',monospace;color:var(--lime);letter-spacing:2px;text-transform:uppercase}.heading-row{display:flex;align-items:end;justify-content:space-between;margin:5px 0 12px}.heading-row h1{font:600 clamp(30px,4vw,45px)/1 Oswald,sans-serif;letter-spacing:.4px;margin:0}.race-meta{font:11px 'DM Mono',monospace;color:var(--muted);text-align:right;line-height:1.8}.race-card,.bet-card{background:var(--panel);border:1px solid var(--line);border-radius:15px;overflow:hidden}.track-head{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--line)}.track-title{font:600 13px 'DM Sans',sans-serif;letter-spacing:.3px}.track-title span{display:block;color:var(--muted);font-size:11px;font-weight:400;margin-top:3px}.live{font:10px 'DM Mono',monospace;color:var(--red);display:flex;align-items:center;gap:7px;letter-spacing:1px}.live i{height:7px;width:7px;border-radius:50%;background:var(--red);box-shadow:0 0 12px var(--red)}.track{padding:8px 12px 9px;background:#252b22;position:relative}.track:before{content:'';position:absolute;inset:8px 12px 9px;background:repeating-linear-gradient(0deg,transparent 0 35px,#f0f2e91b 36px,#f0f2e91b 37px);pointer-events:none;border-radius:9px}.lane{height:37px;position:relative;border-bottom:1px dashed #b8c6a329;display:flex;align-items:center;padding-left:8px}.lane:last-of-type{border-bottom:0}.lane.your-pick{background:linear-gradient(90deg,#c7f36b24,transparent 78%);box-shadow:inset 3px 0 var(--lime)}.lane-no{z-index:2;width:25px;height:25px;display:grid;place-items:center;font:12px 'DM Mono',monospace;color:#141a12;border-radius:5px;font-weight:500}.runner{position:absolute;left:39px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:8px;z-index:2;will-change:left}.runner.your-pick .dog{filter:drop-shadow(0 0 4px var(--lime)) drop-shadow(0 2px 2px #0008)}.dog{font-size:23px;filter:drop-shadow(0 2px 2px #0008);line-height:1}.dog.run{animation:bob .28s infinite alternate}.dog-name{font:10px 'DM Mono',monospace;color:#f0f2e9cc;white-space:nowrap;text-shadow:0 1px 4px #000}.pick-marker{display:none;color:var(--lime);font:8px 'DM Mono',monospace;letter-spacing:.6px;margin-left:6px}.runner.your-pick .pick-marker{display:inline}.finish{position:absolute;right:46px;top:0;bottom:0;width:4px;background:repeating-linear-gradient(180deg,#eff2e9 0 8px,#222820 8px 16px);z-index:1;opacity:.8}.finish:after{content:'FINISH';position:absolute;top:-13px;right:-26px;font:8px 'DM Mono',monospace;letter-spacing:1px;color:var(--muted)}.track-footer{display:flex;justify-content:space-between;padding:8px 16px;background:#171c17;border-top:1px solid var(--line);font:10px 'DM Mono',monospace;color:var(--muted)}.race-banner{display:none;padding:9px 15px;background:#26331d;color:var(--lime);font-size:12px;font-weight:700;align-items:center;justify-content:space-between}.race-banner.show{display:flex}.race-banner small{font:10px 'DM Mono',monospace;color:#c7f36bbd;font-weight:400}.odds-title{display:flex;justify-content:space-between;align-items:center;margin:14px 0 7px}.odds-title h2{font:600 17px Oswald,sans-serif;letter-spacing:.4px;margin:0}.odds-title span{font:10px 'DM Mono',monospace;color:var(--muted)}.dog-list{display:grid;gap:5px}.dog-row{width:100%;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:9px;padding:7px 11px;display:grid;grid-template-columns:35px minmax(0,1fr) auto auto;align-items:center;gap:10px;text-align:left;transition:border-color .16s,background .16s}.dog-row:hover{border-color:#687450}.dog-row.selected{border-color:var(--lime);background:#232d1d;box-shadow:inset 3px 0 var(--lime)}.dog-row:disabled{cursor:default}.silk{height:27px;width:27px;border-radius:7px;display:grid;place-items:center;color:#101510;font:600 12px 'DM Mono',monospace}.dog-info strong{font-size:12px;font-weight:600;display:block}.dog-info small{font:9px 'DM Mono',monospace;color:var(--muted);display:block;margin-top:2px}.fav{font:8px 'DM Mono',monospace;text-transform:uppercase;color:var(--gold);margin-left:7px;letter-spacing:.7px}.form{color:var(--muted);font:9px 'DM Mono',monospace}.odds{min-width:49px;text-align:right;font:500 14px 'DM Mono',monospace;color:var(--lime)}.odds small{display:block;color:var(--muted);font:8px 'DM Mono',monospace;margin-top:2px}.bet-card{padding:16px 18px;position:sticky;top:12px}.balance-label{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font:10px 'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase}.balance{font:600 34px/1.1 Oswald,sans-serif;margin:6px 0 2px;color:var(--lime)}.balance-note{font-size:10px;color:var(--muted);padding-bottom:12px;border-bottom:1px solid var(--line)}.bet-heading{font:600 16px Oswald,sans-serif;margin:13px 0 9px}.selected-box{border:1px solid var(--line);border-radius:9px;padding:9px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;min-height:50px}.selected-name{font-size:12px;font-weight:600}.selected-name small{display:block;color:var(--muted);font:9px 'DM Mono',monospace;margin-top:3px}.selected-odds{color:var(--lime);font:13px 'DM Mono',monospace}.label{display:flex;justify-content:space-between;margin-bottom:6px;color:var(--muted);font:9px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.7px}.stake-wrap{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#111611}.currency{display:grid;place-items:center;width:36px;color:var(--muted);font:13px 'DM Mono',monospace;border-right:1px solid var(--line)}input[type=number]{min-width:0;width:100%;padding:9px 12px;color:var(--text);border:0;background:transparent;font:13px 'DM Mono',monospace;outline:none}input::-webkit-inner-spin-button{appearance:none}.quick-stakes{display:flex;gap:6px;margin:7px 0 11px}.quick-stakes button{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:6px;color:var(--muted);font:9px 'DM Mono',monospace}.quick-stakes button:hover{border-color:var(--lime);color:var(--lime)}.return-row{display:flex;justify-content:space-between;padding:9px 0;margin:0 0 9px;border-top:1px solid var(--line);color:var(--muted);font-size:10px}.return-row strong{color:var(--text);font:13px 'DM Mono',monospace}.primary{width:100%;border:0;border-radius:9px;background:var(--lime);color:#1a2113;padding:11px 12px;font:700 12px 'DM Sans',sans-serif;letter-spacing:.4px;transition:filter .15s,transform .15s}.primary:not(:disabled):hover{filter:brightness(1.06);transform:translateY(-1px)}.primary:disabled{opacity:.38;cursor:not-allowed}.secondary{width:100%;margin-top:7px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--muted);padding:9px;font:600 10px 'DM Sans',sans-serif}.secondary:hover{color:var(--text);border-color:#687450}.hint{text-align:center;font-size:9px;color:var(--muted);margin:8px 0 0;line-height:1.4}.notice{padding:9px 10px;border-radius:8px;background:#34251f;color:#ffb099;font-size:10px;line-height:1.4;margin-bottom:8px;display:none}.notice.show{display:block}.results{display:none;margin-top:8px;background:var(--panel);border:1px solid var(--line);border-radius:11px;overflow:hidden}.results.show{display:block;animation:rise .25s ease}.result-head{padding:8px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.result-head h3{font:600 14px Oswald,sans-serif;margin:0}.result-head span{font:9px 'DM Mono',monospace;color:var(--muted)}.result-body{padding:9px 12px;display:flex;justify-content:space-between;gap:14px;align-items:center}.result-copy strong{font-size:11px}.result-copy p{margin:3px 0 0;font-size:10px;color:var(--muted);line-height:1.4}.result-change{text-align:right;font:600 16px Oswald,sans-serif;white-space:nowrap}.result-change.win{color:var(--lime)}.result-change.loss{color:var(--red)}.result-change small{display:block;font:9px 'DM Mono',monospace;color:var(--muted);margin-top:2px}.results .primary{width:calc(100% - 24px);margin:0 12px 9px;padding:9px;font-size:10px}.game-over{position:fixed;inset:0;background:#090c09d9;z-index:10;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px)}.game-over.show{display:flex}.modal{max-width:420px;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:30px;text-align:center;box-shadow:0 20px 90px #0008}.modal-icon{font-size:36px}.modal h2{font:600 30px Oswald,sans-serif;margin:11px 0}.modal p{font-size:13px;line-height:1.6;color:var(--muted);margin:0 0 22px}.muted-note{font-size:10px;color:var(--muted);line-height:1.5;margin:12px 0 0;text-align:center}.footer{margin-top:12px;color:#737c71;font:9px 'DM Mono',monospace;line-height:1.4;text-align:center}@keyframes bob{to{transform:translateY(-2px) rotate(-2deg)}}@keyframes rise{from{transform:translateY(6px);opacity:0}to{transform:translateY(0);opacity:1}}
+    @media(max-width:840px){.shell{padding:22px 18px 38px}.grid{grid-template-columns:1fr}.bet-card{position:static}.left{min-width:0}.bet-card{order:2}.heading-row h1{font-size:38px}}
+    @media(max-width:480px){.shell{padding:17px 12px 30px}.demo-pill{font-size:9px;padding:7px 9px}.brand-name{font-size:17px}.heading-row{align-items:start;gap:8px}.heading-row h1{font-size:33px}.race-meta{font-size:9px}.track{padding-left:9px;padding-right:9px}.track:before{inset:14px 9px 17px}.finish{right:32px}.runner{gap:4px}.dog{font-size:23px}.dog-name{font-size:9px}.dog-row{padding:10px;gap:7px;grid-template-columns:31px minmax(0,1fr) auto auto}.silk{width:27px;height:27px}.form{font-size:9px}.odds{font-size:13px;min-width:46px}.dog-info strong{font-size:12px}}
+  </style>
+  <style>.finish{width:5px;box-shadow:0 0 8px #eaf4d766;opacity:.95}</style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand"><div class="brand-mark">♞</div><div><div class="brand-name">TRACKSIDE</div><div class="brand-sub">Virtual greyhound racing</div></div></div>
+      <div class="demo-pill">✳&nbsp; FOR FUN · NO REAL MONEY</div>
+    </header>
+    <div class="grid">
+      <section class="left" aria-label="Race card">
+        <div class="eyebrow">The evening card</div>
+        <div class="heading-row"><h1 id="raceTitle">Race 01</h1><div class="race-meta"><div>HARBOR PARK</div><div>400M · FLAT</div></div></div>
+        <div class="race-card">
+          <div class="track-head"><div class="track-title">The track<span>Watch the pack chase the hare</span></div><div class="live" id="liveLabel"><i></i> READY</div></div>
+          <div class="track" id="track" aria-label="Greyhound race track"></div>
+          <div class="race-banner" id="raceBanner"><span id="bannerText">And they're off!</span><small>HARBOR PARK · 400M</small></div>
+          <div class="track-footer"><span>GOOD TO FIRM</span><span>4:20 PM</span><span>TRAP 1 — 6</span></div>
+        </div>
+        <div class="odds-title"><h2>Pick your runner</h2><span>WIN · FIXED ODDS</span></div>
+        <div class="dog-list" id="dogList"></div>
+      </section>
+      <aside class="bet-card" aria-label="Bet slip">
+        <div class="balance-label"><span>Play balance</span><span>✦&nbsp; DEMO CREDITS</span></div>
+        <div class="balance" id="balance">£1,000</div>
+        <div class="balance-note">Your balance resets with each new game.</div>
+        <h2 class="bet-heading">Your bet slip</h2>
+        <div class="selected-box"><div class="selected-name"><span id="selectedName">Select a dog</span><small id="selectedHint">Choose a runner to get started</small></div><div class="selected-odds" id="selectedOdds">—</div></div>
+        <div class="notice" id="notice" role="alert"></div>
+        <label class="label" for="stake"><span>Stake</span><span id="maxStake">MAX £1,000</span></label>
+        <div class="stake-wrap"><div class="currency">£</div><input id="stake" type="number" inputmode="numeric" min="1" step="1" value="50" aria-label="Stake amount in play credits" /></div>
+        <div class="quick-stakes"><button type="button" data-stake="25">£25</button><button type="button" data-stake="50">£50</button><button type="button" data-stake="100">£100</button><button type="button" data-stake="max">MAX</button></div>
+        <div class="return-row"><span>Potential return</span><strong id="potentialReturn">£—</strong></div>
+        <button class="primary" id="raceButton" disabled>PLACE BET &amp; RACE&nbsp; →</button>
+        <button class="secondary" id="newGameButton">↻&nbsp; Start a new game</button>
+        <p class="hint">Choose a dog, set your stake, and watch the race.</p>
+        <section class="results" id="results" aria-live="polite">
+          <div class="result-head"><h3>Race result</h3><span id="resultRace">RACE 01 · OFFICIAL</span></div>
+          <div class="result-body"><div class="result-copy"><strong id="resultHeadline">You won!</strong><p id="resultDetails"></p></div><div class="result-change" id="resultChange"></div></div>
+          <button class="primary" id="nextRaceButton" hidden>NEXT RACE&nbsp; →</button>
+        </section>
+        <p class="muted-note">This is a fictional game using play credits only. No real money or prizes.</p>
+      </aside>
+    </div>
+    <footer class="footer">ALL DOGS, RACES &amp; ODDS ARE FICTIONAL · PLAY CREDITS HAVE NO CASH VALUE</footer>
+  </main>
+  <div class="game-over" id="gameOver" role="dialog" aria-modal="true" aria-labelledby="overTitle"><div class="modal"><div class="modal-icon">🏁</div><div class="eyebrow">That's the final bell</div><h2 id="overTitle">Game over</h2><p id="overCopy">Your play balance has reached £0. Start a new game to get a fresh balance and race again.</p><button class="primary" id="restartButton">START A NEW GAME&nbsp; →</button><p class="muted-note">Just for fun · fictional races · no real money</p></div></div>
+  <script>
+    (() => {
+      const STARTING_BALANCE = 1000;
+      const names = ['Copper Comet','Misty Harbour','Rocket Socks','Velvet Thunder','Sunday Sprint','Pocket Rocket','Moonlit Dash','Lucky Biscuit','Rapid Fern','Silver Whistle','Daisy Chain','Brass Button','Tidal Wave','Pepper Flash','Bluebell Run','Midnight Echo','Clever Fox','Sunny Side Up'];
+      const colors = ['#f2f0e8','#292d31','#d54a38','#5576b9','#dcbd39','#41a5a1'];
+      const forms = ['1-2-1','2-1-3','1-1-2','3-2-1','2-3-1','1-3-2','2-1-2','3-1-1'];
+      const emojis = ['🐕','🐕‍🦺','🐕','🐕‍🦺','🐕','🐕‍🦺'];
+      const $ = id => document.getElementById(id);
+      let balance = STARTING_BALANCE, raceNo = 1, dogs = [], selected = null, racing = false, completed = false;
+      const money = n => '£' + Math.max(0, Math.round(n)).toLocaleString('en-GB');
+      const rand = (a,b) => Math.random() * (b-a) + a;
+      function makeRace(){
+        const pool = [...names]; dogs = [];
+        for(let i=0;i<6;i++){
+          const idx = Math.floor(Math.random()*pool.length), name = pool.splice(idx,1)[0];
+          dogs.push({id:i,name,form:forms[Math.floor(Math.random()*forms.length)],color:colors[i],emoji:emojis[i],skill:rand(.65,1.38),progress:0});
+        }
+        // Convert hidden ability into fair fractional odds. Rounding creates a modest simulated bookmaker margin.
+        const total = dogs.reduce((s,d)=>s+d.skill,0);
+        dogs.forEach(d=>{d.prob=d.skill/total; d.odds=Math.max(1.35,Math.round((1/d.prob)*1.08*4)/4);});
+        selected=null; completed=false; racing=false;
+        $('raceTitle').textContent='Race '+String(raceNo).padStart(2,'0');
+        $('resultRace').textContent='RACE '+String(raceNo).padStart(2,'0')+' · OFFICIAL';
+        $('raceBanner').classList.remove('show');$('results').classList.remove('show');$('liveLabel').innerHTML='<i></i> READY';
+        renderDogs();renderTrack();updateSlip();
+      }
+      function renderTrack(){
+        const track=$('track'); track.innerHTML='';
+        dogs.forEach((d,i)=>{
+          const lane=document.createElement('div');lane.className='lane';
+          lane.innerHTML='<span class="lane-no" style="background:'+d.color+'">'+(i+1)+'</span><div class="runner" id="runner'+d.id+'"><span class="dog" id="dog'+d.id+'">'+d.emoji+'</span><span class="dog-name">'+d.name+'<span class="pick-marker">YOUR PICK</span></span></div>';
+          track.appendChild(lane);
+        });
+        const finish=document.createElement('div');finish.className='finish';finish.id='finishLine';track.appendChild(finish);
+        updateTrackSelection();
+      }
+      function updateTrackSelection(){
+        dogs.forEach(d=>{
+          const runner=$('runner'+d.id),lane=runner&&runner.parentElement,isPick=d.id===selected;
+          if(runner){runner.classList.toggle('your-pick',isPick);runner.setAttribute('aria-label',d.name+(isPick?' — your pick':''));}
+          if(lane)lane.classList.toggle('your-pick',isPick);
+        });
+      }
+      function renderDogs(){
+        $('dogList').innerHTML='';
+        const favourite=dogs.reduce((a,b)=>a.prob>b.prob?a:b);
+        dogs.forEach((d,i)=>{
+          const btn=document.createElement('button');btn.type='button';btn.className='dog-row'+(selected===d.id?' selected':'');btn.disabled=racing||balance<=0||completed;btn.setAttribute('aria-pressed',selected===d.id?'true':'false');
+          btn.innerHTML='<span class="silk" style="background:'+d.color+'">'+(i+1)+'</span><span class="dog-info"><strong>'+d.name+(d===favourite?'<span class="fav">favourite</span>':'')+'</strong><small>TRAP '+(i+1)+' · '+d.odds.toFixed(2)+' odds</small></span><span class="form">FORM '+d.form+'</span><span class="odds">'+d.odds.toFixed(2)+'<small>DECIMAL</small></span>';
+          btn.addEventListener('click',()=>{if(racing||completed)return;selected=d.id;$('notice').classList.remove('show');renderDogs();updateTrackSelection();updateSlip();});$('dogList').appendChild(btn);
+        });
+      }
+      function updateSlip(){
+        const dog=dogs.find(d=>d.id===selected),stake=Math.floor(Number($('stake').value)||0);
+        $('balance').textContent=money(balance);$('maxStake').textContent='MAX '+money(balance);
+        $('selectedName').textContent=dog?dog.name:'Select a dog';
+        $('selectedHint').textContent=dog?'TRAP '+(dog.id+1)+' · WIN':'Choose a runner to get started';
+        $('selectedOdds').textContent=dog?dog.odds.toFixed(2):'—';
+        $('potentialReturn').textContent=dog&&stake>0?money(stake*dog.odds):'£—';
+        $('raceButton').disabled=!dog||!stake||stake>balance||racing||completed||balance<=0;
+        $('raceButton').textContent=racing?'RACE IN PROGRESS…':completed?'RACE COMPLETE':'PLACE BET & RACE  →';
+      }
+      function delay(ms){return new Promise(r=>setTimeout(r,ms));}
+      function chooseWinner(){let x=Math.random(),sum=0;for(const d of dogs){sum+=d.prob;if(x<=sum)return d;}return dogs[dogs.length-1];}
+      async function runRace(){
+        const dog=dogs.find(d=>d.id===selected),stake=Math.floor(Number($('stake').value)||0);
+        if(!dog||racing||stake<1||stake>balance)return;
+        balance-=stake;racing=true;$('notice').classList.remove('show');$('liveLabel').innerHTML='<i></i> LIVE';$('raceBanner').classList.add('show');$('bannerText').textContent="They're off!";renderDogs();updateSlip();
+        dogs.forEach(d=>{d.progress=0;$('dog'+d.id).classList.add('run');});
+        const winner=chooseWinner(),start=performance.now(),duration=5800;
+        const finishTimes=new Map(dogs.map(d=>[d,d===winner?duration:duration*rand(1.025,1.30)]));
+        const pacePhase=new Map(dogs.map(d=>[d,{a:rand(0,Math.PI*2),b:rand(0,Math.PI*2)}]));
+        const track=$('track'),trackRect=track.getBoundingClientRect(),finish=$('finishLine'),finishRect=finish.getBoundingClientRect();
+        const borderLeft=parseFloat(getComputedStyle(track).borderLeftWidth)||0;
+        const finishCenter=finishRect.left-trackRect.left-borderLeft+finish.offsetWidth/2;
+        const finishLeft=finishCenter-$('dog'+winner.id).getBoundingClientRect().width/2;
+        const startLeft=39,runDistance=Math.max(1,finishLeft-startLeft);
+        await new Promise(resolve=>{
+          function frame(now){
+            const elapsed=Math.min(duration,now-start);
+            dogs.forEach(d=>{
+              const phase=pacePhase.get(d),u=Math.min(1,elapsed/finishTimes.get(d));
+              // A smooth, individual pace curve lets dogs surge and fade without frame-to-frame jumps.
+              const raw=u+.32/(2*Math.PI)*(Math.cos(phase.a)-Math.cos(2*Math.PI*u+phase.a))+.20/(6*Math.PI)*(Math.cos(phase.b)-Math.cos(6*Math.PI*u+phase.b));
+              d.progress=Math.max(0,Math.min(1,raw));
+              $('runner'+d.id).style.left=(startLeft+runDistance*d.progress)+'px';
+            });
+            if(elapsed<duration)requestAnimationFrame(frame);else resolve();
+          }requestAnimationFrame(frame);
+        });
+        await delay(550);
+        dogs.forEach(d=>$('dog'+d.id).classList.remove('run'));
+        const won=dog.id===winner.id,returned=won?Math.round(stake*dog.odds):0;
+        balance+=returned;completed=true;racing=false;
+        $('liveLabel').innerHTML='<i style="background:var(--lime);box-shadow:0 0 12px var(--lime)"></i> FINISHED';$('bannerText').textContent='🏆  '+winner.name+' wins!';
+        $('resultHeadline').textContent=won?'Your pick won!':'Your pick finished out of the places';
+        $('resultDetails').textContent=won?dog.name+' won at '+dog.odds.toFixed(2)+' odds. Your £'+stake+' stake returned '+money(returned)+'.':'You backed '+dog.name+' at '+dog.odds.toFixed(2)+'. '+winner.name+' crossed the line first. Your £'+stake+' stake is lost.';
+        const change=$('resultChange');change.className='result-change '+(won?'win':'loss');change.innerHTML=(won?'+'+money(returned-stake):'−'+money(stake))+'<small>'+ (won?'NET WIN':'STAKE LOST')+'</small>';
+        $('results').classList.add('show');
+        renderDogs();updateSlip();
+        if(balance<=0){await delay(800);$('overCopy').textContent='Your play balance has reached £0. You played '+raceNo+' race'+(raceNo===1?'':'s')+'. Start a new game to get a fresh balance and race again.';$('gameOver').classList.add('show');$('restartButton').focus();}
+      }
+      function newGame(){balance=STARTING_BALANCE;raceNo=1;$('stake').value='50';$('gameOver').classList.remove('show');makeRace();window.scrollTo({top:0,behavior:'smooth'});}
+      $('stake').addEventListener('input',()=>{const v=Number($('stake').value);$('notice').classList.toggle('show',v>balance);$('notice').textContent=v>balance?'Your stake is more than your available balance.':'';updateSlip();});
+      document.querySelectorAll('[data-stake]').forEach(b=>b.addEventListener('click',()=>{$('stake').value=b.dataset.stake==='max'?balance:b.dataset.stake;$('stake').dispatchEvent(new Event('input'));}));
+      $('raceButton').addEventListener('click',runRace);
+      $('newGameButton').addEventListener('click',()=>{if(racing)return;if(balance===STARTING_BALANCE&&raceNo===1&&!completed)return;newGame();});
+      $('restartButton').addEventListener('click',newGame);
+      function nextRace(){raceNo++;makeRace();window.scrollTo({top:0,behavior:'smooth'});}
+      $('nextRaceButton').addEventListener('click',nextRace);
+      makeRace();
+      const observer=new MutationObserver(()=>{
+        $('nextRaceButton').hidden=!(completed&&balance>0);
+      });observer.observe($('results'),{attributes:true,attributeFilter:['class']});
+    })();
+  </script>
+</body>
+</html>
