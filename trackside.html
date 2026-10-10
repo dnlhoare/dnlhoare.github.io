@@ -12,7 +12,7 @@
     @media(max-width:840px){.shell{padding:22px 18px 38px}.grid{grid-template-columns:1fr}.bet-card{position:static}.left{min-width:0}.bet-card{order:2}.heading-row h1{font-size:38px}}
     @media(max-width:480px){.shell{padding:17px 12px 30px}.demo-pill{font-size:9px;padding:7px 9px}.brand-name{font-size:17px}.heading-row{align-items:start;gap:8px}.heading-row h1{font-size:33px}.race-meta{font-size:9px}.track{padding-left:9px;padding-right:9px}.track:before{inset:14px 9px 17px}.finish{right:32px}.runner{gap:4px}.dog{font-size:23px}.dog-name{font-size:9px}.dog-row{padding:10px;gap:7px;grid-template-columns:31px minmax(0,1fr) auto auto}.silk{width:27px;height:27px}.form{font-size:9px}.odds{font-size:13px;min-width:46px}.dog-info strong{font-size:12px}}
   </style>
-  <style>.finish{width:5px;box-shadow:0 0 8px #eaf4d766;opacity:.95}@media(max-width:480px){.form{font-size:8px}.dog-info strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}</style>
+  <style>.finish{width:5px;box-shadow:0 0 8px #eaf4d766;opacity:.95}.finish-badge{display:none;color:var(--lime);font:8px 'DM Mono',monospace;margin-left:5px}.runner.finished .finish-badge{display:inline}@media(max-width:480px){.form{font-size:8px}.dog-info strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}</style>
 </head>
 <body>
   <main class="shell">
@@ -93,7 +93,7 @@
         const track=$('track'); track.innerHTML='';
         dogs.forEach((d,i)=>{
           const lane=document.createElement('div');lane.className='lane';
-          lane.innerHTML='<span class="lane-no" style="background:'+d.color+'">'+(i+1)+'</span><div class="runner" id="runner'+d.id+'"><span class="dog" id="dog'+d.id+'">'+d.emoji+'</span><span class="dog-name">'+d.name+'<span class="pick-marker">YOUR PICK</span></span></div>';
+          lane.innerHTML='<span class="lane-no" style="background:'+d.color+'">'+(i+1)+'</span><div class="runner" id="runner'+d.id+'"><span class="dog" id="dog'+d.id+'">'+d.emoji+'</span><span class="dog-name">'+d.name+'<span class="pick-marker">YOUR PICK</span><span class="finish-badge">· FINISHED</span></span></div>';
           track.appendChild(lane);
         });
         const finish=document.createElement('div');finish.className='finish';finish.id='finishLine';track.appendChild(finish);
@@ -133,11 +133,12 @@
         balance-=stake;racing=true;$('notice').classList.remove('show');$('liveLabel').innerHTML='<i></i> LIVE';$('raceBanner').classList.add('show');$('bannerText').textContent="They're off!";renderDogs();updateSlip();
         dogs.forEach(d=>{d.progress=0;$('dog'+d.id).classList.add('run');});
         const winner=chooseWinner(),start=performance.now(),duration=5800;
-        const finishTimes=new Map(dogs.map(d=>{
-          if(d===winner)return [d,duration];
-          const gap=.35+Math.max(0,winner.racePower-d.racePower)*1.8+rand(.2,.95);
-          return [d,duration+gap];
-        }));
+        const raceOrder=dogs.filter(d=>d!==winner).map(d=>({dog:d,draw:d.racePower+rand(-.12,.12)})).sort((a,b)=>b.draw-a.draw);
+        const raceTargets=new Map([[winner,1]]);
+        raceOrder.forEach(({dog},index)=>{
+          // The strongest chaser finishes closest to the line; every other runner stays clearly behind it.
+          raceTargets.set(dog,.58+.24*(raceOrder.length-1-index)/(raceOrder.length-1));
+        });
         const pacePhase=new Map(dogs.map(d=>[d,{a:rand(0,Math.PI*2),b:rand(0,Math.PI*2)}]));
         const track=$('track'),trackRect=track.getBoundingClientRect(),finish=$('finishLine'),finishRect=finish.getBoundingClientRect();
         const borderLeft=parseFloat(getComputedStyle(track).borderLeftWidth)||0;
@@ -148,11 +149,14 @@
           function frame(now){
             const elapsed=Math.min(duration,now-start);
             dogs.forEach(d=>{
-              const phase=pacePhase.get(d),u=Math.min(1,elapsed/finishTimes.get(d));
+              const phase=pacePhase.get(d),u=Math.min(1,elapsed/duration);
               // A smooth, individual pace curve lets dogs surge and fade without frame-to-frame jumps.
               const raw=u+.32/(2*Math.PI)*(Math.cos(phase.a)-Math.cos(2*Math.PI*u+phase.a))+.20/(6*Math.PI)*(Math.cos(phase.b)-Math.cos(6*Math.PI*u+phase.b));
-              d.progress=Math.max(0,Math.min(1,raw));
-              $('runner'+d.id).style.left=(startLeft+runDistance*d.progress)+'px';
+              const runner=$('runner'+d.id);
+              const target=raceTargets.get(d);
+              d.progress=elapsed>=duration?target:target*Math.max(0,Math.min(1,raw));
+              if(d===winner&&elapsed>=duration&&!d.finished){d.finished=true;runner.classList.add('finished');}
+              runner.style.left=(startLeft+runDistance*d.progress)+'px';
             });
             if(elapsed<duration)requestAnimationFrame(frame);else resolve();
           }requestAnimationFrame(frame);
