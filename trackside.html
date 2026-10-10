@@ -12,7 +12,7 @@
     @media(max-width:840px){.shell{padding:22px 18px 38px}.grid{grid-template-columns:1fr}.bet-card{position:static}.left{min-width:0}.bet-card{order:2}.heading-row h1{font-size:38px}}
     @media(max-width:480px){.shell{padding:17px 12px 30px}.demo-pill{font-size:9px;padding:7px 9px}.brand-name{font-size:17px}.heading-row{align-items:start;gap:8px}.heading-row h1{font-size:33px}.race-meta{font-size:9px}.track{padding-left:9px;padding-right:9px}.track:before{inset:14px 9px 17px}.finish{right:32px}.runner{gap:4px}.dog{font-size:23px}.dog-name{font-size:9px}.dog-row{padding:10px;gap:7px;grid-template-columns:31px minmax(0,1fr) auto auto}.silk{width:27px;height:27px}.form{font-size:9px}.odds{font-size:13px;min-width:46px}.dog-info strong{font-size:12px}}
   </style>
-  <style>.finish{width:5px;box-shadow:0 0 8px #eaf4d766;opacity:.95}</style>
+  <style>.finish{width:5px;box-shadow:0 0 8px #eaf4d766;opacity:.95}@media(max-width:480px){.form{font-size:8px}.dog-info strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}</style>
 </head>
 <body>
   <main class="shell">
@@ -30,7 +30,7 @@
           <div class="race-banner" id="raceBanner"><span id="bannerText">And they're off!</span><small>HARBOR PARK · 400M</small></div>
           <div class="track-footer"><span>GOOD TO FIRM</span><span>4:20 PM</span><span>TRAP 1 — 6</span></div>
         </div>
-        <div class="odds-title"><h2>Pick your runner</h2><span>WIN · FIXED ODDS</span></div>
+        <div class="odds-title"><h2>Pick your runner</h2><span>FORM: LATEST → OLDEST</span></div>
         <div class="dog-list" id="dogList"></div>
       </section>
       <aside class="bet-card" aria-label="Bet slip">
@@ -63,7 +63,7 @@
       const STARTING_BALANCE = 1000;
       const names = ['Copper Comet','Misty Harbour','Rocket Socks','Velvet Thunder','Sunday Sprint','Pocket Rocket','Moonlit Dash','Lucky Biscuit','Rapid Fern','Silver Whistle','Daisy Chain','Brass Button','Tidal Wave','Pepper Flash','Bluebell Run','Midnight Echo','Clever Fox','Sunny Side Up'];
       const colors = ['#f2f0e8','#292d31','#d54a38','#5576b9','#dcbd39','#41a5a1'];
-      const forms = ['1-2-1','2-1-3','1-1-2','3-2-1','2-3-1','1-3-2','2-1-2','3-1-1'];
+      const formWeights = [.42,.26,.16,.10,.06];
       const emojis = ['🐕','🐕‍🦺','🐕','🐕‍🦺','🐕','🐕‍🦺'];
       const $ = id => document.getElementById(id);
       let balance = STARTING_BALANCE, raceNo = 1, dogs = [], selected = null, racing = false, completed = false;
@@ -73,11 +73,16 @@
         const pool = [...names]; dogs = [];
         for(let i=0;i<6;i++){
           const idx = Math.floor(Math.random()*pool.length), name = pool.splice(idx,1)[0];
-          dogs.push({id:i,name,form:forms[Math.floor(Math.random()*forms.length)],color:colors[i],emoji:emojis[i],skill:rand(.65,1.38),progress:0});
+          const form=Array.from({length:5},()=>1+Math.floor(Math.random()*6));
+          const formScore=form.reduce((score,place,index)=>score+formWeights[index]*(6-place)/5,0);
+          const ability=rand(.78,1.32);
+          dogs.push({id:i,name,form,formScore,ability,color:colors[i],emoji:emojis[i],progress:0});
         }
-        // Convert hidden ability into fair fractional odds. Rounding creates a modest simulated bookmaker margin.
-        const total = dogs.reduce((s,d)=>s+d.skill,0);
-        dogs.forEach(d=>{d.prob=d.skill/total; d.odds=Math.max(1.35,Math.round((1/d.prob)*1.08*4)/4);});
+        // Recent form nudges each dog's underlying ability; the displayed odds then become the strongest race signal.
+        dogs.forEach(d=>{d.rating=d.ability*(.82+.36*d.formScore);});
+        const total = dogs.reduce((s,d)=>s+d.rating,0), strongest=Math.max(...dogs.map(d=>d.rating));
+        dogs.forEach(d=>{d.prob=d.rating/total;d.odds=Math.max(1.35,Math.round((1/d.prob)*1.08*4)/4);});
+        dogs.forEach(d=>{d.racePower=.75*(d.rating/strongest)+.25*d.formScore;});
         selected=null; completed=false; racing=false;
         $('raceTitle').textContent='Race '+String(raceNo).padStart(2,'0');
         $('resultRace').textContent='RACE '+String(raceNo).padStart(2,'0')+' · OFFICIAL';
@@ -106,7 +111,7 @@
         const favourite=dogs.reduce((a,b)=>a.prob>b.prob?a:b);
         dogs.forEach((d,i)=>{
           const btn=document.createElement('button');btn.type='button';btn.className='dog-row'+(selected===d.id?' selected':'');btn.disabled=racing||balance<=0||completed;btn.setAttribute('aria-pressed',selected===d.id?'true':'false');
-          btn.innerHTML='<span class="silk" style="background:'+d.color+'">'+(i+1)+'</span><span class="dog-info"><strong>'+d.name+(d===favourite?'<span class="fav">favourite</span>':'')+'</strong><small>TRAP '+(i+1)+' · '+d.odds.toFixed(2)+' odds</small></span><span class="form">FORM '+d.form+'</span><span class="odds">'+d.odds.toFixed(2)+'<small>DECIMAL</small></span>';
+          btn.innerHTML='<span class="silk" style="background:'+d.color+'">'+(i+1)+'</span><span class="dog-info"><strong>'+d.name+(d===favourite?'<span class="fav">favourite</span>':'')+'</strong><small>TRAP '+(i+1)+' · '+d.odds.toFixed(2)+' odds</small></span><span class="form" title="Recent finishing places, newest first">FORM '+d.form.join('-')+'</span><span class="odds">'+d.odds.toFixed(2)+'<small>DECIMAL</small></span>';
           btn.addEventListener('click',()=>{if(racing||completed)return;selected=d.id;$('notice').classList.remove('show');renderDogs();updateTrackSelection();updateSlip();});$('dogList').appendChild(btn);
         });
       }
@@ -128,7 +133,11 @@
         balance-=stake;racing=true;$('notice').classList.remove('show');$('liveLabel').innerHTML='<i></i> LIVE';$('raceBanner').classList.add('show');$('bannerText').textContent="They're off!";renderDogs();updateSlip();
         dogs.forEach(d=>{d.progress=0;$('dog'+d.id).classList.add('run');});
         const winner=chooseWinner(),start=performance.now(),duration=5800;
-        const finishTimes=new Map(dogs.map(d=>[d,d===winner?duration:duration*rand(1.025,1.30)]));
+        const finishTimes=new Map(dogs.map(d=>{
+          if(d===winner)return [d,duration];
+          const gap=.35+Math.max(0,winner.racePower-d.racePower)*1.8+rand(.2,.95);
+          return [d,duration+gap];
+        }));
         const pacePhase=new Map(dogs.map(d=>[d,{a:rand(0,Math.PI*2),b:rand(0,Math.PI*2)}]));
         const track=$('track'),trackRect=track.getBoundingClientRect(),finish=$('finishLine'),finishRect=finish.getBoundingClientRect();
         const borderLeft=parseFloat(getComputedStyle(track).borderLeftWidth)||0;
