@@ -13,6 +13,24 @@
     @media(max-width:480px){.shell{padding:17px 12px 30px}.demo-pill{font-size:9px;padding:7px 9px}.brand-name{font-size:17px}.heading-row{align-items:start;gap:8px}.heading-row h1{font-size:33px}.race-meta{font-size:9px}.track{padding-left:9px;padding-right:9px}.track:before{inset:14px 9px 17px}.finish{right:32px}.runner{gap:4px}.dog{font-size:23px}.dog-name{font-size:9px}.dog-row{padding:10px;gap:7px;grid-template-columns:31px minmax(0,1fr) auto auto}.silk{width:27px;height:27px}.form{font-size:9px}.odds{font-size:13px;min-width:46px}.dog-info strong{font-size:12px}}
   </style>
   <style>.finish{width:5px;box-shadow:0 0 8px #eaf4d766;opacity:.95}.finish-badge{display:none;color:var(--lime);font:8px 'DM Mono',monospace;margin-left:5px}.runner.finished .finish-badge{display:inline}@media(max-width:480px){.form{font-size:8px}.dog-info strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}</style>
+  <style>
+    .results{position:fixed;inset:0;z-index:11;margin:0;padding:20px;background:#090c09d9;backdrop-filter:blur(5px);border:0;border-radius:0;align-items:center;justify-content:center;overflow:auto}
+    .results.show{display:flex}
+    .result-modal{width:min(100%,460px);padding:28px;background:var(--panel);border:1px solid var(--line);border-radius:17px;text-align:center;box-shadow:0 20px 90px #0008}
+    .results.win .result-modal{border-color:#36c977;background:linear-gradient(145deg,#193626,var(--panel) 58%)}
+    .results.loss .result-modal{border-color:#e45c5c;background:linear-gradient(145deg,#3b2022,var(--panel) 58%)}
+    .result-modal .eyebrow{margin:5px 0 12px}
+    .result-head{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:12px 0}
+    .result-head h3{font-size:18px}
+    .result-body{padding:18px 0;align-items:center;text-align:left}
+    .result-copy strong{font-size:16px}
+    .result-copy p{font-size:12px;line-height:1.55}
+    .result-change{font-size:22px}
+    .result-change.win{color:#4ade80}
+    .result-change.loss{color:#ff6868}
+    .result-modal .primary{margin-top:8px}
+    @media(max-width:480px){.result-modal{padding:22px}.result-body{gap:8px}.result-change{font-size:18px}}
+  </style>
 </head>
 <body>
   <main class="shell">
@@ -47,16 +65,20 @@
         <button class="primary" id="raceButton" disabled>PLACE BET &amp; RACE&nbsp; →</button>
         <button class="secondary" id="newGameButton">↻&nbsp; Start a new game</button>
         <p class="hint">Choose a dog, set your stake, and watch the race.</p>
-        <section class="results" id="results" aria-live="polite">
-          <div class="result-head"><h3>Race result</h3><span id="resultRace">RACE 01 · OFFICIAL</span></div>
-          <div class="result-body"><div class="result-copy"><strong id="resultHeadline">You won!</strong><p id="resultDetails"></p></div><div class="result-change" id="resultChange"></div></div>
-          <button class="primary" id="nextRaceButton" hidden>NEXT RACE&nbsp; →</button>
-        </section>
         <p class="muted-note">This is a fictional game using play credits only. No real money or prizes.</p>
       </aside>
     </div>
     <footer class="footer">ALL DOGS, RACES &amp; ODDS ARE FICTIONAL · PLAY CREDITS HAVE NO CASH VALUE</footer>
   </main>
+  <section class="results" id="results" aria-live="polite" role="dialog" aria-modal="true" aria-labelledby="resultHeadline">
+    <div class="result-modal">
+      <div class="modal-icon" id="resultIcon">🏁</div>
+      <div class="eyebrow">Race complete</div>
+      <div class="result-head"><h3>Race result</h3><span id="resultRace">RACE 01 · OFFICIAL</span></div>
+      <div class="result-body"><div class="result-copy"><strong id="resultHeadline">You won!</strong><p id="resultDetails"></p></div><div class="result-change" id="resultChange"></div></div>
+      <button class="primary" id="nextRaceButton" hidden>NEXT RACE&nbsp; →</button>
+    </div>
+  </section>
   <div class="game-over" id="gameOver" role="dialog" aria-modal="true" aria-labelledby="overTitle"><div class="modal"><div class="modal-icon">🏁</div><div class="eyebrow">That's the final bell</div><h2 id="overTitle">Game over</h2><p id="overCopy">Your play balance has reached £0. Start a new game to get a fresh balance and race again.</p><button class="primary" id="restartButton">START A NEW GAME&nbsp; →</button><p class="muted-note">Just for fun · fictional races · no real money</p></div></div>
   <script>
     (() => {
@@ -169,9 +191,11 @@
         $('resultHeadline').textContent=won?'Your pick won!':'Your pick finished out of the places';
         $('resultDetails').textContent=won?dog.name+' won at '+dog.odds.toFixed(2)+' odds. Your £'+stake+' stake returned '+money(returned)+'.':'You backed '+dog.name+' at '+dog.odds.toFixed(2)+'. '+winner.name+' crossed the line first. Your £'+stake+' stake is lost.';
         const change=$('resultChange');change.className='result-change '+(won?'win':'loss');change.innerHTML=(won?'+'+money(returned-stake):'−'+money(stake))+'<small>'+ (won?'NET WIN':'STAKE LOST')+'</small>';
-        $('results').classList.add('show');
+        $('results').classList.remove('win','loss');$('results').classList.add('show',won?'win':'loss');
         renderDogs();updateSlip();
-        if(balance<=0){await delay(800);$('overCopy').textContent='Your play balance has reached £0. You played '+raceNo+' race'+(raceNo===1?'':'s')+'. Start a new game to get a fresh balance and race again.';$('gameOver').classList.add('show');$('restartButton').focus();}
+        $('nextRaceButton').textContent=balance<=0?'START A NEW GAME  →':'NEXT RACE  →';
+        if(balance<=0){$('resultDetails').textContent+=' Your balance is £0, so this game is over.';$('resultHeadline').textContent=won?'A win, but game over':'Game over';}
+        $('nextRaceButton').focus();
       }
       function newGame(){balance=STARTING_BALANCE;raceNo=1;$('stake').value='50';$('gameOver').classList.remove('show');makeRace();window.scrollTo({top:0,behavior:'smooth'});}
       $('stake').addEventListener('input',()=>{const v=Number($('stake').value);$('notice').classList.toggle('show',v>balance);$('notice').textContent=v>balance?'Your stake is more than your available balance.':'';updateSlip();});
@@ -180,10 +204,10 @@
       $('newGameButton').addEventListener('click',()=>{if(racing)return;if(balance===STARTING_BALANCE&&raceNo===1&&!completed)return;newGame();});
       $('restartButton').addEventListener('click',newGame);
       function nextRace(){raceNo++;makeRace();window.scrollTo({top:0,behavior:'smooth'});}
-      $('nextRaceButton').addEventListener('click',nextRace);
+      $('nextRaceButton').addEventListener('click',()=>balance<=0?newGame():nextRace());
       makeRace();
       const observer=new MutationObserver(()=>{
-        $('nextRaceButton').hidden=!(completed&&balance>0);
+        $('nextRaceButton').hidden=!completed;
       });observer.observe($('results'),{attributes:true,attributeFilter:['class']});
     })();
   </script>
