@@ -30,6 +30,12 @@
     .result-change.loss{color:#ff6868}
     .result-modal .primary{margin-top:8px}
     @media(max-width:480px){.result-modal{padding:22px}.result-body{gap:8px}.result-change{font-size:18px}}
+    .results.win .result-change .win-amount{display:inline-block;transform-origin:center;animation:winAmountPop .85s cubic-bezier(.2,.85,.25,1.35) both}
+    @keyframes winAmountPop{0%{transform:scale(1)}35%{transform:scale(1.65)}62%{transform:scale(.86)}82%{transform:scale(1.12)}100%{transform:scale(1)}}
+    .dollar-rain{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:12}
+    .dollar-confetti{position:absolute;top:-12vh;color:#8df0a9;font:700 25px 'DM Mono',monospace;text-shadow:0 2px 8px #07170c,0 0 10px #38d87888;animation:dollarFall var(--fall-time) linear var(--fall-delay) both;will-change:transform,opacity}
+    @keyframes dollarFall{0%{transform:translate3d(0,-8vh,0) rotate(0) scale(.7);opacity:0}8%{opacity:1}88%{opacity:1}100%{transform:translate3d(var(--sway),115vh,0) rotate(var(--spin)) scale(1.12);opacity:0}}
+    @media(prefers-reduced-motion:reduce){.results.win .result-change .win-amount{animation:none}.dollar-confetti{animation-duration:1ms}}
   </style>
 </head>
 <body>
@@ -71,7 +77,7 @@
     <footer class="footer">ALL DOGS, RACES &amp; ODDS ARE FICTIONAL · PLAY CREDITS HAVE NO CASH VALUE</footer>
   </main>
   <section class="results" id="results" aria-live="polite" role="dialog" aria-modal="true" aria-labelledby="resultHeadline">
-    <div class="result-modal">
+    <div class="dollar-rain" id="dollarRain" aria-hidden="true"></div><div class="result-modal">
       <div class="modal-icon" id="resultIcon">🏁</div>
       <div class="eyebrow">Race complete</div>
       <div class="result-head"><h3>Race result</h3><span id="resultRace">RACE 01 · OFFICIAL</span></div>
@@ -149,7 +155,13 @@
       }
       function delay(ms){return new Promise(r=>setTimeout(r,ms));}
       function chooseWinner(){let x=Math.random(),sum=0;for(const d of dogs){sum+=d.prob;if(x<=sum)return d;}return dogs[dogs.length-1];}
-      async function runRace(){
+      let dollarRainTimer;
+      function stopDollarRain(){clearInterval(dollarRainTimer);$('dollarRain').replaceChildren();}
+      function startDollarRain(){
+        stopDollarRain();const rain=$('dollarRain');
+        const drop=()=>{for(let i=0;i<9;i++){const dollar=document.createElement('span');dollar.className='dollar-confetti';dollar.textContent='$';dollar.style.left=rand(0,100)+'vw';dollar.style.setProperty('--fall-time',rand(2.8,5.1)+'s');dollar.style.setProperty('--fall-delay',rand(0,.65)+'s');dollar.style.setProperty('--sway',rand(-150,150)+'px');dollar.style.setProperty('--spin',rand(-600,600)+'deg');dollar.style.fontSize=rand(16,31)+'px';rain.appendChild(dollar);dollar.addEventListener('animationend',()=>dollar.remove(),{once:true});}};
+        drop();dollarRainTimer=setInterval(drop,260);
+      }      async function runRace(){
         const dog=dogs.find(d=>d.id===selected),stake=Math.floor(Number($('stake').value)||0);
         if(!dog||racing||stake<1||stake>balance)return;
         balance-=stake;racing=true;$('notice').classList.remove('show');$('liveLabel').innerHTML='<i></i> LIVE';$('raceBanner').classList.add('show');$('bannerText').textContent="They're off!";renderDogs();updateSlip();
@@ -190,7 +202,8 @@
         $('liveLabel').innerHTML='<i style="background:var(--lime);box-shadow:0 0 12px var(--lime)"></i> FINISHED';$('bannerText').textContent='🏆  '+winner.name+' wins!';
         $('resultHeadline').textContent=won?'Your pick won!':'Your pick finished out of the places';
         $('resultDetails').textContent=won?dog.name+' won at '+dog.odds.toFixed(2)+' odds. Your £'+stake+' stake returned '+money(returned)+'.':'You backed '+dog.name+' at '+dog.odds.toFixed(2)+'. '+winner.name+' crossed the line first. Your £'+stake+' stake is lost.';
-        const change=$('resultChange');change.className='result-change '+(won?'win':'loss');change.innerHTML=(won?'+'+money(returned-stake):'−'+money(stake))+'<small>'+ (won?'NET WIN':'STAKE LOST')+'</small>';
+        const change=$('resultChange');change.className='result-change '+(won?'win':'loss');change.innerHTML=(won?'<span class="win-amount">+'+money(returned-stake)+'</span>':'âˆ’'+money(stake))+'<small>'+ (won?'NET WIN':'STAKE LOST')+'</small>';
+        if(won)startDollarRain();else stopDollarRain();
         $('results').classList.remove('win','loss');$('results').classList.add('show',won?'win':'loss');
         renderDogs();updateSlip();
         $('nextRaceButton').textContent=balance<=0?'START A NEW GAME  →':'NEXT RACE  →';
