@@ -1,4 +1,4 @@
-﻿/* Add a demo by copying an entry. Set enabled:false to keep it out of the public catalog. */
+/* Add a demo by copying an entry. Set enabled:false to keep it out of the public catalog. */
 window.DJHDEV_CATALOG = [
   {
     id: 'trackside',
@@ -26,7 +26,7 @@ window.DJHDEV_CATALOG = [
     badge: 'PLAY NOW',
     meta: 'Puzzle · Pick-up-and-play',
     art: 'tetris',
-    image: '' // Optional local screenshot, e.g. "images/tetris.jpg"
+    image: 'images/tetris-unity.png' // Unity gameplay screenshot
   },
   {
     id: 'foldable-comparison',
