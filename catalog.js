@@ -54,6 +54,6 @@ window.DJHDEV_CATALOG = [
     badge: 'EXPERIMENT',
     meta: 'Tools · Live shader playground',
     art: 'shaders',
-    image: ''
+    image: 'images/shader-sandbox.jpg'
   }
 ];
