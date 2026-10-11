@@ -1,34 +1,62 @@
-<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DJHDev</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        html, body {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: url('scene01.webp') no-repeat center center;
-            background-size: contain;
-            background-color: black;
-        }
-        body {
-            color: white;
-            font-size: 3rem;
-            font-family: Arial, sans-serif;
-            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#090909" />
+  <meta name="description" content="A collection of demos, experiments and useful little tools by DJHDEV." />
+  <title>DJHDEV — Demos & experiments</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="catalog.js" defer></script>
+  <script src="app.js" defer></script>
 </head>
 <body>
-    DJHDev.co.uk
+  <header class="topbar">
+    <a class="brand" href="#home" aria-label="DJHDEV home">DJH<span>DEV</span></a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a class="active" href="#home">Home</a>
+      <a href="#catalog">Demos</a>
+      <a href="#about">About</a>
+    </nav>
+    <div class="nav-tools">
+      <label class="search-wrap" for="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search demos" autocomplete="off" /></label>
+      <span class="profile-mark" aria-label="DJHDEV">D</span>
+    </div>
+  </header>
+
+  <main id="home">
+    <section class="hero" aria-labelledby="heroTitle">
+      <div class="hero-art art-racing" id="heroArt" aria-hidden="true">
+        <div class="track-glow"></div><div class="hero-lines"></div><div class="hero-number">01</div>
+        <div class="hero-track"><span>01</span><i>🐕</i><b></b><em>FINISH</em></div>
+        <div class="hero-track second"><span>02</span><i>🐕</i><b></b><em>FINISH</em></div>
+        <div class="hero-track third"><span>03</span><i>🐕</i><b></b><em>FINISH</em></div>
+        <div class="art-label" id="heroArtLabel">HARBOR PARK · 400M</div>
+      </div>
+      <div class="hero-shade"></div>
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-mark">D</span> DJHDEV PRESENTS</div>
+        <p class="hero-kicker" id="heroCategory">A LITTLE FRIENDLY COMPETITION</p>
+        <h1 id="heroTitle">Trackside</h1>
+        <p class="hero-description" id="heroDescription">Pick your runner, place a play-credit bet and watch the race unfold.</p>
+        <div class="hero-meta"><span class="maturity">DEMO</span><span id="heroMeta">Games · Just for fun</span><span>★ <b>FEATURED</b></span></div>
+        <div class="hero-actions"><a class="play-button" id="heroLink" href="https://djhdev.co.uk/trackside.html"><span aria-hidden="true">▶</span> Open demo</a><a class="info-button" href="#catalog"><span aria-hidden="true">ⓘ</span> Browse collection</a></div>
+      </div>
+      <div class="hero-progress" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="hero-caption">INDEPENDENT PROJECTS · ALWAYS EXPERIMENTING</div>
+    </section>
+
+    <section class="catalog-section" id="catalog" aria-labelledby="catalogTitle">
+      <div class="section-heading"><div><p class="section-kicker">THE COLLECTION</p><h2 id="catalogTitle">Explore demos <span class="heading-arrow">›</span></h2></div><div class="filters" role="group" aria-label="Filter demos"><button class="filter active" data-filter="all" type="button">All</button><button class="filter" data-filter="Games" type="button">Games</button><button class="filter" data-filter="Tools" type="button">Tools</button></div></div>
+      <div class="catalog-grid" id="catalogGrid" aria-live="polite"></div>
+      <p class="empty-state" id="emptyState" hidden>No demos match that search. Try another title.</p>
+    </section>
+
+    <section class="about-section" id="about"><span class="about-mark">D</span><div><p class="section-kicker">ABOUT THIS SPACE</p><h2>Built to try things out.</h2><p>DJHDEV is a home for small apps, experiments and ideas in progress. New projects will appear here as they’re ready to play with.</p></div></section>
+  </main>
+  <footer class="site-footer"><a class="brand footer-brand" href="#home">DJH<span>DEV</span></a><p>A changing collection of things made by DJH.</p><span>© <span id="year"></span> DJHDEV</span></footer>
 </body>
 </html>
