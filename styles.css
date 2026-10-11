@@ -17,3 +17,5 @@
 @keyframes shader-drift{to{transform:translate(-4%,5%) scale(1.12)}}
 @media(max-width:760px){.shader-orb-one{width:55vw;height:55vw}.shader-orb-two{width:39vw;height:39vw}.shader-orb-three{width:34vw;height:34vw}}
 @media(max-width:540px){.shader-orb-one{width:75vw;height:75vw}.shader-orb-two{width:54vw;height:54vw}.shader-orb-three{width:46vw;height:46vw}}
+.poster-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.site-version{margin-left:8px;color:#555;font:9px 'DM Mono',monospace;letter-spacing:.5px;white-space:nowrap}
