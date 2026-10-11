@@ -24,8 +24,9 @@
     art.innerHTML = '';
     document.querySelector('.hero-meta>span:last-child').hidden = !item.featured;
     if (item.image) {
-      art.style.backgroundImage = 'linear-gradient(90deg,rgba(8,8,8,.08),rgba(8,8,8,.02)),url("' + encodeURI(item.image) + '")';
       art.classList.add('has-image');
+      art.innerHTML = '<img class="hero-image" src="' + encodeURI(item.image) + '" alt="" aria-hidden="true" />';
+      return;
     }
     if (item.art === 'shaders') art.innerHTML = '<div class="shader-orb shader-orb-one"></div><div class="shader-orb shader-orb-two"></div><div class="shader-orb shader-orb-three"></div><div class="art-label">FRAGMENT SHADERS · WEBGL</div>';
     if (item.art === 'tetris' && !item.image) art.innerHTML = '<div class="tetris-board" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="art-label">STACK · CLEAR · REPEAT</div>';
