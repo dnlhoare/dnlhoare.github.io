@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Shader Sandbox</title>
+    <style>
+        body, html { margin: 0; padding: 0; overflow: hidden; height: 100%; font-family: sans-serif; background: #111; color: #fff; }
+        #canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
+        #ui { position: absolute; top: 20px; left: 20px; z-index: 2; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; width: 350px; }
+        textarea { width: 100%; height: 200px; background: #222; color: #0f0; border: 1px solid #444; font-family: monospace; padding: 8px; resize: vertical; }
+        select, button { width: 100%; margin-top: 10px; padding: 8px; background: #333; color: #fff; border: 1px solid #555; cursor: pointer; }
+        button:hover { background: #444; }
+        .error { color: #ff5555; font-size: 12px; margin-top: 5px; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div id="ui">
+        <h3>Shader Sandbox</h3>
+        <label>Select Demo Shader:</label>
+        <select id="shaderSelect" onchange="loadDemo()">
+            <option value="plasma">Plasma Waves</option>
+            <option value="circles">Moving Circles</option>
+        </select>
+        
+        <label style="margin-top: 10px; display:block;">Fragment Shader Code:</label>
+        <textarea id="shaderCode"></textarea>
+        <button onclick="compileShader()">Compile & Run</button>
+        <div id="errorLog" class="error"></div>
+    </div>
+
+    <!-- Load Three.js for easy WebGL handling -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, material, mesh;
+        let clock = new THREE.Clock();
+
+        const demos = {
+            plasma: `uniform float u_time;
+uniform vec2 u_resolution;
+
+void main() {
+    vec2 st = gl_FragCoord.xy / u_resolution.xy;
+    vec3 color = vec3(0.0);
+
+    // Simple plasma effect
+    color.r = sin(st.x * 10.0 + u_time);
+    color.g = cos(st.y * 10.0 + u_time);
+    color.b = sin(st.x * 5.0 + st.y * 5.0 + u_time);
+
+    gl_FragColor = vec4(color, 1.0);
+}`,
+            circles: `uniform float u_time;
+uniform vec2 u_resolution;
+
+void main() {
+    vec2 st = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / min(u_resolution.x, u_resolution.y);
+    vec3 color = vec3(0.0);
+
+    float d = length(st);
+    float c = sin(d * 20.0 - u_time * 4.0);
+
+    gl_FragColor = vec4(vec3(c), 1.0);
+}`
+        };
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+            
+            scene = new THREE.Scene();
+            camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            loadDemo();
+            animate();
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function loadDemo() {
+            const type = document.getElementById('shaderSelect').value;
+            document.getElementById('shaderCode').value = demos[type];
+            compileShader();
+        }
+
+        function compileShader() {
+            const fragmentShaderText = document.getElementById('shaderCode').value;
+            const errorLog = document.getElementById('errorLog');
+            errorLog.textContent = '';
+
+            // Remove old mesh if it exists
+            if (mesh) scene.remove(mesh);
+
+            try {
+                material = new THREE.ShaderMaterial({
+                    uniforms: {
+                        u_time: { value: 0.0 },
+                        u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
+                    },
+                    vertexShader: `
+                        void main() {
+                            gl_Position = vec4(position, 1.0);
+                        }
+                    `,
+                    fragmentShader: fragmentShaderText
+                });
+
+                const geometry = new THREE.PlaneGeometry(2, 2);
+                mesh = new THREE.Mesh(geometry, material);
+                scene.add(mesh);
+            } catch (e) {
+                errorLog.textContent = e.message;
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (material && material.uniforms.u_time) {
+                material.uniforms.u_time.value = clock.getElapsedTime();
+            }
+            
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            if (material && material.uniforms.u_resolution) {
+                material.uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
