@@ -41,5 +41,19 @@ window.DJHDEV_CATALOG = [
     meta: 'Tools · 3D product comparison',
     art: 'phones',
     image: '' // Optional local screenshot, e.g. "images/phone-lab.jpg"
+  },
+  {
+    id: 'shaders',
+    title: 'Shader Sandbox',
+    subtitle: 'Create animated WebGL effects',
+    description: 'Experiment with fragment shaders and watch colorful effects come to life.',
+    category: 'Tools',
+    href: 'https://djhdev.co.uk/shaders.html',
+    enabled: true,
+    featured: false,
+    badge: 'EXPERIMENT',
+    meta: 'Tools · Live shader playground',
+    art: 'shaders',
+    image: ''
   }
 ];
