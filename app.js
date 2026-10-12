@@ -37,11 +37,14 @@
   function card(item) {
     const image = item.image ? '<img class="poster-image" src="' + escapeHTML(encodeURI(item.image)) + '" alt="" loading="lazy" />' : '';
     const glyph = item.image ? '' : item.art === 'racing' ? '<div class="poster-race"><span>01</span><b>🐕</b><i>02&nbsp; ━━━━━━━━</i><i>03&nbsp; ━━━━━</i><small>HARBOR PARK · 400M</small></div>' : item.art === 'tetris' ? '<div class="poster-blocks"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="poster-tetris">TETRIS</span>' : item.art === 'shaders' ? '<div class="shader-poster"><i></i><i></i><i></i></div><span class="poster-chip">WEBGL PLAYGROUND</span>' : '<div class="phone-art"><i></i><i></i><b>FOLD<br>LAB</b></div><span class="poster-chip">3D COMPARISON</span>';
-    return '<a class="demo-card" href="' + escapeHTML(item.href) + '" target="_blank" rel="noopener noreferrer" aria-label="Open ' + escapeHTML(item.title) + ' demo"><div class="poster poster-' + escapeHTML(item.art) + '">' + image + glyph + '<span class="card-badge">' + escapeHTML(item.badge || 'OPEN') + '</span><span class="poster-number">' + String(catalog.indexOf(item)+1).padStart(2,'0') + '</span></div><div class="card-copy"><div><h3>' + escapeHTML(item.title) + '</h3><p>' + escapeHTML(item.subtitle) + '</p></div><span class="card-arrow" aria-hidden="true">↗</span></div></a>';
+    return '<button class="demo-card" type="button" aria-pressed="' + (item === selectedItem) + '" aria-label="Select ' + escapeHTML(item.title) + ' demo"><div class="poster poster-' + escapeHTML(item.art) + '">' + image + glyph + '<span class="card-badge">' + escapeHTML(item.badge || 'OPEN') + '</span><span class="poster-number">' + String(catalog.indexOf(item)+1).padStart(2,'0') + '</span></div><div class="card-copy"><div><h3>' + escapeHTML(item.title) + '</h3><p>' + escapeHTML(item.subtitle) + '</p></div><span class="card-arrow" aria-hidden="true">↗</span></div></button>';
   }
 
   function selectItem(item) {
     selectedItem = item;
+    grid.querySelectorAll('.demo-card').forEach((cardLink, index) => {
+      cardLink.setAttribute('aria-pressed', String(visibleItems[index] === item));
+    });
     renderHero(item);
   }
 
@@ -52,6 +55,7 @@
     grid.innerHTML = visibleItems.map(card).join('');
     empty.hidden = visibleItems.length > 0;
     grid.querySelectorAll('.demo-card').forEach((cardLink, index) => {
+      cardLink.addEventListener('click', () => selectItem(visibleItems[index]));
       cardLink.addEventListener('mouseenter', () => selectItem(visibleItems[index]));
       cardLink.addEventListener('focus', () => selectItem(visibleItems[index]));
     });
