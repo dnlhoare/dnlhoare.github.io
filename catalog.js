@@ -6,7 +6,7 @@ window.DJHDEV_CATALOG = [
     subtitle: 'Virtual greyhound racing',
     description: 'Pick your runner, place a play-credit bet and watch the race unfold.',
     category: 'Games',
-    href: 'https://djhdev.co.uk/trackside.html',
+    href: 'https://djhdev.co.uk/trackside.html?v=20261012-5',
     enabled: true,
     featured: true,
     badge: 'PLAY NOW',
