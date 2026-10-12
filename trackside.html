@@ -106,11 +106,13 @@
           const ability=rand(.78,1.32);
           dogs.push({id:i,name,form,formScore,ability,color:colors[i],emoji:emojis[i],progress:0});
         }
-        // Recent form nudges each dog's underlying ability; the displayed odds then become the strongest race signal.
-        dogs.forEach(d=>{d.rating=d.ability*(.82+.36*d.formScore);});
-        const total = dogs.reduce((s,d)=>s+d.rating,0), strongest=Math.max(...dogs.map(d=>d.rating));
-        dogs.forEach(d=>{d.prob=d.rating/total;d.odds=Math.max(1.35,Math.round((1/d.prob)*1.08*4)/4);});
-        dogs.forEach(d=>{d.racePower=.75*(d.rating/strongest)+.25*d.formScore;});
+        // Form shapes each dog's rating, race pace, and the probabilities used to set the displayed odds.
+        dogs.forEach(d=>{d.rating=d.ability*(.78+.44*d.formScore);});
+        const strongest=Math.max(...dogs.map(d=>d.rating));
+        dogs.forEach(d=>{d.racePower=.66*(d.rating/strongest)+.34*d.formScore;});
+        const winWeights=dogs.map(d=>Math.pow(d.racePower,1.22));
+        const totalWinWeight=winWeights.reduce((sum,weight)=>sum+weight,0);
+        dogs.forEach((d,index)=>{d.prob=winWeights[index]/totalWinWeight;d.odds=Math.max(1.35,Math.round((1/d.prob)*1.08*4)/4);});
         selected=null; completed=false; racing=false;
         $('raceTitle').textContent='Race '+String(raceNo).padStart(2,'0');
         $('resultRace').textContent='RACE '+String(raceNo).padStart(2,'0')+' · OFFICIAL';
@@ -167,7 +169,7 @@
         balance-=stake;racing=true;$('notice').classList.remove('show');$('liveLabel').innerHTML='<i></i> LIVE';$('raceBanner').classList.add('show');$('bannerText').textContent="They're off!";renderDogs();updateSlip();
         dogs.forEach(d=>{d.progress=0;$('dog'+d.id).classList.add('run');});
         const winner=chooseWinner(),start=performance.now(),duration=5800;
-        const raceOrder=dogs.filter(d=>d!==winner).map(d=>({dog:d,draw:d.racePower+rand(-.12,.12)})).sort((a,b)=>b.draw-a.draw);
+        const raceOrder=dogs.filter(d=>d!==winner).map(d=>({dog:d,draw:d.racePower+rand(-.08,.08)})).sort((a,b)=>b.draw-a.draw);
         const raceTargets=new Map([[winner,1]]);
         raceOrder.forEach(({dog},index)=>{
           // The strongest chaser finishes closest to the line; every other runner stays clearly behind it.
