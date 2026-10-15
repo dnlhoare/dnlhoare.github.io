@@ -49,7 +49,7 @@
       this.x += this.vx * dt; this.z += this.vz * dt;
       const newSpeed = Math.hypot(this.vx, this.vz);
       if (newSpeed > 40) { this.vx *= 40 / newSpeed; this.vz *= 40 / newSpeed; }
-      return { speed: newSpeed, lateralG: Math.abs(rearForce) / tune.mass / 9.81, angle: wrapAngle(Math.atan2(this.vx, -this.vz) - this.heading) };
+      return { speed: newSpeed, lateralG: Math.abs(rearForce) / tune.mass / 9.81, angle: newSpeed < 0.2 ? 0 : wrapAngle(Math.atan2(this.vx, -this.vz) - this.heading) };
     }
   }
 
