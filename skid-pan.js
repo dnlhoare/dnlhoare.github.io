@@ -92,13 +92,13 @@
     catch(e) { $('loading').hidden=true; $('webglError').hidden=false; return; }
     renderer.setPixelRatio(Math.min(devicePixelRatio || 1,1.6)); renderer.setSize(viewport.clientWidth,viewport.clientHeight);
     renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-    renderer.outputEncoding=THREE.sRGBEncoding; renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.14;
+    renderer.outputEncoding=THREE.sRGBEncoding; renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.0;
     viewport.prepend(renderer.domElement);
     scene=new THREE.Scene();scene.background=new THREE.Color('#31382d');scene.fog=new THREE.Fog('#31382d',95,190);
     camera=new THREE.PerspectiveCamera(43,viewport.clientWidth/viewport.clientHeight,.1,300);
     camera.position.set(0,47,31);
-    scene.add(new THREE.HemisphereLight('#e9edd9','#34392d',2.05));
-    const sun=new THREE.DirectionalLight('#fff3d8',3.2);sun.position.set(-28,46,-18);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-52;sun.shadow.camera.right=52;sun.shadow.camera.top=52;sun.shadow.camera.bottom=-52;sun.shadow.bias=-.00018;scene.add(sun);
+    scene.add(new THREE.HemisphereLight('#e9edd9','#34392d',0.72));
+    const sun=new THREE.DirectionalLight('#fff3d8',1.35);sun.position.set(-28,46,-18);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-52;sun.shadow.camera.right=52;sun.shadow.camera.top=52;sun.shadow.camera.bottom=-52;sun.shadow.bias=-.00018;scene.add(sun);
     makePan();makeCar();makeSkidLine();
     camera.lookAt(0,0,0);$('loading').hidden=true;clearTimeout(window.skidPanBootWatchdog);
     new ResizeObserver(resize).observe(viewport);
