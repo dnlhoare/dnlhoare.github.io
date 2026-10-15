@@ -6,7 +6,7 @@ window.DJHDEV_CATALOG = [
     subtitle: 'A top-down drift driving sandbox',
     description: 'Explore rear-wheel-drive drift physics on a 3D skid pan. Find the slip angle, link corners and leave your mark.',
     category: 'Games',
-    href: 'https://djhdev.co.uk/skid-pan.html?v=20261016-3',
+    href: 'https://djhdev.co.uk/skid-pan.html?v=20261016-4',
     enabled: true,
     featured: false,
     badge: 'NEW DEMO',
