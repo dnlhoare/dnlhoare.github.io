@@ -1,4 +1,4 @@
-﻿# DJHDEV landing page
+# DJHDEV landing page
 
 The landing page is `index.html`. Demo entries live in `catalog.js`; the layout and rendering are in `styles.css` and `app.js`.
 
@@ -12,7 +12,11 @@ Copy an object inside `window.DJHDEV_CATALOG` in `catalog.js` and set:
 - `href`: the demo URL
 - `enabled`: `true` to show it, `false` to hide it
 - `featured`: set one item to `true` for the large top feature
-- `art`: `racing`, `tetris`, or `phones` for the matching built-in cover illustration
+- `art`: `racing`, `skidpan`, `tetris`, or `phones` for the matching built-in cover illustration
 - `image`: optional local screenshot path, such as `images/my-demo.jpg`; leave empty to use the illustration
 
 Keep screenshot files in an `images/` folder beside these files. Only enabled entries appear in search and category filters. Keep one enabled item marked as featured.
+
+## Skid Pan demo
+
+The top-down 3D driving sandbox lives in `skid-pan.html`. Rendering and controls are in `skid-pan.js`; the planar rear-wheel-drive model and swappable lateral tyre curves are in `skid-pan-physics.js`. The current Pacejka option is a simplified Magic Formula curve intended as a starting point for later load sensitivity, combined slip, and suspension work.

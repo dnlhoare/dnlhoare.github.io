@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#11130f" />
+  <meta name="description" content="A 3D rear-wheel-drive drift driving sandbox." />
+  <title>Skid Pan — DJHDEV</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;600;700;800&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="skid-pan.css?v=20261016-1" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="skid-pan-physics.js?v=20261016-1" defer></script>
+  <script src="skid-pan.js?v=20261016-1" defer></script>
+  <script>
+    window.skidPanBootWatchdog = setTimeout(() => {
+      const loading = document.getElementById('loading');
+      const error = document.getElementById('webglError');
+      if (loading && !loading.hidden) {
+        loading.hidden = true;
+        error.textContent = 'A game file or the 3D library did not load. Keep the skid-pan files together and check your internet connection.';
+        error.hidden = false;
+      }
+    }, 12000);
+  </script>
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="index.html">DJH<span>DEV</span></a><a class="back-link" href="index.html#catalog">← All demos</a><span class="top-label">DRIVER DEVELOPMENT · 01</span></header>
+  <main class="app-shell">
+    <section class="intro"><div><p class="eyebrow">REAR-WHEEL DRIVE · SKID PAN</p><h1>Find the <span>angle.</span></h1><p class="intro-copy">A little space to learn the balance between grip and slip. Get moving, feed in steering and use the handbrake to bring the rear around.</p></div><div class="run-status"><i></i><span id="statusText">READY TO DRIVE</span></div></section>
+    <section class="sim-layout" aria-label="Driving simulator">
+      <div class="viewport-wrap"><div id="viewport" class="viewport"><div class="viewport-hud"><span><i class="live-dot"></i> LIVE SIMULATION</span><span>SKID PAN A · DRY</span></div><div class="speed-readout"><strong id="speed">000</strong><span>KM/H</span></div><div id="loading" class="loading">BUILDING THE SKID PAN…</div><div id="webglError" class="webgl-error" hidden>This browser could not start the 3D renderer.</div><div class="touch-controls"><button data-control="left" aria-label="Steer left">◀</button><button data-control="handbrake" aria-label="Handbrake">HB</button><button data-control="right" aria-label="Steer right">▶</button><button data-control="throttle" aria-label="Accelerate">▲</button><button data-control="brake" aria-label="Brake">▼</button></div></div><div class="viewport-footer"><span>WASD / ARROWS <b>DRIVE</b></span><span>SPACE <b>HANDBRAKE</b></span><span>R <b>RESET</b></span></div></div>
+      <aside class="telemetry"><div class="panel-heading"><div><p class="eyebrow">CAR 01</p><h2>Club coupe</h2></div><button id="resetButton" class="reset-button" type="button" title="Reset car (R)">↻</button></div><div class="speed-block"><div class="big-speed"><strong id="speedLarge">000</strong><span>KM/H</span></div><div class="gear-readout"><span>GEAR</span><b id="gear">N</b></div></div><div class="metric"><div><span>DRIFT ANGLE</span><b id="angle">0°</b></div><div class="meter"><i id="angleMeter"></i></div></div><div class="metric"><div><span>LATERAL LOAD</span><b id="lateralG">0.00 G</b></div><div class="meter"><i id="gMeter"></i></div></div><div class="metric slip-metric"><div><span>REAR SLIP</span><b id="slip">0°</b></div></div><div class="panel-divider"></div><label class="setting-row" for="tyreModel"><span>TYRE MODEL</span><select id="tyreModel"><option value="linear">Linear · baseline</option><option value="pacejka">Pacejka · simplified</option></select></label><label class="setting-row" for="grip"><span>TYRE GRIP</span><span class="range-control"><input id="grip" type="range" min="55" max="125" value="88" /><b id="gripValue">88%</b></span></label><div class="hint"><span>↗</span>Rear-wheel drive · front axle steers</div></aside>
+    </section>
+    <section class="bottom-row"><div class="controls-card"><p class="eyebrow">CONTROLS</p><div class="key-guide"><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><small>Throttle · steer · brake</small></span><span><kbd>SPACE</kbd><small>Handbrake</small></span><span><kbd>R</kbd><small>Reset</small></span></div></div><div class="note-card"><span class="note-mark">i</span><p><b>How to start a drift</b><br>Build speed, turn into the corner, then tap the handbrake. Countersteer to catch the slide and balance the throttle to hold your line.</p></div></section>
+    <footer>SKID PAN PHYSICS · RIGID-BODY PLANAR MODEL <span>AN EXPERIMENT BY DJHDEV</span></footer>
+  </main>
+</body>
+</html>
