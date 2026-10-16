@@ -1,6 +1,20 @@
 /* Add a demo by copying an entry. Set enabled:false to keep it out of the public catalog. */
 window.DJHDEV_CATALOG = [
   {
+    id: 'borough-run',
+    title: 'Borough Run',
+    subtitle: 'A 30-day London market trading game',
+    description: 'Work your way across London boroughs. Read the market, manage your bag space and build your play-credit fortune.',
+    category: 'Games',
+    href: 'borough-run.html',
+    enabled: true,
+    featured: false,
+    badge: 'NEW DEMO',
+    meta: 'Strategy · Play credits only',
+    art: 'shaders',
+    image: ''
+  },
+  {
     id: 'skid-pan',
     title: 'Skid Pan',
     subtitle: 'A top-down drift driving sandbox',

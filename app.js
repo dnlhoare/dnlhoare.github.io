@@ -81,5 +81,8 @@
   }));
   search.addEventListener('input', render);
   document.getElementById('year').textContent = new Date().getFullYear();
+  document.getElementById('dismissCookieNotice').addEventListener('click', () => {
+    document.getElementById('cookieNotice').hidden = true;
+  });
   render();
 })();
