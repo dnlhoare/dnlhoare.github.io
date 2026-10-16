@@ -56,3 +56,9 @@ window.BOROUGH_RUN_CONFIG = {
   ],
   dialogue: { buy:'Picked up {qty} {item}. Mind the bag space.', sell:'Moved {qty} {item}. That’s £{total} in the till.', event:'{name} has turned the market on its head.' }
 };
+
+// This edition uses a compact, repeatable 8-stop pool; the engine can still use a longer location list.
+window.BOROUGH_RUN_CONFIG.locations = window.BOROUGH_RUN_CONFIG.locations.slice(0, 8);
+window.BOROUGH_RUN_CONFIG.goods.forEach(good => {
+  good.locations = good.locations.filter(name => window.BOROUGH_RUN_CONFIG.locations.some(location => location.name === name));
+});
