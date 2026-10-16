@@ -8,7 +8,9 @@
   let state;
 
   function createRun() {
-    return {day:0,locationIndex:0,nextLocation:0,available:[],costs:{},cash:config.startingCash,inventory:{},history:[],prices:{},trend:{},event:null,log:[],ended:false};
+    const priceHistory={};
+    config.goods.forEach(good=>{priceHistory[good.id]=Array.from({length:8},()=>Math.round(good.min+Math.random()*(good.max-good.min)));});
+    return {day:0,locationIndex:0,nextLocation:0,available:[],costs:{},priceHistory,cash:config.startingCash,inventory:{},history:[],prices:{},trend:{},event:null,log:[],ended:false};
   }
   function save() { try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (_) {} }
   function note(message) {
@@ -33,6 +35,9 @@
       price=Math.round(Math.max(good.min*(eventMove?.25:.5),Math.min(good.max*(eventMove?3:1.5),price)));
       state.prices[good.id] = price;
       state.trend[good.id] = previous === null ? 0 : Math.round((price/previous-1)*100);
+      state.priceHistory[good.id] ||= [];
+      state.priceHistory[good.id].push(price);
+      state.priceHistory[good.id]=state.priceHistory[good.id].slice(-12);
     });
     state.history.push({...state.prices});
     if (state.event) note(config.dialogue.event.replace('{name}', state.event.title));
@@ -41,7 +46,11 @@
   function load() {
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey));
-      if (saved && saved.day >= 1 && saved.day <= config.days && saved.log && saved.inventory && saved.history) { saved.costs ||= {}; saved.nextLocation ??= (saved.locationIndex+1)%config.locations.length; return saved; }
+      if (saved && saved.day >= 1 && saved.day <= config.days && saved.log && saved.inventory && saved.history) {
+        saved.costs ||= {}; saved.nextLocation ??= (saved.locationIndex+1)%config.locations.length; saved.priceHistory ||= {};
+        config.goods.forEach(good=>{if(!saved.priceHistory[good.id]){saved.priceHistory[good.id]=Array.from({length:8},()=>Math.round(good.min+Math.random()*(good.max-good.min)));saved.priceHistory[good.id].push(saved.prices?.[good.id]||good.base);}saved.priceHistory[good.id]=saved.priceHistory[good.id].slice(-12);});
+        state=saved; return saved;
+      }
     } catch (_) {}
     const fresh = createRun(); state = fresh; addDay();
   }
@@ -58,6 +67,30 @@
     const canSell = owned > 0 && !state.ended;
     return `<article class="good-row" style="--good:${good.color||({violet:'#c299f5',blue:'#7cb9ff',amber:'#f1c978',green:'#94d786',coral:'#ff9a83',pink:'#f28cce',lime:'#c7f36b',orange:'#f5a36e',cyan:'#79d9d4'}[good.tone]||'#c7f36b')}"><div class="good-name"><span class="good-glyph">${escapeHTML(good.glyph)}</span><div><strong>${escapeHTML(good.name)}</strong><small>${available?`STOCK HERE · ${owned} ${escapeHTML(good.unit)} OWNED`:`NOT STOCKED HERE · ${owned} OWNED`}</small></div></div><div class="price">${currency(price)}<small>${delta}</small></div><div class="quantity"><button type="button" data-step="-1" data-id="${good.id}" aria-label="Decrease quantity for ${escapeHTML(good.name)}">−</button><input id="qty-${good.id}" type="number" min="1" max="${config.capacity}" value="1" aria-label="Quantity of ${escapeHTML(good.name)}" ${state.ended?'disabled':''}><button type="button" data-step="1" data-id="${good.id}" aria-label="Increase quantity for ${escapeHTML(good.name)}">+</button></div><div class="trade-actions"><button type="button" data-action="buy" data-id="${good.id}" ${canBuy?'':'disabled'}>BUY</button><button class="sell" type="button" data-action="sell" data-id="${good.id}" ${canSell?'':'disabled'}>SELL</button></div></article>`;
   }
+  let activeChart=null;
+  function hidePriceChart(){if(activeChart){activeChart.remove();activeChart=null;}}
+  function wirePriceCharts(){
+    $('marketList').querySelectorAll('.price').forEach(priceEl=>{
+      const row=priceEl.closest('.good-row'), id=row.querySelector('[data-id]').dataset.id, good=config.goods.find(item=>item.id===id);
+      const button=document.createElement('button');button.type='button';button.className='price price-trigger';button.innerHTML=priceEl.innerHTML;button.setAttribute('aria-label',`${good.name} current price. Show price history.`);priceEl.replaceWith(button);
+      button.addEventListener('click',event=>{
+        event.stopPropagation();
+        if(activeChart?.dataset.goodId===id){hidePriceChart();return;}
+        hidePriceChart();
+        const values=state.priceHistory[id]||[], low=Math.min(...values), high=Math.max(...values), span=Math.max(1,high-low);
+        const points=values.map((value,index)=>`${8+index*(224/Math.max(1,values.length-1))},${82-(value-low)/span*64}`).join(' ');
+        const chart=document.createElement('div');chart.className='price-chart-popover';chart.dataset.goodId=id;chart.setAttribute('role','dialog');chart.setAttribute('aria-label',`${good.name} price history`);
+        chart.innerHTML=`<div class="chart-heading"><strong>${escapeHTML(good.name)} · PRICE HISTORY</strong><button type="button" class="chart-close" aria-label="Close chart">×</button></div><svg viewBox="0 0 240 100" role="img" aria-label="${escapeHTML(good.name)} prices over ${values.length} market visits"><line x1="8" y1="18" x2="232" y2="18"/><line x1="8" y1="50" x2="232" y2="50"/><line x1="8" y1="82" x2="232" y2="82"/><polyline points="${points}"/><text x="8" y="12">${currency(high)}</text><text x="8" y="97">${currency(low)}</text></svg><small>Random opening history · latest ${currency(state.prices[id])}</small>`;
+        document.body.append(chart);activeChart=chart;
+        const rect=button.getBoundingClientRect(), width=260, height=190;
+        chart.style.left=`${Math.max(8,Math.min(window.innerWidth-width-8,rect.left+rect.width/2-width/2))}px`;
+        chart.style.top=`${Math.max(8,Math.min(window.innerHeight-height-8,rect.bottom+8))}px`;
+        chart.addEventListener('click',e=>e.stopPropagation());chart.querySelector('.chart-close').addEventListener('click',hidePriceChart);
+      });
+    });
+  }
+  document.addEventListener('click',hidePriceChart);
+  document.addEventListener('keydown',event=>{if(event.key==='Escape')hidePriceChart();});
   function render() {
     const location = config.locations[state.locationIndex] || config.locations[0];
     const finalDay = state.ended;
@@ -85,6 +118,7 @@
     if (state.event) { event.classList.add('show'); $('eventText').textContent = `${state.event.title} — ${state.event.text}`; } else event.classList.remove('show');
     const visibleGoods=config.goods.filter(good=>localAvailability(good,location)||(state.inventory[good.id]||0)>0);
     $('marketList').innerHTML = finalDay ? `<div class="game-over"><p class="eyebrow">THE 30-DAY ROUTE IS COMPLETE</p><h2>Run complete</h2><p>${state.cash < netWorth() ? 'Your remaining stock is valued at today’s prices.' : 'You made it to the final borough with cash in hand.'}</p><div class="final-score"><small>FINAL NET WORTH</small>${currency(netWorth())}</div></div>` : visibleGoods.map(good=>marketHTML(good,location)).join('');
+    wirePriceCharts();
     $('marketList').querySelectorAll('[data-step]').forEach(button=>button.addEventListener('click',()=>{const input=$(`qty-${button.dataset.id}`);input.value=clamp((Number(input.value)||1)+Number(button.dataset.step),1,config.capacity);updateButtons();}));
     $('marketList').querySelectorAll('input[type=number]').forEach(input=>input.addEventListener('input',updateButtons));
     $('marketList').querySelectorAll('[data-action]').forEach(button=>button.addEventListener('click',()=>trade(button.dataset.id,button.dataset.action)));
