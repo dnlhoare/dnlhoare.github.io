@@ -3,12 +3,12 @@
   const $ = id => document.getElementById(id);
   const currency = value => config.currency + Math.max(0, Math.floor(value)).toLocaleString('en-GB');
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-  const storageKey = 'djhdev-borough-run-v2';
+  const storageKey = 'djhdev-borough-run-v3';
   const escapeHTML = value => String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   let state;
 
   function createRun() {
-    return {day:0,locationIndex:0,available:[],cash:config.startingCash,inventory:{},history:[],prices:{},trend:{},event:null,log:[],ended:false};
+    return {day:0,locationIndex:0,nextLocation:0,available:[],costs:{},cash:config.startingCash,inventory:{},history:[],prices:{},trend:{},event:null,log:[],ended:false};
   }
   function save() { try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (_) {} }
   function note(message) {
@@ -19,19 +19,19 @@
     state.day++;
     state.locationIndex = Number.isInteger(locationIndex) ? locationIndex : Math.floor(Math.random()*config.locations.length);
     const location = config.locations[state.locationIndex];
+    state.nextLocation = (state.locationIndex+1+Math.floor(Math.random()*(config.locations.length-1)))%config.locations.length;
     state.available = config.goods.map(good=>good.id).sort(()=>Math.random()-.5).slice(0,5+Math.floor(Math.random()*3));
     state.event = Math.random() < .34 ? config.events[Math.floor(Math.random()*config.events.length)] : null;
     if (state.event) state.available = [...new Set([...state.available,...state.event.goods])];
     state.prices = {}; state.trend = {};
     config.goods.forEach(good => {
-      const previous = state.history.length ? state.history[state.history.length-1][good.id] || good.base : good.base;
-      const drift = (Math.random()-.5)*good.volatility*2;
-      state.trend[good.id] = Math.round(drift*100);
-      let price = Math.round(good.base * (1+drift) * (.72+Math.random()*.56));
-      price = Math.max(5, Math.round(previous*(1+drift*.62)*(.82+Math.random()*.36)));
+      const previous = state.history.length ? state.history[state.history.length-1][good.id] || good.base : null;
+      let price = previous === null ? good.min + Math.random()*(good.max-good.min) : previous + (Math.random()-.5)*(good.max-good.min)*good.volatility;
       if (!good.locations.includes(location.name)) price = Math.round(price*(.82+Math.random()*.2));
-      if (state.event && state.event.goods.includes(good.id)) price = Math.round(price*state.event.multiplier);
-      state.prices[good.id] = Math.max(5,price);
+      if (state.event && state.event.goods.includes(good.id)) price = (previous===null?good.base:previous)*state.event.multiplier;
+      price=Math.round(Math.max(good.min*.5,Math.min(good.max*1.5,price)));
+      state.prices[good.id] = price;
+      state.trend[good.id] = previous === null ? 0 : Math.round((price/previous-1)*100);
     });
     state.history.push({...state.prices});
     if (state.event) note(config.dialogue.event.replace('{name}', state.event.title));
@@ -40,7 +40,7 @@
   function load() {
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey));
-      if (saved && saved.day >= 1 && saved.day <= config.days && saved.log && saved.inventory && saved.history) return saved;
+      if (saved && saved.day >= 1 && saved.day <= config.days && saved.log && saved.inventory && saved.history) { saved.costs ||= {}; saved.nextLocation ??= (saved.locationIndex+1)%config.locations.length; return saved; }
     } catch (_) {}
     const fresh = createRun(); state = fresh; addDay();
   }
@@ -69,13 +69,13 @@
     $('marketTitle').textContent = `${location.name} Market`;
     $('dayChip').textContent = `DAY ${String(state.day).padStart(2,'0')}`;
     $('locationIndex').textContent = String(state.day).padStart(2,'0');
-    const picker=$('locationPicker');
-    picker.innerHTML=config.locations.map((item,index)=>`<option value="${index}" ${index===state.locationIndex?'selected':''}>${escapeHTML(item.name)} · ${escapeHTML(item.district)}</option>`).join('');
-    picker.disabled=finalDay||state.day>=config.days;
-    $('nextPlace').textContent = finalDay ? 'End of the route' : state.day >= config.days ? 'Run complete' : config.locations[Number(picker.value)]?.name || config.locations[state.locationIndex].name;
+    $('nextPlace').textContent = finalDay ? 'End of the route' : state.day >= config.days ? 'Run complete' : config.locations[state.nextLocation]?.name || config.locations[0].name;
+    const choices=$('locationChoices');
+    choices.innerHTML=config.locations.map((item,index)=>`<button class="location-choice ${index===state.locationIndex?'current':''} ${index===state.nextLocation?'selected':''}" type="button" data-location="${index}" ${index===state.locationIndex||finalDay||state.day>=config.days?'disabled':''}><span>${escapeHTML(item.name)}</span><small>${index===state.locationIndex?'CURRENT LOCATION':escapeHTML(item.district)}</small></button>`).join('');
+    choices.querySelectorAll('[data-location]').forEach(button=>button.addEventListener('click',()=>{state.nextLocation=Number(button.dataset.location);render();}));
     $('travelNote').textContent = finalDay ? `You’ve finished the route with ${currency(netWorth())} to your name.` : state.day >= config.days ? 'Sell any remaining stock, then finish your run.' : 'Pick any borough. You can revisit a market, but its stock and prices will change.';
     $('travelButton').disabled = finalDay;
-    $('travelButton').innerHTML = finalDay ? 'Route complete <span>✓</span>' : state.day >= config.days ? 'Finish 30-day run <span>✓</span>' : `Travel to ${escapeHTML(config.locations[Number(picker.value)]?.name || 'borough')} <span>→</span>`;
+    $('travelButton').innerHTML = finalDay ? 'Route complete <span>✓</span>' : state.day >= config.days ? 'Finish 30-day run <span>✓</span>' : `Travel to ${escapeHTML(config.locations[state.nextLocation]?.name || 'borough')} <span>→</span>`;
     $('travelHint').textContent = finalDay ? 'Start a new run to play again.' : state.day >= config.days ? 'Finish when you’re happy with your final tally.' : 'Moving on ends today’s market and its prices.';
     $('contactAvatar').textContent = location.avatar;
     $('contactName').textContent = location.contact;
@@ -89,6 +89,8 @@
     $('marketList').querySelectorAll('[data-action]').forEach(button=>button.addEventListener('click',()=>trade(button.dataset.id,button.dataset.action)));
     $('marketList').querySelectorAll('.good-row').forEach(row=>{
       const id=row.querySelector('[data-id]').dataset.id;
+      const owned=state.inventory[id]||0;
+      if(owned){const average=state.costs[id]||0, pnl=owned*(state.prices[id]-average), info=document.createElement('small');info.className='cost-info';info.textContent=`AVG PAID ${currency(average)} · ${pnl>=0?'+':''}${currency(Math.abs(pnl))} ${pnl>=0?'UP':'DOWN'}`;info.classList.add(pnl>=0?'profit':'loss');row.querySelector('.good-name>div').append(info);}
       [['buymax','BUY MAX'],['sellall','SELL ALL']].forEach(([action,label])=>{const button=document.createElement('button');button.type='button';button.className='bulk '+(action==='sellall'?'sell':'');button.dataset.action=action;button.dataset.id=id;button.textContent=label;row.querySelector('.trade-actions').append(button);button.addEventListener('click',()=>trade(id,action));});
     });
     $('runLog').innerHTML = state.log.length ? state.log.map(item=>`<div class="log-line"><time>D${String(item.day).padStart(2,'0')}</time><span>${escapeHTML(item.text)}</span></div>`).join('') : '<span class="log-empty">Your deals and market news will show up here.</span>';
@@ -114,17 +116,18 @@
     const qty=action==='buymax'?Math.min(config.capacity-stockCount(),Math.floor(state.cash/price)):action==='sellall'?(state.inventory[id]||0):clamp(Math.floor(Number($(`qty-${id}`).value)||1),1,config.capacity);
     if(action==='buy'||action==='buymax') {
       if(qty<1||qty*price>state.cash||stockCount()+qty>config.capacity||!localAvailability(good,config.locations[state.locationIndex]))return;
-      state.cash-=qty*price;state.inventory[id]=(state.inventory[id]||0)+qty;
+      state.cash-=qty*price;
+      const oldQty=state.inventory[id]||0, oldCost=state.costs[id]||0;
+      state.inventory[id]=oldQty+qty;state.costs[id]=(oldQty*oldCost+qty*price)/(oldQty+qty);
       const text=config.dialogue.buy.replace('{qty}',qty).replace('{item}',good.name);note(text);toast(`${text} ${config.currency}${(qty*price).toLocaleString('en-GB')} spent.`);
     } else {
       const sold=Math.min(qty,state.inventory[id]||0);if(!sold)return;
-      state.cash+=sold*price;state.inventory[id]-=sold;if(!state.inventory[id])delete state.inventory[id];
+      state.cash+=sold*price;state.inventory[id]-=sold;if(!state.inventory[id]){delete state.inventory[id];delete state.costs[id];}
       const text=config.dialogue.sell.replace('{qty}',sold).replace('{item}',good.name).replace('{total}',(sold*price).toLocaleString('en-GB'));note(text);toast(text);
     }
     render();
   }
-  $('locationPicker').addEventListener('change',()=>{const location=config.locations[Number($('locationPicker').value)];$('nextPlace').textContent=location.name;$('travelButton').innerHTML=`Travel to ${escapeHTML(location.name)} <span>→</span>`;});
-  $('travelButton').addEventListener('click',()=>{if(state.day<config.days)addDay(Number($('locationPicker').value));else if(!state.ended){state.ended=true;note(`Route complete · final worth ${currency(netWorth())}.`);render();}});
+  $('travelButton').addEventListener('click',()=>{if(state.day<config.days)addDay(state.nextLocation);else if(!state.ended){state.ended=true;note(`Route complete · final worth ${currency(netWorth())}.`);render();}});
   $('newGame').addEventListener('click',()=>{state=createRun();addDay();toast('A fresh 30-day route begins.');});
   load();render();
 })();

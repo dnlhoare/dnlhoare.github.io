@@ -2,15 +2,15 @@
 window.BOROUGH_RUN_CONFIG = {
   title: 'Borough Run', days: 30, startingCash: 2000, capacity: 100, currency: '£',
   goods: [
-    { id:'comics', name:'Bootleg comics', unit:'packs', base:38, volatility:.38, glyph:'▤', tone:'violet', locations:['Camden','Hackney','Tower Hamlets','Islington','Lambeth'] },
-    { id:'synth', name:'Retro synths', unit:'units', base:125, volatility:.3, glyph:'♫', tone:'blue', locations:['Hackney','Tower Hamlets','Newham','Lewisham','Greenwich'] },
-    { id:'vinyl', name:'Rare vinyl', unit:'crates', base:82, volatility:.25, glyph:'◉', tone:'amber', locations:['Camden','Islington','Westminster','Southwark','Lambeth'] },
-    { id:'tea', name:'Fancy tea', unit:'tins', base:24, volatility:.2, glyph:'♨', tone:'green', locations:['Richmond upon Thames','Kensington and Chelsea','Hammersmith and Fulham','Westminster','Wandsworth'] },
-    { id:'sneakers', name:'Vintage trainers', unit:'pairs', base:105, volatility:.34, glyph:'⌁', tone:'coral', locations:['Newham','Brent','Haringey','Croydon','Barking and Dagenham'] },
-    { id:'cameras', name:'Old film cameras', unit:'units', base:175, volatility:.28, glyph:'▣', tone:'pink', locations:['Hackney','Camden','Southwark','Greenwich','Lewisham'] },
-    { id:'plants', name:'Rare houseplants', unit:'pots', base:54, volatility:.4, glyph:'❋', tone:'lime', locations:['Richmond upon Thames','Bromley','Enfield','Barnet','Hounslow'] },
-    { id:'posters', name:'Gig posters', unit:'rolls', base:31, volatility:.31, glyph:'▧', tone:'orange', locations:['Camden','Haringey','Islington','Hackney','Waltham Forest'] },
-    { id:'gadgets', name:'Pocket gadgets', unit:'units', base:68, volatility:.3, glyph:'⌘', tone:'cyan', locations:['Newham','Tower Hamlets','Westminster','Ealing','Brent'] }
+    { id:'comics', name:'Bootleg comics', unit:'packs', base:38, min:12, max:80, volatility:.55, glyph:'▤', tone:'violet', locations:['Camden','Hackney','Tower Hamlets','Islington','Lambeth'] },
+    { id:'synth', name:'Retro synths', unit:'units', base:125, min:55, max:340, volatility:.8, glyph:'♫', tone:'blue', locations:['Hackney','Tower Hamlets','Newham','Lewisham','Greenwich'] },
+    { id:'vinyl', name:'Rare vinyl', unit:'crates', base:82, min:35, max:180, volatility:.4, glyph:'◉', tone:'amber', locations:['Camden','Islington','Westminster','Southwark','Lambeth'] },
+    { id:'tea', name:'Fancy tea', unit:'tins', base:24, min:8, max:48, volatility:.25, glyph:'♨', tone:'green', locations:['Richmond upon Thames','Kensington and Chelsea','Hammersmith and Fulham','Westminster','Wandsworth'] },
+    { id:'sneakers', name:'Vintage trainers', unit:'pairs', base:105, min:35, max:260, volatility:.65, glyph:'⌁', tone:'coral', locations:['Newham','Brent','Haringey','Croydon','Barking and Dagenham'] },
+    { id:'cameras', name:'Old film cameras', unit:'units', base:175, min:70, max:520, volatility:.9, glyph:'▣', tone:'pink', locations:['Hackney','Camden','Southwark','Greenwich','Lewisham'] },
+    { id:'plants', name:'Rare houseplants', unit:'pots', base:54, min:14, max:170, volatility:.75, glyph:'❋', tone:'lime', locations:['Richmond upon Thames','Bromley','Enfield','Barnet','Hounslow'] },
+    { id:'posters', name:'Gig posters', unit:'rolls', base:31, min:8, max:95, volatility:.65, glyph:'▧', tone:'orange', locations:['Camden','Haringey','Islington','Hackney','Waltham Forest'] },
+    { id:'gadgets', name:'Pocket gadgets', unit:'units', base:68, min:22, max:190, volatility:.5, glyph:'⌘', tone:'cyan', locations:['Newham','Tower Hamlets','Westminster','Ealing','Brent'] }
   ],
   locations: [
     {name:'Camden', district:'North London', contact:'Mags', avatar:'M', lines:['Camden’s humming today. Vinyl’s moving fast — don’t hang about.','Word is the gig crowd are after posters. Make of that what you will.']},
@@ -45,14 +45,14 @@ window.BOROUGH_RUN_CONFIG = {
     {name:'Bexley', district:'South East London', contact:'Kit', avatar:'K', lines:['Last borough. Let’s see what you made of the journey.','Final market of the run. Sell up and check your score.']}
   ],
   events: [
-    {title:'Tube delay', text:'A line closure has sent the crowd wandering. Trainers are suddenly in demand.', goods:['sneakers'], multiplier:1.9},
-    {title:'Collectors’ fair', text:'A local collectors’ fair is in town. Rare vinyl and old cameras are fetching a premium.', goods:['vinyl','cameras'], multiplier:1.75},
-    {title:'Gadget launch', text:'A new gadget launch has stolen the spotlight. Pocket gadgets are hard to find today.', goods:['gadgets'], multiplier:1.8},
-    {title:'Gig night', text:'A surprise gig has the crowds out. Posters are selling before you can blink.', goods:['posters'], multiplier:2.1},
-    {title:'Tea festival', text:'A neighbourhood tea festival is drawing a crowd. Fancy tins are in demand.', goods:['tea'], multiplier:2},
-    {title:'Plant swap', text:'A community plant swap has everyone talking greenery. Rare pots are going cheap.', goods:['plants'], multiplier:.48},
-    {title:'Stockroom find', text:'A seller found an old box in the stockroom. Bootleg comics are unusually cheap.', goods:['comics'], multiplier:.45},
-    {title:'Market oversupply', text:'A delivery arrived all at once. Synths are going for a song.', goods:['synth'], multiplier:.5}
+    {title:'Tube delay', text:'A line closure sent crowds looking for trainers. Vintage pairs are fetching nearly double today.', goods:['sneakers'], multiplier:1.85},
+    {title:'Collectors’ fair', text:'A collectors’ fair brought buyers out early. Vinyl and old cameras are up around 70%.', goods:['vinyl','cameras'], multiplier:1.7},
+    {title:'Gadget launch', text:'A new gadget launch made pocket tech the talk of town. Prices have jumped 80%.', goods:['gadgets'], multiplier:1.8},
+    {title:'Gig night', text:'A surprise gig has the crowds out. Poster prices have more than doubled.', goods:['posters'], multiplier:2.2},
+    {title:'Tea festival', text:'A neighbourhood tea festival has drawn a crowd. Fancy tins are twice the usual price.', goods:['tea'], multiplier:2},
+    {title:'Plant swap', text:'A community plant swap flooded the market with greenery. Houseplant prices have halved.', goods:['plants'], multiplier:.5},
+    {title:'Stockroom find', text:'A seller found a forgotten box of comics. Bootleg packs are going for half price.', goods:['comics'], multiplier:.5},
+    {title:'Market oversupply', text:'A bulk delivery of synths arrived at once. Prices have dropped by about half.', goods:['synth'], multiplier:.5}
   ],
   dialogue: { buy:'Picked up {qty} {item}. Mind the bag space.', sell:'Moved {qty} {item}. That’s £{total} in the till.', event:'{name} has turned the market on its head.' }
 };
