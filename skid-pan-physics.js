@@ -35,12 +35,12 @@
       const frontForce = model(frontSlip, loadEach, tune.grip * 1.04);
       const rearForce = model(rearSlip, loadEach, tune.grip * (input.handbrake ? 0.58 : 0.98));
       const drive = input.throttle * tune.power * (input.throttle < 0 ? 0.62 : 1);
-      const brake = input.brake * 13;
+      const brake = Math.min(input.brake * 9000 + (input.handbrake ? 8500 : 0), Math.abs(speed) * tune.mass / Math.max(dt, 0.001));
       const drag = 0.018 * speed * Math.abs(speed);
       const totalForward = drive - Math.sign(speed || 1) * brake - drag;
 
-      const ax = (totalForward * forwardX + frontForce * (Math.cos(this.steer) * rightX + Math.sin(this.steer) * forwardX) + rearForce * rightX) / tune.mass;
-      const az = (totalForward * forwardZ + frontForce * (Math.cos(this.steer) * rightZ + Math.sin(this.steer) * forwardZ) + rearForce * rightZ) / tune.mass;
+      const ax = (totalForward * forwardX + frontForce * (Math.cos(this.steer) * rightX - Math.sin(this.steer) * forwardX) + rearForce * rightX) / tune.mass;
+      const az = (totalForward * forwardZ + frontForce * (Math.cos(this.steer) * rightZ - Math.sin(this.steer) * forwardZ) + rearForce * rightZ) / tune.mass;
       this.vx += ax * dt; this.vz += az * dt;
       this.vx *= Math.pow(0.999, dt * 60); this.vz *= Math.pow(0.999, dt * 60);
       this.yawRate += ((frontForce * 1.15 - rearForce * 1.25) / tune.inertia) * dt;

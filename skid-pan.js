@@ -15,7 +15,7 @@
   const keys = new Set();
   const clamp = window.DriftPhysics.clamp;
   let scene, camera, renderer, carRig, wheelMeshes = [], rearSmoke, trailPositions, trailGeometry, trailLine;
-  let lastTime = 0, elapsed = 0, trailAccum = 0;
+  let lastTime = 0, elapsed = 0, trailAccum = 0, lastTrailPoints = null;
 
   function material(color, roughness = 0.8, metalness = 0) { return new THREE.MeshStandardMaterial({ color, roughness, metalness }); }
   function box(parent, w, h, d, x, y, z, mat, radius = 0) {
@@ -85,7 +85,7 @@
   function makeSkidLine() {
     trailPositions = new Float32Array(6000*3); trailGeometry = new THREE.BufferGeometry();
     trailGeometry.setAttribute('position',new THREE.BufferAttribute(trailPositions,3)); trailGeometry.setDrawRange(0,0);
-    trailLine = new THREE.LineSegments(trailGeometry,new THREE.LineBasicMaterial({color:'#252521',transparent:true,opacity:.65})); trailLine.position.y=.018; scene.add(trailLine);
+    trailLine = new THREE.LineSegments(trailGeometry,new THREE.LineBasicMaterial({color:'#252521',transparent:true,opacity:.65})); trailLine.position.y=-.16; scene.add(trailLine);
   }
   function init() {
     try { renderer = new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'}); }
@@ -127,7 +127,17 @@
     const lateral=Math.abs(car.rearSlip);
     rearSmoke.children.forEach((p,i)=>{const active=lateral>.17&&data.speed>7; p.visible=active;if(active){const t=(elapsed*.55+i*.16)%1; const x=(i%2?1:-1)*.92; const z=1.15+t*1.6; const worldX=car.x+Math.cos(car.heading)*x+Math.sin(car.heading)*z;const worldZ=car.z+Math.sin(car.heading)*x-Math.cos(car.heading)*z;p.position.set(worldX,.28+t*.65,worldZ);p.scale.setScalar(.6+t*1.45);p.material.opacity=(1-t)*.3;}});
     trailAccum+=dt;
-    if(lateral>.2&&data.speed>8&&trailAccum>.035){trailAccum=0;const pos=trailGeometry.attributes.position;let n=trailGeometry.drawRange.count;for(const side of [-.72,.72]){if(n>=pos.count-2){n=0;}const x=car.x+Math.cos(car.heading)*side+Math.sin(car.heading)*1.13;const z=car.z+Math.sin(car.heading)*side-Math.cos(car.heading)*1.13;pos.setXYZ(n++,x,.022,z);}trailGeometry.setDrawRange(0,n);pos.needsUpdate=true;trailGeometry.computeBoundingSphere();}
+    if(lateral>.2&&data.speed>8&&trailAccum>.035){
+      trailAccum=0;
+      const points=[-.72,.72].map(side=>({x:car.x+Math.cos(car.heading)*side+Math.sin(car.heading)*1.13,z:car.z+Math.sin(car.heading)*side-Math.cos(car.heading)*1.13}));
+      if(lastTrailPoints){
+        const pos=trailGeometry.attributes.position;let n=trailGeometry.drawRange.count;
+        if(n>=pos.count-4){n=0;trailGeometry.setDrawRange(0,0);}
+        for(let i=0;i<2;i++){pos.setXYZ(n++,lastTrailPoints[i].x,.025,lastTrailPoints[i].z);pos.setXYZ(n++,points[i].x,.025,points[i].z);}
+        trailGeometry.setDrawRange(0,n);pos.needsUpdate=true;trailGeometry.computeBoundingSphere();
+      }
+      lastTrailPoints=points;
+    }else if(lateral<=.2||data.speed<=8){lastTrailPoints=null;}
   }
   function animate(now){const dt=Math.min((now-lastTime)/1000||0,0.035);lastTime=now;elapsed+=dt;readInput();
     if(dt>0){const data=car.step(controls,dt,tune);updateHud(data,dt);updateCarVisuals(dt,data);}
@@ -136,7 +146,7 @@
     const lookAt=new THREE.Vector3(car.x,0,car.z);camera.lookAt(lookAt);
     renderer.render(scene,camera);
   }
-  function reset(){car.reset();trailGeometry.setDrawRange(0,0);trailAccum=0;}
+  function reset(){car.reset();trailGeometry.setDrawRange(0,0);trailAccum=0;lastTrailPoints=null;}
   window.addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();keys.add(e.code);if(e.code==='KeyR')reset();});
   window.addEventListener('keyup',e=>keys.delete(e.code));window.addEventListener('blur',()=>keys.clear());
   $('resetButton').addEventListener('click',reset);
