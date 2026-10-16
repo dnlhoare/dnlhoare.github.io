@@ -28,8 +28,9 @@
       const previous = state.history.length ? state.history[state.history.length-1][good.id] || good.base : null;
       let price = previous === null ? good.min + Math.random()*(good.max-good.min) : previous + (Math.random()-.5)*(good.max-good.min)*good.volatility;
       if (!good.locations.includes(location.name)) price = Math.round(price*(.82+Math.random()*.2));
-      if (state.event && state.event.goods.includes(good.id)) price = (previous===null?good.base:previous)*state.event.multiplier;
-      price=Math.round(Math.max(good.min*.5,Math.min(good.max*1.5,price)));
+      const eventMove=state.event&&state.event.goods.includes(good.id);
+      if (eventMove) price = (previous===null?good.base:previous)*state.event.multiplier;
+      price=Math.round(Math.max(good.min*(eventMove?.25:.5),Math.min(good.max*(eventMove?3:1.5),price)));
       state.prices[good.id] = price;
       state.trend[good.id] = previous === null ? 0 : Math.round((price/previous-1)*100);
     });
