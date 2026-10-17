@@ -14,7 +14,7 @@
   function createRun() {
     const priceHistory={};
     config.goods.forEach(good=>{priceHistory[good.id]=Array.from({length:24},()=>samplePrice(good));});
-    return {day:0,locationIndex:0,nextLocation:0,available:[],costs:{},priceHistory,cash:config.startingCash,inventory:{},history:[],prices:{},trend:{},event:null,log:[],ended:false};
+    return {day:0,locationIndex:0,nextLocation:0,available:[],costs:{},priceHistory,cash:config.startingCash,inventory:{},history:[],marketPrices:{},prices:{},trend:{},event:null,log:[],ended:false};
   }
   function save() { try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (_) {} }
   function note(message) {
@@ -29,16 +29,22 @@
     state.available = config.goods.map(good=>good.id).sort(()=>Math.random()-.5).slice(0,5+Math.floor(Math.random()*3));
     state.event = Math.random() < .34 ? config.events[Math.floor(Math.random()*config.events.length)] : null;
     if (state.event) state.available = [...new Set([...state.available,...state.event.goods])];
+    const previousPrices=state.prices;
     state.prices = {}; state.trend = {};
     config.goods.forEach(good => {
-      const previous = state.history.length ? state.history[state.history.length-1][good.id] || good.base : null;
-      let price = previous === null ? samplePrice(good) : previous + (Math.random()-.5)*(good.max-good.min)*good.volatility;
-      if (!good.locations.includes(location.name)) price = Math.round(price*(.82+Math.random()*.2));
+      const previousVisible=previousPrices[good.id];
+      const previous = state.marketPrices[good.id] || null;
+      let basePrice = previous === null ? samplePrice(good) : previous + (Math.random()-.5)*(good.max-good.min)*good.volatility;
+      if (!good.locations.includes(location.name)) basePrice *= (.82+Math.random()*.2);
+      basePrice=Math.round(Math.max(good.min,Math.min(good.max,basePrice)));
+      state.marketPrices[good.id]=basePrice;
+      let price = basePrice;
       const eventMove=state.event&&state.event.goods.includes(good.id);
-      if (eventMove) price = (previous===null?good.base:previous)*state.event.multiplier;
-      price=Math.round(Math.max(good.min*(eventMove?.25:.5),Math.min(good.max*(eventMove?3:1.5),price)));
+      if (eventMove) price = basePrice*state.event.multiplier;
+      price=Math.round(Math.max(good.min*(eventMove?.25:1),Math.min(good.max*(eventMove?3:1),price)));
+      if(previousVisible!==undefined&&price===previousVisible){basePrice=basePrice>=good.max?Math.max(good.min,basePrice-1):Math.min(good.max,basePrice+1);state.marketPrices[good.id]=basePrice;price=Math.round(Math.max(good.min*(eventMove?.25:1),Math.min(good.max*(eventMove?3:1),basePrice*(eventMove?state.event.multiplier:1))));}
       state.prices[good.id] = price;
-      state.trend[good.id] = previous === null ? 0 : Math.round((price/previous-1)*100);
+      state.trend[good.id] = previousVisible === undefined ? 0 : Math.round((price/previousVisible-1)*100);
       state.priceHistory[good.id] ||= [];
       state.priceHistory[good.id].push(price);
       state.priceHistory[good.id]=state.priceHistory[good.id].slice(-40);
@@ -51,7 +57,8 @@
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey));
       if (saved && saved.day >= 1 && saved.day <= config.days && saved.log && saved.inventory && saved.history) {
-        saved.costs ||= {}; saved.nextLocation ??= (saved.locationIndex+1)%config.locations.length; saved.priceHistory ||= {};
+        saved.costs ||= {}; saved.nextLocation ??= (saved.locationIndex+1)%config.locations.length; saved.priceHistory ||= {}; saved.marketPrices ||= {};
+        config.goods.forEach(good=>{if(!saved.marketPrices[good.id]){const multiplier=saved.event?.goods?.includes(good.id)?saved.event.multiplier:1;saved.marketPrices[good.id]=Math.round((saved.prices?.[good.id]||good.base)/multiplier);}});
         config.goods.forEach(good=>{if(!saved.priceHistory[good.id]){saved.priceHistory[good.id]=Array.from({length:24},()=>samplePrice(good));saved.priceHistory[good.id].push(saved.prices?.[good.id]||good.base);}else if(saved.priceHistory[good.id].length<24){const gap=24-saved.priceHistory[good.id].length;saved.priceHistory[good.id]=Array.from({length:gap},()=>samplePrice(good)).concat(saved.priceHistory[good.id]);}saved.priceHistory[good.id]=saved.priceHistory[good.id].slice(-40);});
         state=saved; return saved;
       }
