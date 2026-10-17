@@ -5,11 +5,15 @@
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
   const storageKey = 'djhdev-borough-run-v3';
   const escapeHTML = value => String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const samplePrice = good => {
+    const uniform=Math.random(), triangular=(Math.random()+Math.random())/2;
+    return Math.round(good.min+(good.max-good.min)*(.65*uniform+.35*triangular));
+  };
   let state;
 
   function createRun() {
     const priceHistory={};
-    config.goods.forEach(good=>{priceHistory[good.id]=Array.from({length:8},()=>Math.round(good.min+Math.random()*(good.max-good.min)));});
+    config.goods.forEach(good=>{priceHistory[good.id]=Array.from({length:24},()=>samplePrice(good));});
     return {day:0,locationIndex:0,nextLocation:0,available:[],costs:{},priceHistory,cash:config.startingCash,inventory:{},history:[],prices:{},trend:{},event:null,log:[],ended:false};
   }
   function save() { try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (_) {} }
@@ -28,7 +32,7 @@
     state.prices = {}; state.trend = {};
     config.goods.forEach(good => {
       const previous = state.history.length ? state.history[state.history.length-1][good.id] || good.base : null;
-      let price = previous === null ? good.min + Math.random()*(good.max-good.min) : previous + (Math.random()-.5)*(good.max-good.min)*good.volatility;
+      let price = previous === null ? samplePrice(good) : previous + (Math.random()-.5)*(good.max-good.min)*good.volatility;
       if (!good.locations.includes(location.name)) price = Math.round(price*(.82+Math.random()*.2));
       const eventMove=state.event&&state.event.goods.includes(good.id);
       if (eventMove) price = (previous===null?good.base:previous)*state.event.multiplier;
@@ -37,7 +41,7 @@
       state.trend[good.id] = previous === null ? 0 : Math.round((price/previous-1)*100);
       state.priceHistory[good.id] ||= [];
       state.priceHistory[good.id].push(price);
-      state.priceHistory[good.id]=state.priceHistory[good.id].slice(-12);
+      state.priceHistory[good.id]=state.priceHistory[good.id].slice(-40);
     });
     state.history.push({...state.prices});
     if (state.event) note(config.dialogue.event.replace('{name}', state.event.title));
@@ -48,7 +52,7 @@
       const saved = JSON.parse(localStorage.getItem(storageKey));
       if (saved && saved.day >= 1 && saved.day <= config.days && saved.log && saved.inventory && saved.history) {
         saved.costs ||= {}; saved.nextLocation ??= (saved.locationIndex+1)%config.locations.length; saved.priceHistory ||= {};
-        config.goods.forEach(good=>{if(!saved.priceHistory[good.id]){saved.priceHistory[good.id]=Array.from({length:8},()=>Math.round(good.min+Math.random()*(good.max-good.min)));saved.priceHistory[good.id].push(saved.prices?.[good.id]||good.base);}saved.priceHistory[good.id]=saved.priceHistory[good.id].slice(-12);});
+        config.goods.forEach(good=>{if(!saved.priceHistory[good.id]){saved.priceHistory[good.id]=Array.from({length:24},()=>samplePrice(good));saved.priceHistory[good.id].push(saved.prices?.[good.id]||good.base);}else if(saved.priceHistory[good.id].length<24){const gap=24-saved.priceHistory[good.id].length;saved.priceHistory[good.id]=Array.from({length:gap},()=>samplePrice(good)).concat(saved.priceHistory[good.id]);}saved.priceHistory[good.id]=saved.priceHistory[good.id].slice(-40);});
         state=saved; return saved;
       }
     } catch (_) {}
@@ -77,12 +81,13 @@
         event.stopPropagation();
         if(activeChart?.dataset.goodId===id){hidePriceChart();return;}
         hidePriceChart();
-        const values=state.priceHistory[id]||[], low=Math.min(...values), high=Math.max(...values), span=Math.max(1,high-low);
+        const values=state.priceHistory[id]||[], low=Math.min(...values), high=Math.max(...values), average=values.reduce((sum,value)=>sum+value,0)/Math.max(1,values.length), span=Math.max(1,high-low);
         const points=values.map((value,index)=>`${8+index*(224/Math.max(1,values.length-1))},${82-(value-low)/span*64}`).join(' ');
+        const averageY=82-(average-low)/span*64;
         const chart=document.createElement('div');chart.className='price-chart-popover';chart.dataset.goodId=id;chart.setAttribute('role','dialog');chart.setAttribute('aria-label',`${good.name} price history`);
-        chart.innerHTML=`<div class="chart-heading"><strong>${escapeHTML(good.name)} · PRICE HISTORY</strong><button type="button" class="chart-close" aria-label="Close chart">×</button></div><svg viewBox="0 0 240 100" role="img" aria-label="${escapeHTML(good.name)} prices over ${values.length} market visits"><line x1="8" y1="18" x2="232" y2="18"/><line x1="8" y1="50" x2="232" y2="50"/><line x1="8" y1="82" x2="232" y2="82"/><polyline points="${points}"/><text x="8" y="12">${currency(high)}</text><text x="8" y="97">${currency(low)}</text></svg><small>Random opening history · latest ${currency(state.prices[id])}</small>`;
+        chart.innerHTML=`<div class="chart-heading"><strong>${escapeHTML(good.name)} · PRICE HISTORY</strong><button type="button" class="chart-close" aria-label="Close chart">×</button></div><div class="chart-stats"><span>LOW <b>${currency(low)}</b></span><span>AVG <b>${currency(average)}</b></span><span>HIGH <b>${currency(high)}</b></span></div><svg viewBox="0 0 240 100" role="img" aria-label="${escapeHTML(good.name)} prices over ${values.length} market visits"><line x1="8" y1="18" x2="232" y2="18"/><line x1="8" y1="50" x2="232" y2="50"/><line x1="8" y1="82" x2="232" y2="82"/><line class="average-line" x1="8" y1="${averageY}" x2="232" y2="${averageY}"/><polyline points="${points}"/><text x="8" y="12">${currency(high)}</text><text x="8" y="97">${currency(low)}</text></svg><small>${values.length} recorded prices · latest ${currency(state.prices[id])}</small>`;
         document.body.append(chart);activeChart=chart;
-        const rect=button.getBoundingClientRect(), width=260, height=190;
+        const rect=button.getBoundingClientRect(), width=Math.min(300,window.innerWidth-16), height=222;
         chart.style.left=`${Math.max(8,Math.min(window.innerWidth-width-8,rect.left+rect.width/2-width/2))}px`;
         chart.style.top=`${Math.max(8,Math.min(window.innerHeight-height-8,rect.bottom+8))}px`;
         chart.addEventListener('click',e=>e.stopPropagation());chart.querySelector('.chart-close').addEventListener('click',hidePriceChart);
