@@ -9,9 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="borough-run.css?v=1" />
-  <script src="borough-run-data.js?v=1" defer></script>
-  <script src="borough-run.js?v=1" defer></script>
+  <link rel="stylesheet" href="borough-run.css?v=20261017-1" />
+  <script src="borough-run-data.js?v=20261017-1" defer></script>
+  <script src="borough-run.js?v=20261017-1" defer></script>
 </head>
 <body>
   <header class="topbar"><a class="brand" href="index.html">DJH<span>DEV</span></a><a class="back-link" href="index.html">← All demos</a><span class="top-label">FICTIONAL MARKET SIMULATOR</span></header>
@@ -22,7 +22,7 @@
       <section class="market panel"><div class="panel-head"><div><p class="eyebrow">TODAY'S MARKET</p><h2 id="marketTitle">—</h2></div><span class="day-chip" id="dayChip">DAY 1</span></div><div class="event-banner" id="eventBanner"><span class="event-icon">✦</span><p id="eventText"></p></div><div class="market-list" id="marketList" aria-live="polite"></div><div class="market-foot"><span>Prices in play credits · Stock changes by location</span><span><b id="locationIndex">01</b> / 30</span></div></section>
       <aside class="side-column"><section class="panel travel-panel"><p class="eyebrow">CHOOSE YOUR NEXT STOP</p><h2 id="nextPlace">—</h2><p id="travelNote">Trade here as long as you like. Pick your next market when you’re ready.</p><p class="location-picker-label">LONDON BOROUGHS</p><div class="location-choices" id="locationChoices" aria-label="Choose your next borough"></div><button class="primary-button" id="travelButton" type="button">Travel to borough <span>→</span></button><p class="travel-hint" id="travelHint">Leaving ends today's market.</p></section><section class="panel contact-panel"><div class="contact-top"><span class="avatar" id="contactAvatar">M</span><div><p class="eyebrow">LOCAL CONTACT</p><h2 id="contactName">—</h2></div></div><p class="dialogue" id="dialogue"></p></section><section class="panel log-panel"><p class="eyebrow">RUN LOG</p><div id="runLog" aria-live="polite"></div></section></aside>
     </div>
-    <footer><span>ALL GOODS, CHARACTERS AND EVENTS ARE FICTIONAL.</span><span id="endNote">Make it to day 30 and see where you stand.</span></footer>
+    <footer><span>ALL GOODS, CHARACTERS AND EVENTS ARE FICTIONAL.</span><span id="endNote">Make it to day 30 and see where you stand.</span><span id="buildVersion">VERSION 0.3.0</span></footer>
   </main>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>

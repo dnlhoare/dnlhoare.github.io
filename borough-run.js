@@ -41,8 +41,8 @@
       let price = basePrice;
       const eventMove=state.event&&state.event.goods.includes(good.id);
       if (eventMove) price = basePrice*state.event.multiplier;
-      price=Math.round(Math.max(good.min*(eventMove?.25:1),Math.min(good.max*(eventMove?3:1),price)));
-      if(previousVisible!==undefined&&price===previousVisible){basePrice=basePrice>=good.max?Math.max(good.min,basePrice-1):Math.min(good.max,basePrice+1);state.marketPrices[good.id]=basePrice;price=Math.round(Math.max(good.min*(eventMove?.25:1),Math.min(good.max*(eventMove?3:1),basePrice*(eventMove?state.event.multiplier:1))));}
+      price=eventMove?Math.max(1,Math.round(price)):Math.round(Math.max(good.min,Math.min(good.max,price)));
+      if(previousVisible!==undefined&&price===previousVisible){basePrice=basePrice>=good.max?Math.max(good.min,basePrice-1):Math.min(good.max,basePrice+1);state.marketPrices[good.id]=basePrice;price=eventMove?Math.max(1,Math.round(basePrice*state.event.multiplier)):basePrice;}
       state.prices[good.id] = price;
       state.trend[good.id] = previousVisible === undefined ? 0 : Math.round((price/previousVisible-1)*100);
       state.priceHistory[good.id] ||= [];
@@ -142,6 +142,7 @@
     });
     $('runLog').innerHTML = state.log.length ? state.log.map(item=>`<div class="log-line"><time>D${String(item.day).padStart(2,'0')}</time><span>${escapeHTML(item.text)}</span></div>`).join('') : '<span class="log-empty">Your deals and market news will show up here.</span>';
     $('endNote').textContent = finalDay ? 'Thanks for taking the route.' : 'Make it to day 30 and see where you stand.';
+    $('buildVersion').textContent = `VERSION ${config.version}`;
     document.body.classList.toggle('is-final',finalDay);
     save();
   }

@@ -1,6 +1,6 @@
 /* Swap this configuration to create another edition. The engine reads only this data shape. */
 window.BOROUGH_RUN_CONFIG = {
-  title: 'Borough Run', days: 30, startingCash: 2000, capacity: 100, currency: '£',
+  title: 'Borough Run', version: '0.3.0', days: 30, startingCash: 2000, capacity: 100, currency: '£',
   goods: [
     { id:'acid', name:'Acid', unit:'tabs', base:520, min:180, max:1250, volatility:.58, glyph:'✳', tone:'violet', locations:['Camden','Hackney','Tower Hamlets','Islington','Lambeth'] },
     { id:'cocaine', name:'Cocaine', unit:'units', base:29954, min:18500, max:51000, volatility:.86, glyph:'◆', tone:'blue', locations:['Hackney','Tower Hamlets','Newham','Lewisham','Greenwich'] },
@@ -47,17 +47,17 @@ window.BOROUGH_RUN_CONFIG = {
     {name:'Bexley', district:'South East London', contact:'Kit', avatar:'K', lines:['Last borough. Let’s see what you made of the journey.','Final market of the run. Sell up and check your score.']}
   ],
   events: [
-    {title:'Sudden shortage', text:'A supply disruption has made acid scarce. Its price has jumped 85% since the last market.', goods:['acid'], multiplier:1.85},
-    {title:'High-profile rumour', text:'Word spread about a cocaine shortage. Its market price has surged 70%.', goods:['cocaine'], multiplier:1.7},
-    {title:'Street-level glut', text:'A sudden surplus of crack hit the market. Its price has fallen by half.', goods:['crack'], multiplier:.5},
-    {title:'Changing demand', text:'A rush for hashish has pushed its price up 60%.', goods:['hashish'], multiplier:1.6},
-    {title:'Supply scare', text:'A rumoured heroin shortage sent its price soaring by 90%.', goods:['heroin'], multiplier:1.9},
-    {title:'Event crowd', text:'A busy night out has driven MDA prices up 75%.', goods:['mda'], multiplier:1.75},
-    {title:'Seasonal surplus', text:'A large mushrooms shipment arrived. Prices are down by about 45%.', goods:['mushrooms'], multiplier:.55},
-    {title:'Market oversupply', text:'A bulk opium shipment arrived at once. Prices have dropped by half.', goods:['opium'], multiplier:.5},
-    {title:'Rare find', text:'A sudden shortage has made peyote nearly twice as expensive.', goods:['peyote'], multiplier:1.9},
-    {title:'Fresh delivery', text:'Speed is in plentiful supply today. Prices have fallen by 55%.', goods:['speed'], multiplier:.45},
-    {title:'Local demand spike', text:'A jump in local demand pushed weed prices up 65%.', goods:['weed'], multiplier:1.65}
+    {title:'Sudden shortage', text:'A supply disruption has made acid scarce. Its price has jumped to about 2.5 times its normal level.', goods:['acid'], multiplier:2.5},
+    {title:'High-profile rumour', text:'Word spread about a cocaine shortage. Its market price has more than doubled.', goods:['cocaine'], multiplier:2.4},
+    {title:'Street-level glut', text:'A sudden surplus of crack hit the market. Its price has plunged to about a quarter of normal.', goods:['crack'], multiplier:.25},
+    {title:'Changing demand', text:'A rush for hashish has pushed its price to more than twice its normal level.', goods:['hashish'], multiplier:2.2},
+    {title:'Supply scare', text:'A rumoured heroin shortage sent its price soaring to about 2.5 times normal.', goods:['heroin'], multiplier:2.5},
+    {title:'Event crowd', text:'A busy night out has driven MDA prices to more than twice their normal level.', goods:['mda'], multiplier:2.3},
+    {title:'Seasonal surplus', text:'A large mushrooms shipment arrived. Prices have plunged to about a quarter of normal.', goods:['mushrooms'], multiplier:.25},
+    {title:'Market oversupply', text:'A bulk opium shipment arrived at once. Prices have plunged to about a quarter of normal.', goods:['opium'], multiplier:.25},
+    {title:'Rare find', text:'A sudden shortage has sent peyote prices to nearly three times normal.', goods:['peyote'], multiplier:2.8},
+    {title:'Fresh delivery', text:'Speed is in plentiful supply today. Prices have fallen to about a fifth of normal.', goods:['speed'], multiplier:.2},
+    {title:'Local demand spike', text:'A jump in local demand pushed weed prices to more than twice normal.', goods:['weed'], multiplier:2.3}
   ],
   dialogue: { buy:'Picked up {qty} {item}. Mind the bag space.', sell:'Moved {qty} {item}. That’s £{total} in the till.', event:'{name} has turned the market on its head.' }
 };
