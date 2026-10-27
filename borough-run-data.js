@@ -1,28 +1,30 @@
 /* Swap this configuration to create another edition. The engine reads only this data shape. */
 window.BOROUGH_RUN_CONFIG = {
-  title: 'Borough Run', version: '0.6.0', days: 30, startingCash: 2000, capacity: 100, currency: '£',
+  title: 'Borough Run', version: '0.8.0', days: 30, startingCash: 2000, capacity: 100, currency: '£',
   goods: [
-    { id:'acid', name:'Acid', unit:'tabs', base:520, min:180, max:1250, volatility:.58, glyph:'✳', tone:'violet', locations:['Camden','Hackney','Tower Hamlets','Islington','Lambeth'] },
-    { id:'cocaine', name:'Cocaine', unit:'units', base:29954, min:18500, max:51000, volatility:.86, glyph:'◆', tone:'blue', locations:['Hackney','Tower Hamlets','Newham','Lewisham','Greenwich'] },
-    { id:'crack', name:'Crack', unit:'units', base:2135, min:1250, max:3900, volatility:.8, glyph:'◇', tone:'coral', locations:['Camden','Islington','Westminster','Southwark','Lambeth'] },
-    { id:'hashish', name:'Hashish', unit:'units', base:390, min:140, max:950, volatility:.5, glyph:'⬟', tone:'green', locations:['Richmond upon Thames','Hackney','Westminster','Tower Hamlets','Wandsworth'] },
-    { id:'heroin', name:'Heroin', unit:'units', base:11716, min:6800, max:22000, volatility:.84, glyph:'⬢', tone:'pink', locations:['Newham','Brent','Haringey','Camden','Barking and Dagenham'] },
-    { id:'mda', name:'MDA', unit:'units', base:1621, min:950, max:2900, volatility:.68, glyph:'✦', tone:'amber', locations:['Hackney','Camden','Southwark','Greenwich','Lewisham'] },
-    { id:'mushrooms', name:'Mushrooms', unit:'units', base:165, min:55, max:430, volatility:.95, glyph:'☘', tone:'lime', locations:['Richmond upon Thames','Bromley','Enfield','Barnet','Hounslow'] },
-    { id:'opium', name:'Opium', unit:'units', base:125, min:40, max:340, volatility:.72, glyph:'❋', tone:'orange', locations:['Camden','Haringey','Islington','Hackney','Waltham Forest'] },
-    { id:'peyote', name:'Peyote', unit:'units', base:90, min:25, max:250, volatility:1.05, glyph:'♣', tone:'cyan', locations:['Newham','Tower Hamlets','Westminster','Ealing','Brent'] },
-    { id:'speed', name:'Speed', unit:'units', base:38, min:10, max:100, volatility:.9, glyph:'⚡', tone:'orange', locations:['Southwark','Lambeth','Croydon','Greenwich','Barking and Dagenham'] },
-    { id:'weed', name:'Weed', unit:'units', base:65, min:20, max:175, volatility:.62, glyph:'♧', tone:'lime', locations:['Islington','Hackney','Haringey','Lewisham','Waltham Forest'] }
+    { id:'acid', name:'Acid', unit:'tabs', base:520, min:180, max:1250, volatility:.58, glyph:'✳', tone:'violet' },
+    { id:'cocaine', name:'Cocaine', unit:'units', base:29954, min:18500, max:51000, volatility:.86, glyph:'◆', tone:'blue' },
+    { id:'crack', name:'Crack', unit:'units', base:2135, min:1250, max:3900, volatility:.8, glyph:'◇', tone:'coral' },
+    { id:'hashish', name:'Hashish', unit:'units', base:390, min:140, max:950, volatility:.5, glyph:'⬟', tone:'green' },
+    { id:'heroin', name:'Heroin', unit:'units', base:11716, min:6800, max:22000, volatility:.84, glyph:'⬢', tone:'pink' },
+    { id:'mda', name:'MDA', unit:'units', base:1621, min:950, max:2900, volatility:.68, glyph:'✦', tone:'amber' },
+    { id:'mushrooms', name:'Mushrooms', unit:'units', base:165, min:55, max:430, volatility:.95, glyph:'☘', tone:'lime' },
+    { id:'opium', name:'Opium', unit:'units', base:125, min:40, max:340, volatility:.72, glyph:'❋', tone:'orange' },
+    { id:'peyote', name:'Peyote', unit:'units', base:90, min:25, max:250, volatility:1.05, glyph:'♣', tone:'cyan' },
+    { id:'speed', name:'Speed', unit:'units', base:38, min:10, max:100, volatility:.9, glyph:'⚡', tone:'orange' },
+    { id:'weed', name:'Weed', unit:'units', base:65, min:20, max:175, volatility:.62, glyph:'♧', tone:'lime' }
   ],
+  // Market tuning: priceBias is a percentage as a decimal; volatilityScale multiplies daily price movement.
+  // Calm markets have lower volatilityScale; swing markets also get more event days (chance = 0.10 + scale * 0.13).
   locations: [
-    {name:'Camden', district:'North London', contact:'Mags', avatar:'M', lines:['Camden’s humming today. Hashish and weed prices are worth a look.','Word is the market’s thin on acid. Check the board before you buy.']},
-    {name:'Hackney', district:'East London', contact:'Leon', avatar:'L', lines:['Hackney’s got a bit of everything if you know where to look.','Keep your eyes open. Cocaine and MDA prices can swing sharply.']},
-    {name:'Westminster', district:'Central London', contact:'Rae', avatar:'R', lines:['Central London: big crowds, bigger price swings.','Hashish is drawing attention today. Check the latest market price.']},
-    {name:'Newham', district:'East London', contact:'Dev', avatar:'D', lines:['Fresh stock comes through here all the time. Room in your bag?','Peyote and cocaine prices are moving around today.']},
-    {name:'Islington', district:'North London', contact:'Kit', avatar:'K', lines:['A quieter day on the high street. Quiet doesn’t mean cheap.','Someone’s been asking about weed. Might be a short window.']},
-    {name:'Southwark', district:'South London', contact:'Nia', avatar:'N', lines:['Good footfall by the river. Keep your head about you.','Speed prices are all over the place today. Take a look.']},
-    {name:'Lambeth', district:'South London', contact:'Mo', avatar:'M', lines:['Market’s lively. Take your time and check the board.','Crack and acid have both been shifting today.']},
-    {name:'Tower Hamlets', district:'East London', contact:'Sal', avatar:'S', lines:['You’ve got options here. Bag space is the real question.','Cocaine and hashish are the talk of the market today.']},
+    {name:'Camden', district:'North London', priceBias:-.06, volatilityScale:.8, contact:'Mags', avatar:'M', lines:['Camden’s humming today. Hashish and weed prices are worth a look.','Word is the market’s thin on acid. Check the board before you buy.']},
+    {name:'Hackney', district:'East London', priceBias:.02, volatilityScale:1.35, contact:'Leon', avatar:'L', lines:['Hackney’s got a bit of everything if you know where to look.','Keep your eyes open. Cocaine and MDA prices can swing sharply.']},
+    {name:'Westminster', district:'Central London', priceBias:.14, volatilityScale:.65, contact:'Rae', avatar:'R', lines:['Central London: big crowds, bigger price swings.','Hashish is drawing attention today. Check the latest market price.']},
+    {name:'Newham', district:'East London', priceBias:-.12, volatilityScale:1.6, contact:'Dev', avatar:'D', lines:['Fresh stock comes through here all the time. Room in your bag?','Peyote and cocaine prices are moving around today.']},
+    {name:'Islington', district:'North London', priceBias:.08, volatilityScale:.75, contact:'Kit', avatar:'K', lines:['A quieter day on the high street. Quiet doesn’t mean cheap.','Someone’s been asking about weed. Might be a short window.']},
+    {name:'Southwark', district:'South London', priceBias:0, volatilityScale:1.05, contact:'Nia', avatar:'N', lines:['Good footfall by the river. Keep your head about you.','Speed prices are all over the place today. Take a look.']},
+    {name:'Lambeth', district:'South London', priceBias:-.09, volatilityScale:.7, contact:'Mo', avatar:'M', lines:['Market’s lively. Take your time and check the board.','Crack and acid have both been shifting today.']},
+    {name:'Tower Hamlets', district:'East London', priceBias:-.02, volatilityScale:1.45, contact:'Sal', avatar:'S', lines:['You’ve got options here. Bag space is the real question.','Cocaine and hashish are the talk of the market today.']},
     {name:'Croydon', district:'South London', contact:'Jay', avatar:'J', lines:['Long way out, but there’s always a deal somewhere.','Vintage trainers are in demand round here — for now.']},
     {name:'Richmond upon Thames', district:'South West London', contact:'Eve', avatar:'E', lines:['A change of pace out here. Some surprisingly keen buyers.','Houseplants are all the rage with the locals.']},
     {name:'Brent', district:'North West London', contact:'Oz', avatar:'O', lines:['Brent’s got a lively market today. See what turns up.','Pocket gadgets are getting snapped up. Keep your options open.']},
@@ -64,6 +66,3 @@ window.BOROUGH_RUN_CONFIG = {
 
 // This edition uses a compact, repeatable 8-stop pool; the engine can still use a longer location list.
 window.BOROUGH_RUN_CONFIG.locations = window.BOROUGH_RUN_CONFIG.locations.slice(0, 8);
-window.BOROUGH_RUN_CONFIG.goods.forEach(good => {
-  good.locations = good.locations.filter(name => window.BOROUGH_RUN_CONFIG.locations.some(location => location.name === name));
-});

@@ -29,8 +29,8 @@
     const location = config.locations[state.locationIndex];
     state.nextLocation = (state.locationIndex+1+Math.floor(Math.random()*(config.locations.length-1)))%config.locations.length;
     state.storageOffer=travelling&&!state.capacityUpgrade&&Math.random()<.2;
-    state.available = config.goods.map(good=>good.id).sort(()=>Math.random()-.5).slice(0,5+Math.floor(Math.random()*3));
-    state.event = Math.random() < .34 ? config.events[Math.floor(Math.random()*config.events.length)] : null;
+    state.available = config.goods.map(good=>good.id);
+    state.event = Math.random() < (.1+location.volatilityScale*.13) ? config.events[Math.floor(Math.random()*config.events.length)] : null;
     if (state.event) state.available = [...new Set([...state.available,...state.event.goods])];
     const previousLowOffers=state.lowOffers||[];
     const lowCandidates=config.goods.map(good=>good.id).filter(id=>!previousLowOffers.includes(id)&&!state.event?.goods.includes(id)).sort(()=>Math.random()-.5);
@@ -43,18 +43,17 @@
       const previous = state.marketPrices[good.id] || null;
       const middle=(good.min+good.max)/2, range=good.max-good.min;
       let basePrice;
-      if(state.lowOffers.includes(good.id)) basePrice=good.min+range*(.1+Math.random()*.25);
+      if(state.lowOffers.includes(good.id)) basePrice=good.min+range*(.18+Math.random()*.18*location.volatilityScale);
       else if(previous===null) basePrice=samplePrice(good);
-      else if(previousLowOffers.includes(good.id)) basePrice=previous+(middle-previous)*(.68+Math.random()*.2)+(Math.random()-.5)*range*.12;
-      else basePrice=previous+(middle-previous)*.22+(Math.random()-.5)*range*good.volatility*.42;
-      if (!good.locations.includes(location.name)) basePrice *= (.82+Math.random()*.2);
+      else if(previousLowOffers.includes(good.id)) basePrice=previous+(middle-previous)*(.68+Math.random()*.2)+(Math.random()-.5)*range*.12*location.volatilityScale;
+      else basePrice=previous+(middle-previous)*.22+(Math.random()-.5)*range*good.volatility*.42*location.volatilityScale;
       basePrice=Math.round(Math.max(good.min,Math.min(good.max,basePrice)));
       state.marketPrices[good.id]=basePrice;
-      let price = basePrice;
+      let price = basePrice*(1+location.priceBias);
       const eventMove=state.event&&state.event.goods.includes(good.id);
-      if (eventMove) price = basePrice*state.event.multiplier;
+      if (eventMove) price = basePrice*(1+location.priceBias)*state.event.multiplier;
       price=eventMove?Math.max(1,Math.round(price)):Math.round(Math.max(good.min,Math.min(good.max,price)));
-      if(previousVisible!==undefined&&price===previousVisible){basePrice=basePrice>=good.max?Math.max(good.min,basePrice-1):Math.min(good.max,basePrice+1);state.marketPrices[good.id]=basePrice;price=eventMove?Math.max(1,Math.round(basePrice*state.event.multiplier)):basePrice;}
+      if(previousVisible!==undefined&&price===previousVisible){basePrice=basePrice>=good.max?Math.max(good.min,basePrice-1):Math.min(good.max,basePrice+1);state.marketPrices[good.id]=basePrice;price=Math.max(1,Math.round(basePrice*(1+location.priceBias)*(eventMove?state.event.multiplier:1)));}
       state.prices[good.id] = price;
       state.trend[good.id] = previousVisible === undefined ? 0 : Math.round((price/previousVisible-1)*100);
       state.priceHistory[good.id] ||= [];
@@ -80,7 +79,7 @@
   function stockCount() { return Object.values(state.inventory).reduce((sum, qty) => sum + Math.max(0, qty), 0); }
   function inventoryValue() { return config.goods.reduce((sum, good) => sum + (state.inventory[good.id]||0)*(state.prices[good.id]||0),0); }
   function netWorth() { return state.cash + inventoryValue(); }
-  function localAvailability(good, location) { return state.available.includes(good.id); }
+  function localAvailability(good, location) { return true; }
   function marketHTML(good, location) {
     const price = state.prices[good.id], owned = state.inventory[good.id]||0, trend=state.trend[good.id]||0;
     const available = localAvailability(good, location);
@@ -132,9 +131,9 @@
     $('locationIndex').textContent = String(state.day).padStart(2,'0');
     $('nextPlace').textContent = finalDay ? 'End of the route' : state.day >= config.days ? 'Run complete' : config.locations[state.nextLocation]?.name || config.locations[0].name;
     const choices=$('locationChoices');
-    choices.innerHTML=config.locations.map((item,index)=>`<button class="location-choice ${index===state.locationIndex?'current':''} ${index===state.nextLocation?'selected':''}" type="button" data-location="${index}" ${index===state.locationIndex||finalDay||state.day>=config.days?'disabled':''}><span>${escapeHTML(item.name)}</span><small>${index===state.locationIndex?'CURRENT LOCATION':escapeHTML(item.district)}</small></button>`).join('');
+    choices.innerHTML=config.locations.map((item,index)=>{const bias=Math.round(item.priceBias*100),biasText=`${bias>0?'+':''}${bias}%`,volText=`${item.volatilityScale.toFixed(1)}×`;return `<button title="${escapeHTML(item.district)} · price bias ${biasText} · volatility ${volText}" aria-label="${escapeHTML(item.name)}: price bias ${biasText}, volatility multiplier ${volText}" class="location-choice ${index===state.locationIndex?'current':''} ${index===state.nextLocation?'selected':''}" type="button" data-location="${index}" ${index===state.locationIndex||finalDay||state.day>=config.days?'disabled':''}><span>${escapeHTML(item.name)}</span><small>${index===state.locationIndex?'HERE · ':''}${biasText} · ${volText}</small></button>`;}).join('');
     choices.querySelectorAll('[data-location]').forEach(button=>button.addEventListener('click',()=>{state.nextLocation=Number(button.dataset.location);render();}));
-    $('travelNote').textContent = finalDay ? `You’ve finished the route with ${currency(netWorth())} to your name.` : state.day >= config.days ? 'Sell any remaining stock, then finish your run.' : 'Pick any borough. You can revisit a market, but its stock and prices will change.';
+    $('travelNote').textContent = finalDay ? `You’ve finished the route with ${currency(netWorth())} to your name.` : state.day >= config.days ? 'Sell any remaining stock, then finish your run.' : 'Negative bias means cheaper prices; high volatility means bigger swings and more events.';
     $('travelButton').disabled = finalDay;
     $('travelButton').innerHTML = finalDay ? 'Route complete <span>✓</span>' : state.day >= config.days ? 'Finish 30-day run <span>✓</span>' : `Travel to ${escapeHTML(config.locations[state.nextLocation]?.name || 'borough')} <span>→</span>`;
     $('travelHint').textContent = finalDay ? 'Start a new run to play again.' : state.day >= config.days ? 'Finish when you’re happy with your final tally.' : 'Moving on ends today’s market and its prices.';
