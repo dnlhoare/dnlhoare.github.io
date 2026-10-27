@@ -1,0 +1,485 @@
+{
+  "version": "0.9.0",
+  "locations": {
+    "camden": {
+      "name": "Camden",
+      "volatilityScale": 0.8,
+      "hugeRiseChance": 0.06,
+      "hugeDropChance": 0.06,
+      "riseMultiplier": {
+        "min": 1.9,
+        "max": 2.6
+      },
+      "dropMultiplier": {
+        "min": 0.34,
+        "max": 0.52
+      },
+      "ranges": {
+        "acid": {
+          "min": 169,
+          "max": 1175
+        },
+        "cocaine": {
+          "min": 17390,
+          "max": 47940
+        },
+        "crack": {
+          "min": 1175,
+          "max": 3666
+        },
+        "hashish": {
+          "min": 132,
+          "max": 893
+        },
+        "heroin": {
+          "min": 6392,
+          "max": 20680
+        },
+        "mda": {
+          "min": 893,
+          "max": 2726
+        },
+        "mushrooms": {
+          "min": 52,
+          "max": 404
+        },
+        "opium": {
+          "min": 38,
+          "max": 320
+        },
+        "peyote": {
+          "min": 24,
+          "max": 235
+        },
+        "speed": {
+          "min": 9,
+          "max": 94
+        },
+        "weed": {
+          "min": 19,
+          "max": 165
+        }
+      }
+    },
+    "hackney": {
+      "name": "Hackney",
+      "volatilityScale": 1.35,
+      "hugeRiseChance": 0.14,
+      "hugeDropChance": 0.13,
+      "riseMultiplier": {
+        "min": 2,
+        "max": 3
+      },
+      "dropMultiplier": {
+        "min": 0.28,
+        "max": 0.5
+      },
+      "ranges": {
+        "acid": {
+          "min": 185,
+          "max": 1288
+        },
+        "cocaine": {
+          "min": 19055,
+          "max": 52530
+        },
+        "crack": {
+          "min": 1288,
+          "max": 4017
+        },
+        "hashish": {
+          "min": 144,
+          "max": 979
+        },
+        "heroin": {
+          "min": 7004,
+          "max": 22660
+        },
+        "mda": {
+          "min": 979,
+          "max": 2987
+        },
+        "mushrooms": {
+          "min": 57,
+          "max": 443
+        },
+        "opium": {
+          "min": 41,
+          "max": 350
+        },
+        "peyote": {
+          "min": 26,
+          "max": 258
+        },
+        "speed": {
+          "min": 10,
+          "max": 103
+        },
+        "weed": {
+          "min": 21,
+          "max": 180
+        }
+      }
+    },
+    "westminster": {
+      "name": "Westminster",
+      "volatilityScale": 0.65,
+      "hugeRiseChance": 0.05,
+      "hugeDropChance": 0.05,
+      "riseMultiplier": {
+        "min": 1.8,
+        "max": 2.4
+      },
+      "dropMultiplier": {
+        "min": 0.38,
+        "max": 0.55
+      },
+      "ranges": {
+        "acid": {
+          "min": 225,
+          "max": 1563
+        },
+        "cocaine": {
+          "min": 23125,
+          "max": 63750
+        },
+        "crack": {
+          "min": 1563,
+          "max": 4875
+        },
+        "hashish": {
+          "min": 175,
+          "max": 1188
+        },
+        "heroin": {
+          "min": 8500,
+          "max": 27500
+        },
+        "mda": {
+          "min": 1188,
+          "max": 3625
+        },
+        "mushrooms": {
+          "min": 69,
+          "max": 538
+        },
+        "opium": {
+          "min": 50,
+          "max": 425
+        },
+        "peyote": {
+          "min": 31,
+          "max": 313
+        },
+        "speed": {
+          "min": 13,
+          "max": 125
+        },
+        "weed": {
+          "min": 25,
+          "max": 219
+        }
+      }
+    },
+    "newham": {
+      "name": "Newham",
+      "volatilityScale": 1.6,
+      "hugeRiseChance": 0.22,
+      "hugeDropChance": 0.2,
+      "riseMultiplier": {
+        "min": 2.2,
+        "max": 3.2
+      },
+      "dropMultiplier": {
+        "min": 0.2,
+        "max": 0.42
+      },
+      "ranges": {
+        "acid": {
+          "min": 130,
+          "max": 900
+        },
+        "cocaine": {
+          "min": 13320,
+          "max": 36720
+        },
+        "crack": {
+          "min": 900,
+          "max": 2808
+        },
+        "hashish": {
+          "min": 101,
+          "max": 684
+        },
+        "heroin": {
+          "min": 4896,
+          "max": 15840
+        },
+        "mda": {
+          "min": 684,
+          "max": 2088
+        },
+        "mushrooms": {
+          "min": 40,
+          "max": 310
+        },
+        "opium": {
+          "min": 29,
+          "max": 245
+        },
+        "peyote": {
+          "min": 18,
+          "max": 180
+        },
+        "speed": {
+          "min": 7,
+          "max": 72
+        },
+        "weed": {
+          "min": 14,
+          "max": 126
+        }
+      }
+    },
+    "islington": {
+      "name": "Islington",
+      "volatilityScale": 0.75,
+      "hugeRiseChance": 0.06,
+      "hugeDropChance": 0.06,
+      "riseMultiplier": {
+        "min": 1.9,
+        "max": 2.5
+      },
+      "dropMultiplier": {
+        "min": 0.35,
+        "max": 0.53
+      },
+      "ranges": {
+        "acid": {
+          "min": 202,
+          "max": 1400
+        },
+        "cocaine": {
+          "min": 20720,
+          "max": 57120
+        },
+        "crack": {
+          "min": 1400,
+          "max": 4368
+        },
+        "hashish": {
+          "min": 157,
+          "max": 1064
+        },
+        "heroin": {
+          "min": 7616,
+          "max": 24640
+        },
+        "mda": {
+          "min": 1064,
+          "max": 3248
+        },
+        "mushrooms": {
+          "min": 62,
+          "max": 482
+        },
+        "opium": {
+          "min": 45,
+          "max": 381
+        },
+        "peyote": {
+          "min": 28,
+          "max": 280
+        },
+        "speed": {
+          "min": 11,
+          "max": 112
+        },
+        "weed": {
+          "min": 22,
+          "max": 196
+        }
+      }
+    },
+    "southwark": {
+      "name": "Southwark",
+      "volatilityScale": 1.05,
+      "hugeRiseChance": 0.1,
+      "hugeDropChance": 0.1,
+      "riseMultiplier": {
+        "min": 2,
+        "max": 2.8
+      },
+      "dropMultiplier": {
+        "min": 0.3,
+        "max": 0.5
+      },
+      "ranges": {
+        "acid": {
+          "min": 180,
+          "max": 1250
+        },
+        "cocaine": {
+          "min": 18500,
+          "max": 51000
+        },
+        "crack": {
+          "min": 1250,
+          "max": 3900
+        },
+        "hashish": {
+          "min": 140,
+          "max": 950
+        },
+        "heroin": {
+          "min": 6800,
+          "max": 22000
+        },
+        "mda": {
+          "min": 950,
+          "max": 2900
+        },
+        "mushrooms": {
+          "min": 55,
+          "max": 430
+        },
+        "opium": {
+          "min": 40,
+          "max": 340
+        },
+        "peyote": {
+          "min": 25,
+          "max": 250
+        },
+        "speed": {
+          "min": 10,
+          "max": 100
+        },
+        "weed": {
+          "min": 20,
+          "max": 175
+        }
+      }
+    },
+    "lambeth": {
+      "name": "Lambeth",
+      "volatilityScale": 0.7,
+      "hugeRiseChance": 0.05,
+      "hugeDropChance": 0.05,
+      "riseMultiplier": {
+        "min": 1.8,
+        "max": 2.4
+      },
+      "dropMultiplier": {
+        "min": 0.38,
+        "max": 0.55
+      },
+      "ranges": {
+        "acid": {
+          "min": 148,
+          "max": 1025
+        },
+        "cocaine": {
+          "min": 15170,
+          "max": 41820
+        },
+        "crack": {
+          "min": 1025,
+          "max": 3198
+        },
+        "hashish": {
+          "min": 115,
+          "max": 779
+        },
+        "heroin": {
+          "min": 5576,
+          "max": 18040
+        },
+        "mda": {
+          "min": 779,
+          "max": 2378
+        },
+        "mushrooms": {
+          "min": 45,
+          "max": 353
+        },
+        "opium": {
+          "min": 33,
+          "max": 279
+        },
+        "peyote": {
+          "min": 21,
+          "max": 205
+        },
+        "speed": {
+          "min": 8,
+          "max": 82
+        },
+        "weed": {
+          "min": 16,
+          "max": 144
+        }
+      }
+    },
+    "tower-hamlets": {
+      "name": "Tower Hamlets",
+      "volatilityScale": 1.45,
+      "hugeRiseChance": 0.18,
+      "hugeDropChance": 0.17,
+      "riseMultiplier": {
+        "min": 2.1,
+        "max": 3.1
+      },
+      "dropMultiplier": {
+        "min": 0.23,
+        "max": 0.45
+      },
+      "ranges": {
+        "acid": {
+          "min": 173,
+          "max": 1200
+        },
+        "cocaine": {
+          "min": 17760,
+          "max": 48960
+        },
+        "crack": {
+          "min": 1200,
+          "max": 3744
+        },
+        "hashish": {
+          "min": 134,
+          "max": 912
+        },
+        "heroin": {
+          "min": 6528,
+          "max": 21120
+        },
+        "mda": {
+          "min": 912,
+          "max": 2784
+        },
+        "mushrooms": {
+          "min": 53,
+          "max": 413
+        },
+        "opium": {
+          "min": 38,
+          "max": 326
+        },
+        "peyote": {
+          "min": 24,
+          "max": 240
+        },
+        "speed": {
+          "min": 10,
+          "max": 96
+        },
+        "weed": {
+          "min": 19,
+          "max": 168
+        }
+      }
+    }
+  }
+}

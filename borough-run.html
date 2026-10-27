@@ -9,20 +9,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="borough-run.css?v=20261027-4" />
-  <script src="borough-run-data.js?v=20261027-4" defer></script>
-  <script src="borough-run.js?v=20261027-4" defer></script>
+  <link rel="stylesheet" href="borough-run.css?v=20261027-5" />
+  <script src="borough-run-data.js?v=20261027-5" defer></script>
+  <script src="borough-run.js?v=20261027-5" defer></script>
 </head>
 <body>
   <header class="topbar"><a class="brand" href="index.html">DJH<span>DEV</span></a><a class="back-link" href="index.html">← All demos</a><span class="top-label">FICTIONAL MARKET SIMULATOR</span></header>
   <main class="shell">
     <section class="intro"><div><p class="eyebrow">LONDON · 30 DAYS · PLAY CREDITS ONLY</p><h1>Borough <span>Run</span></h1><p class="intro-copy">Work the fictional street market, read the daily chatter and make your money last. Pick up stock where it’s cheap, sell where it’s wanted, and keep an eye on your bag space.</p></div><button class="reset-button" id="newGame" type="button">New run</button></section>
+    <p class="config-error" id="marketConfigError" hidden></p>
     <section class="stats" aria-label="Run status"><div><span>DAY</span><strong id="dayStat">1 / 30</strong></div><div><span>LOCATION</span><strong id="placeStat">—</strong></div><div><span>CASH</span><strong id="cashStat">£2,000</strong></div><div><span>NET WORTH</span><strong id="worthStat">£2,000</strong></div><div class="capacity"><span>BAG SPACE</span><strong id="capacityStat">0 / 100</strong><i><b id="capacityBar"></b></i></div></section>
     <div class="game-grid">
-      <section class="market panel"><div class="panel-head"><div><p class="eyebrow">TODAY'S MARKET</p><h2 id="marketTitle">—</h2></div><span class="day-chip" id="dayChip">DAY 1</span></div><div class="event-banner" id="eventBanner"><span class="event-icon">✦</span><p id="eventText"></p></div><div class="market-list" id="marketList" aria-live="polite"></div><div class="market-foot"><span>Prices in play credits · Stock changes by location</span><span><b id="locationIndex">01</b> / 30</span></div></section>
-      <aside class="side-column"><section class="panel travel-panel"><p class="eyebrow">CHOOSE YOUR NEXT STOP</p><h2 id="nextPlace">—</h2><p id="travelNote">Trade here as long as you like. Pick your next market when you’re ready.</p><p class="location-picker-label">BOROUGH · PRICE BIAS · VOLATILITY</p><div class="location-choices" id="locationChoices" aria-label="Choose your next borough and compare its market profile"></div><button class="primary-button" id="travelButton" type="button">Travel to borough <span>→</span></button><p class="travel-hint" id="travelHint">Leaving ends today's market.</p></section><section class="panel contact-panel"><div class="contact-top"><span class="avatar" id="contactAvatar">M</span><div><p class="eyebrow">LOCAL CONTACT</p><h2 id="contactName">—</h2></div></div><p class="dialogue" id="dialogue"></p></section><section class="panel log-panel"><p class="eyebrow">RUN LOG</p><div id="runLog" aria-live="polite"></div></section></aside>
+      <section class="market panel"><div class="panel-head"><div><p class="eyebrow">TODAY'S MARKET</p><h2 id="marketTitle">—</h2></div><span class="day-chip" id="dayChip">DAY 1</span></div><div class="event-banner" id="eventBanner"><span class="event-icon">✦</span><p id="eventText"></p></div><div class="market-list" id="marketList" aria-live="polite"></div><div class="market-foot"><span>Prices in play credits · Ranges vary by borough</span><span><b id="locationIndex">01</b> / 30</span></div></section>
+      <aside class="side-column"><section class="panel travel-panel"><p class="eyebrow">CHOOSE YOUR NEXT STOP</p><h2 id="nextPlace">—</h2><p id="travelNote">Trade here as long as you like. Pick your next market when you’re ready.</p><p class="location-picker-label">BOROUGH · VOLATILITY · SPIKE / DROP ODDS</p><div class="location-choices" id="locationChoices" aria-label="Choose your next borough and compare its market profile"></div><button class="primary-button" id="travelButton" type="button">Travel to borough <span>→</span></button><p class="travel-hint" id="travelHint">Leaving ends today's market.</p></section><section class="panel contact-panel"><div class="contact-top"><span class="avatar" id="contactAvatar">M</span><div><p class="eyebrow">LOCAL CONTACT</p><h2 id="contactName">—</h2></div></div><p class="dialogue" id="dialogue"></p></section><section class="panel log-panel"><p class="eyebrow">RUN LOG</p><div id="runLog" aria-live="polite"></div></section></aside>
     </div>
-    <footer><span>ALL GOODS, CHARACTERS AND EVENTS ARE FICTIONAL.</span><span id="endNote">Make it to day 30 and see where you stand.</span><span id="buildVersion">VERSION 0.8.0</span></footer>
+    <footer><span>ALL GOODS, CHARACTERS AND EVENTS ARE FICTIONAL.</span><span id="endNote">Make it to day 30 and see where you stand.</span><span id="buildVersion">VERSION 0.9.0</span></footer>
   </main>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="storage-modal" id="storageModal" hidden>

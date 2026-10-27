@@ -1,5 +1,15 @@
-(() => {
+(async () => {
   const config = window.BOROUGH_RUN_CONFIG;
+  let marketTuning;
+  try {
+    const response=await fetch('borough-run-markets.json?v=20261027-5');
+    if(!response.ok) throw new Error(`Market settings returned ${response.status}`);
+    marketTuning=await response.json();
+  } catch(error) {
+    const notice=document.getElementById('marketConfigError');
+    if(notice){notice.hidden=false;notice.textContent='Market settings could not be loaded. Serve the demo folder over HTTP so borough-run-markets.json can be read.';}
+    return;
+  }
   const $ = id => document.getElementById(id);
   const currency = value => config.currency + Math.max(0, Math.floor(value)).toLocaleString('en-GB');
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
@@ -7,16 +17,16 @@
   const upgradePrice=50000;
   const bagCapacity=()=>state?.capacityUpgrade?200:config.capacity;
   const escapeHTML = value => String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-  const samplePrice = good => {
+  const samplePrice = (good, range=good) => {
     const uniform=Math.random(), triangular=(Math.random()+Math.random())/2;
-    return Math.round(good.min+(good.max-good.min)*(.65*uniform+.35*triangular));
+    return Math.round(range.min+(range.max-range.min)*(.65*uniform+.35*triangular));
   };
   let state;
 
   function createRun() {
     const priceHistory={};
     config.goods.forEach(good=>{priceHistory[good.id]=Array.from({length:24},()=>samplePrice(good));});
-    return {day:0,locationIndex:0,nextLocation:0,lowOffers:[],available:[],costs:{},priceHistory,cash:config.startingCash,inventory:{},history:[],marketPrices:{},prices:{},trend:{},event:null,log:[],ended:false,capacityUpgrade:false,storageOffer:false};
+    return {day:0,locationIndex:0,nextLocation:0,lowOffers:{},available:[],costs:{},priceHistory,cash:config.startingCash,inventory:{},history:[],marketPrices:{},prices:{},trend:{},event:null,log:[],ended:false,capacityUpgrade:false,storageOffer:false};
   }
   function save() { try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (_) {} }
   function note(message) {
@@ -27,33 +37,38 @@
     state.day++;
     state.locationIndex = Number.isInteger(locationIndex) ? locationIndex : Math.floor(Math.random()*config.locations.length);
     const location = config.locations[state.locationIndex];
+    const market=marketTuning.locations[location.marketId];
     state.nextLocation = (state.locationIndex+1+Math.floor(Math.random()*(config.locations.length-1)))%config.locations.length;
     state.storageOffer=travelling&&!state.capacityUpgrade&&Math.random()<.2;
     state.available = config.goods.map(good=>good.id);
-    state.event = Math.random() < (.1+location.volatilityScale*.13) ? config.events[Math.floor(Math.random()*config.events.length)] : null;
-    if (state.event) state.available = [...new Set([...state.available,...state.event.goods])];
-    const previousLowOffers=state.lowOffers||[];
+    const riseChance=market.hugeRiseChance, dropChance=market.hugeDropChance, eventRoll=Math.random();
+    state.event=null;
+    let eventType=eventRoll<riseChance?'rise':eventRoll<riseChance+dropChance?'drop':null;
+    if(eventType){const eventGood=config.goods[Math.floor(Math.random()*config.goods.length)],factor=eventType==='rise'?market.riseMultiplier:market.dropMultiplier,multiplier=factor.min+Math.random()*(factor.max-factor.min);const percent=Math.round(Math.abs(multiplier-1)*100);state.event={title:eventType==='rise'?'Sudden price surge':'Sudden price drop',text:`${eventGood.name} ${eventType==='rise'?'jumped':'fell'} ${percent}% in ${location.name}.`,goods:[eventGood.id],multiplier};}
+    const previousLowOffers=state.lowOffers[location.marketId]||[];
     const lowCandidates=config.goods.map(good=>good.id).filter(id=>!previousLowOffers.includes(id)&&!state.event?.goods.includes(id)).sort(()=>Math.random()-.5);
     const lowOfferCount=1+(Math.random()<.7?1:0);
-    state.lowOffers=lowCandidates.slice(0,lowOfferCount);
+    state.lowOffers[location.marketId]=lowCandidates.slice(0,lowOfferCount);
     const previousPrices=state.prices;
     state.prices = {}; state.trend = {};
+    const marketPrices=state.marketPrices[location.marketId]||(state.marketPrices[location.marketId]={});
     config.goods.forEach(good => {
+      const localRange=market.ranges[good.id];
       const previousVisible=previousPrices[good.id];
-      const previous = state.marketPrices[good.id] || null;
-      const middle=(good.min+good.max)/2, range=good.max-good.min;
+      const previous = marketPrices[good.id] || null;
+      const middle=(localRange.min+localRange.max)/2, range=localRange.max-localRange.min;
       let basePrice;
-      if(state.lowOffers.includes(good.id)) basePrice=good.min+range*(.18+Math.random()*.18*location.volatilityScale);
-      else if(previous===null) basePrice=samplePrice(good);
-      else if(previousLowOffers.includes(good.id)) basePrice=previous+(middle-previous)*(.68+Math.random()*.2)+(Math.random()-.5)*range*.12*location.volatilityScale;
-      else basePrice=previous+(middle-previous)*.22+(Math.random()-.5)*range*good.volatility*.42*location.volatilityScale;
-      basePrice=Math.round(Math.max(good.min,Math.min(good.max,basePrice)));
-      state.marketPrices[good.id]=basePrice;
-      let price = basePrice*(1+location.priceBias);
+      if(state.lowOffers[location.marketId].includes(good.id)) basePrice=localRange.min+range*(.18+Math.random()*.18*market.volatilityScale);
+      else if(previous===null) basePrice=samplePrice(good,localRange);
+      else if(previousLowOffers.includes(good.id)) basePrice=previous+(middle-previous)*(.68+Math.random()*.2)+(Math.random()-.5)*range*.12*market.volatilityScale;
+      else basePrice=previous+(middle-previous)*.22+(Math.random()-.5)*range*good.volatility*.42*market.volatilityScale;
+      basePrice=Math.round(Math.max(localRange.min,Math.min(localRange.max,basePrice)));
+      marketPrices[good.id]=basePrice;
+      let price = basePrice;
       const eventMove=state.event&&state.event.goods.includes(good.id);
-      if (eventMove) price = basePrice*(1+location.priceBias)*state.event.multiplier;
-      price=eventMove?Math.max(1,Math.round(price)):Math.round(Math.max(good.min,Math.min(good.max,price)));
-      if(previousVisible!==undefined&&price===previousVisible){basePrice=basePrice>=good.max?Math.max(good.min,basePrice-1):Math.min(good.max,basePrice+1);state.marketPrices[good.id]=basePrice;price=Math.max(1,Math.round(basePrice*(1+location.priceBias)*(eventMove?state.event.multiplier:1)));}
+      if (eventMove) price = basePrice*state.event.multiplier;
+      price=eventMove?Math.max(1,Math.round(price)):Math.round(Math.max(localRange.min,Math.min(localRange.max,price)));
+      if(previousVisible!==undefined&&price===previousVisible){basePrice=basePrice>=localRange.max?Math.max(localRange.min,basePrice-1):Math.min(localRange.max,basePrice+1);marketPrices[good.id]=basePrice;price=eventMove?Math.max(1,Math.round(basePrice*state.event.multiplier)):basePrice;}
       state.prices[good.id] = price;
       state.trend[good.id] = previousVisible === undefined ? 0 : Math.round((price/previousVisible-1)*100);
       state.priceHistory[good.id] ||= [];
@@ -69,7 +84,12 @@
       const saved = JSON.parse(localStorage.getItem(storageKey));
       if (saved && saved.day >= 1 && saved.day <= config.days && saved.log && saved.inventory && saved.history) {
         saved.costs ||= {}; saved.nextLocation ??= (saved.locationIndex+1)%config.locations.length; saved.priceHistory ||= {}; saved.marketPrices ||= {}; saved.lowOffers ||= [];
-        config.goods.forEach(good=>{if(!saved.marketPrices[good.id]){const multiplier=saved.event?.goods?.includes(good.id)?saved.event.multiplier:1;saved.marketPrices[good.id]=Math.round((saved.prices?.[good.id]||good.base)/multiplier);}});
+        const savedLocation=config.locations[saved.locationIndex]||config.locations[0], firstMarket=marketTuning.locations[savedLocation.marketId];
+        const priceMaps=Object.values(saved.marketPrices).some(value=>value&&typeof value==='object');
+        if(!priceMaps){const legacy=saved.marketPrices;saved.marketPrices={[savedLocation.marketId]:{}};config.goods.forEach(good=>{const multiplier=saved.event?.goods?.includes(good.id)?saved.event.multiplier:1;saved.marketPrices[savedLocation.marketId][good.id]=Math.max(firstMarket.ranges[good.id].min,Math.min(firstMarket.ranges[good.id].max,Math.round((legacy[good.id]||saved.prices?.[good.id]||good.base)/multiplier)));});}
+        else saved.marketPrices[savedLocation.marketId] ||= {};
+        if(Array.isArray(saved.lowOffers))saved.lowOffers={[savedLocation.marketId]:saved.lowOffers};
+        config.goods.forEach(good=>{saved.marketPrices[savedLocation.marketId][good.id] ||= Math.round((firstMarket.ranges[good.id].min+firstMarket.ranges[good.id].max)/2);});
         config.goods.forEach(good=>{if(!saved.priceHistory[good.id]){saved.priceHistory[good.id]=Array.from({length:24},()=>samplePrice(good));saved.priceHistory[good.id].push(saved.prices?.[good.id]||good.base);}else if(saved.priceHistory[good.id].length<24){const gap=24-saved.priceHistory[good.id].length;saved.priceHistory[good.id]=Array.from({length:gap},()=>samplePrice(good)).concat(saved.priceHistory[good.id]);}saved.priceHistory[good.id]=saved.priceHistory[good.id].slice(-40);});
         state=saved; return saved;
       }
@@ -131,9 +151,9 @@
     $('locationIndex').textContent = String(state.day).padStart(2,'0');
     $('nextPlace').textContent = finalDay ? 'End of the route' : state.day >= config.days ? 'Run complete' : config.locations[state.nextLocation]?.name || config.locations[0].name;
     const choices=$('locationChoices');
-    choices.innerHTML=config.locations.map((item,index)=>{const bias=Math.round(item.priceBias*100),biasText=`${bias>0?'+':''}${bias}%`,volText=`${item.volatilityScale.toFixed(1)}×`;return `<button title="${escapeHTML(item.district)} · price bias ${biasText} · volatility ${volText}" aria-label="${escapeHTML(item.name)}: price bias ${biasText}, volatility multiplier ${volText}" class="location-choice ${index===state.locationIndex?'current':''} ${index===state.nextLocation?'selected':''}" type="button" data-location="${index}" ${index===state.locationIndex||finalDay||state.day>=config.days?'disabled':''}><span>${escapeHTML(item.name)}</span><small>${index===state.locationIndex?'HERE · ':''}${biasText} · ${volText}</small></button>`;}).join('');
+    choices.innerHTML=config.locations.map((item,index)=>{const profile=marketTuning.locations[item.marketId],volText=`${profile.volatilityScale.toFixed(1)}×`,rise=Math.round(profile.hugeRiseChance*100),drop=Math.round(profile.hugeDropChance*100);return `<button title="${escapeHTML(item.district)} · volatility ${volText} · rise ${rise}% · drop ${drop}%" aria-label="${escapeHTML(item.name)}: volatility ${volText}, huge rise chance ${rise} percent, huge drop chance ${drop} percent" class="location-choice ${index===state.locationIndex?'current':''} ${index===state.nextLocation?'selected':''}" type="button" data-location="${index}" ${index===state.locationIndex||finalDay||state.day>=config.days?'disabled':''}><span>${escapeHTML(item.name)}</span><small>${index===state.locationIndex?'HERE · ':''}VOL ${volText}</small><small class="market-risk">SPIKE ${rise}% · DROP ${drop}%</small></button>`;}).join('');
     choices.querySelectorAll('[data-location]').forEach(button=>button.addEventListener('click',()=>{state.nextLocation=Number(button.dataset.location);render();}));
-    $('travelNote').textContent = finalDay ? `You’ve finished the route with ${currency(netWorth())} to your name.` : state.day >= config.days ? 'Sell any remaining stock, then finish your run.' : 'Negative bias means cheaper prices; high volatility means bigger swings and more events.';
+    $('travelNote').textContent = finalDay ? `You’ve finished the route with ${currency(netWorth())} to your name.` : state.day >= config.days ? 'Sell any remaining stock, then finish your run.' : 'Compare each borough’s normal item ranges and spike/drop odds before choosing a route.';
     $('travelButton').disabled = finalDay;
     $('travelButton').innerHTML = finalDay ? 'Route complete <span>✓</span>' : state.day >= config.days ? 'Finish 30-day run <span>✓</span>' : `Travel to ${escapeHTML(config.locations[state.nextLocation]?.name || 'borough')} <span>→</span>`;
     $('travelHint').textContent = finalDay ? 'Start a new run to play again.' : state.day >= config.days ? 'Finish when you’re happy with your final tally.' : 'Moving on ends today’s market and its prices.';
@@ -144,6 +164,7 @@
     if (state.event) { event.classList.add('show'); $('eventText').textContent = `${state.event.title} — ${state.event.text}`; } else event.classList.remove('show');
     const visibleGoods=config.goods.filter(good=>localAvailability(good,location)||(state.inventory[good.id]||0)>0);
     $('marketList').innerHTML = finalDay ? `<div class="game-over"><p class="eyebrow">THE 30-DAY ROUTE IS COMPLETE</p><h2>Run complete</h2><p>${state.cash < netWorth() ? 'Your remaining stock is valued at today’s prices.' : 'You made it to the final borough with cash in hand.'}</p><div class="final-score"><small>FINAL NET WORTH</small>${currency(netWorth())}</div></div>` : visibleGoods.map(good=>marketHTML(good,location)).join('');
+    if(!finalDay){const profile=marketTuning.locations[location.marketId];$('marketList').querySelectorAll('.good-row').forEach(row=>{const id=row.querySelector('[data-id]').dataset.id,range=profile.ranges[id],label=document.createElement('small');label.className='price-range';label.textContent=`NORMAL ${currency(range.min)}–${currency(range.max)}`;row.querySelector('.price').append(label);});}
     $('marketList').querySelectorAll('input[type=number]').forEach(input=>input.max=bagCapacity());
     wirePriceCharts();
     $('marketList').querySelectorAll('[data-step]').forEach(button=>button.addEventListener('click',()=>{const input=$(`qty-${button.dataset.id}`);input.value=clamp((Number(input.value)||1)+Number(button.dataset.step),1,bagCapacity());updateButtons();}));
@@ -198,4 +219,4 @@
   $('dismissStorage').addEventListener('click',()=>{state.storageOffer=false;render();});
   $('newGame').addEventListener('click',()=>{state=createRun();addDay();toast('A fresh 30-day route begins.');});
   load();render();
-})();
+})().catch(error=>{const notice=document.getElementById('marketConfigError');if(notice){notice.hidden=false;notice.textContent='Borough Run could not start: '+error.message;}});

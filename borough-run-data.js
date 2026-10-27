@@ -1,6 +1,6 @@
 /* Swap this configuration to create another edition. The engine reads only this data shape. */
 window.BOROUGH_RUN_CONFIG = {
-  title: 'Borough Run', version: '0.8.0', days: 30, startingCash: 2000, capacity: 100, currency: '£',
+  title: 'Borough Run', version: '0.9.0', days: 30, startingCash: 2000, capacity: 100, currency: '£',
   goods: [
     { id:'acid', name:'Acid', unit:'tabs', base:520, min:180, max:1250, volatility:.58, glyph:'✳', tone:'violet' },
     { id:'cocaine', name:'Cocaine', unit:'units', base:29954, min:18500, max:51000, volatility:.86, glyph:'◆', tone:'blue' },
@@ -14,17 +14,15 @@ window.BOROUGH_RUN_CONFIG = {
     { id:'speed', name:'Speed', unit:'units', base:38, min:10, max:100, volatility:.9, glyph:'⚡', tone:'orange' },
     { id:'weed', name:'Weed', unit:'units', base:65, min:20, max:175, volatility:.62, glyph:'♧', tone:'lime' }
   ],
-  // Market tuning: priceBias is a percentage as a decimal; volatilityScale multiplies daily price movement.
-  // Calm markets have lower volatilityScale; swing markets also get more event days (chance = 0.10 + scale * 0.13).
   locations: [
-    {name:'Camden', district:'North London', priceBias:-.06, volatilityScale:.8, contact:'Mags', avatar:'M', lines:['Camden’s humming today. Hashish and weed prices are worth a look.','Word is the market’s thin on acid. Check the board before you buy.']},
-    {name:'Hackney', district:'East London', priceBias:.02, volatilityScale:1.35, contact:'Leon', avatar:'L', lines:['Hackney’s got a bit of everything if you know where to look.','Keep your eyes open. Cocaine and MDA prices can swing sharply.']},
-    {name:'Westminster', district:'Central London', priceBias:.14, volatilityScale:.65, contact:'Rae', avatar:'R', lines:['Central London: big crowds, bigger price swings.','Hashish is drawing attention today. Check the latest market price.']},
-    {name:'Newham', district:'East London', priceBias:-.12, volatilityScale:1.6, contact:'Dev', avatar:'D', lines:['Fresh stock comes through here all the time. Room in your bag?','Peyote and cocaine prices are moving around today.']},
-    {name:'Islington', district:'North London', priceBias:.08, volatilityScale:.75, contact:'Kit', avatar:'K', lines:['A quieter day on the high street. Quiet doesn’t mean cheap.','Someone’s been asking about weed. Might be a short window.']},
-    {name:'Southwark', district:'South London', priceBias:0, volatilityScale:1.05, contact:'Nia', avatar:'N', lines:['Good footfall by the river. Keep your head about you.','Speed prices are all over the place today. Take a look.']},
-    {name:'Lambeth', district:'South London', priceBias:-.09, volatilityScale:.7, contact:'Mo', avatar:'M', lines:['Market’s lively. Take your time and check the board.','Crack and acid have both been shifting today.']},
-    {name:'Tower Hamlets', district:'East London', priceBias:-.02, volatilityScale:1.45, contact:'Sal', avatar:'S', lines:['You’ve got options here. Bag space is the real question.','Cocaine and hashish are the talk of the market today.']},
+    {name:'Camden', marketId:'camden', district:'North London', contact:'Mags', avatar:'M', lines:['Camden’s humming today. Hashish and weed prices are worth a look.','Word is the market’s thin on acid. Check the board before you buy.']},
+    {name:'Hackney', marketId:'hackney', district:'East London', contact:'Leon', avatar:'L', lines:['Hackney’s got a bit of everything if you know where to look.','Keep your eyes open. Cocaine and MDA prices can swing sharply.']},
+    {name:'Westminster', marketId:'westminster', district:'Central London', contact:'Rae', avatar:'R', lines:['Central London: big crowds, bigger price swings.','Hashish is drawing attention today. Check the latest market price.']},
+    {name:'Newham', marketId:'newham', district:'East London', contact:'Dev', avatar:'D', lines:['Fresh stock comes through here all the time. Room in your bag?','Peyote and cocaine prices are moving around today.']},
+    {name:'Islington', marketId:'islington', district:'North London', contact:'Kit', avatar:'K', lines:['A quieter day on the high street. Quiet doesn’t mean cheap.','Someone’s been asking about weed. Might be a short window.']},
+    {name:'Southwark', marketId:'southwark', district:'South London', contact:'Nia', avatar:'N', lines:['Good footfall by the river. Keep your head about you.','Speed prices are all over the place today. Take a look.']},
+    {name:'Lambeth', marketId:'lambeth', district:'South London', contact:'Mo', avatar:'M', lines:['Market’s lively. Take your time and check the board.','Crack and acid have both been shifting today.']},
+    {name:'Tower Hamlets', marketId:'tower-hamlets', district:'East London', contact:'Sal', avatar:'S', lines:['You’ve got options here. Bag space is the real question.','Cocaine and hashish are the talk of the market today.']},
     {name:'Croydon', district:'South London', contact:'Jay', avatar:'J', lines:['Long way out, but there’s always a deal somewhere.','Vintage trainers are in demand round here — for now.']},
     {name:'Richmond upon Thames', district:'South West London', contact:'Eve', avatar:'E', lines:['A change of pace out here. Some surprisingly keen buyers.','Houseplants are all the rage with the locals.']},
     {name:'Brent', district:'North West London', contact:'Oz', avatar:'O', lines:['Brent’s got a lively market today. See what turns up.','Pocket gadgets are getting snapped up. Keep your options open.']},
@@ -47,19 +45,6 @@ window.BOROUGH_RUN_CONFIG = {
     {name:'Kensington and Chelsea', district:'Central London', contact:'Arlo', avatar:'A', lines:['A polished patch of town, but the market’s still a market.','People have expensive tastes. Fancy tea’s a safe bet today.']},
     {name:'Kingston upon Thames', district:'South West London', contact:'Noor', avatar:'N', lines:['Almost at the end of the route. Make this stop count.','A quiet word: people are looking for plants today.']},
     {name:'Bexley', district:'South East London', contact:'Kit', avatar:'K', lines:['Last borough. Let’s see what you made of the journey.','Final market of the run. Sell up and check your score.']}
-  ],
-  events: [
-    {title:'Sudden shortage', text:'A supply disruption has made acid scarce. Its price has jumped to about 2.5 times its normal level.', goods:['acid'], multiplier:2.5},
-    {title:'High-profile rumour', text:'Word spread about a cocaine shortage. Its market price has more than doubled.', goods:['cocaine'], multiplier:2.4},
-    {title:'Street-level glut', text:'A sudden surplus of crack hit the market. Its price has plunged to about a quarter of normal.', goods:['crack'], multiplier:.25},
-    {title:'Changing demand', text:'A rush for hashish has pushed its price to more than twice its normal level.', goods:['hashish'], multiplier:2.2},
-    {title:'Supply scare', text:'A rumoured heroin shortage sent its price soaring to about 2.5 times normal.', goods:['heroin'], multiplier:2.5},
-    {title:'Event crowd', text:'A busy night out has driven MDA prices to more than twice their normal level.', goods:['mda'], multiplier:2.3},
-    {title:'Seasonal surplus', text:'A large mushrooms shipment arrived. Prices have plunged to about a quarter of normal.', goods:['mushrooms'], multiplier:.25},
-    {title:'Market oversupply', text:'A bulk opium shipment arrived at once. Prices have plunged to about a quarter of normal.', goods:['opium'], multiplier:.25},
-    {title:'Rare find', text:'A sudden shortage has sent peyote prices to nearly three times normal.', goods:['peyote'], multiplier:2.8},
-    {title:'Fresh delivery', text:'Speed is in plentiful supply today. Prices have fallen to about a fifth of normal.', goods:['speed'], multiplier:.2},
-    {title:'Local demand spike', text:'A jump in local demand pushed weed prices to more than twice normal.', goods:['weed'], multiplier:2.3}
   ],
   dialogue: { buy:'Picked up {qty} {item}. Mind the bag space.', sell:'Moved {qty} {item}. That’s £{total} in the till.', event:'{name} has turned the market on its head.' }
 };
