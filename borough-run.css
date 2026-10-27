@@ -15,3 +15,4 @@
 .location-choice small{font-size:8px;letter-spacing:.15px}.location-choice[aria-label]:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
 
 .price-range{color:#788273!important;font-size:8px!important;letter-spacing:.1px}.location-choice .market-risk{color:#a8b396}.location-choice small{font-size:7px}.config-error{padding:12px;border:1px solid #874b42;border-radius:7px;background:#321d1a;color:#ffd5cb;font-size:12px}
+.ranges-link{display:inline-block;margin-top:8px;color:var(--lime);font-size:11px;text-decoration:none}.ranges-link:hover{text-decoration:underline}

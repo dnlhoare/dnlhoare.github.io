@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#101510" />
+  <meta name="description" content="Compare every Borough Run item price range across London borough markets." />
+  <title>Borough Run — Market Range Comparison</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet" />
+  <script src="borough-run-data.js?v=20261027-6"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#101510;--panel:#171e17;--panel2:#1d261d;--line:#303b2f;--muted:#899585;--text:#eff3e9;--lime:#c7f36b;--mint:#8eac73;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#34432c 0,transparent 45%),var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh}
+    a{color:inherit}.topbar{height:54px;border-bottom:1px solid #ffffff10;display:flex;align-items:center;gap:22px;padding:0 max(20px,calc((100% - 1280px)/2));background:#101510d9}.brand{font:700 13px var(--mono);letter-spacing:1.6px;text-decoration:none}.brand span{color:var(--lime)}.back{color:#b9c3b0;text-decoration:none;font-size:12px}.back:hover{color:var(--lime)}.top-label{margin-left:auto;color:#778273;font:9px var(--mono);letter-spacing:1px}
+    main{max-width:1280px;margin:0 auto;padding:36px 22px 48px}.heading{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:24px}.eyebrow{margin:0 0 8px;color:var(--lime);font:10px var(--mono);letter-spacing:1.5px}h1{margin:0;font:600 clamp(30px,5vw,48px) Oswald,sans-serif;letter-spacing:.2px}h1 span{color:var(--lime)}.intro{max-width:610px;margin:9px 0 0;color:#a8b2a2;font-size:13px;line-height:1.6}.actions{display:flex;gap:8px}.select,.button{height:38px;border:1px solid #40503b;border-radius:6px;background:#1b241a;color:var(--text);padding:0 12px;font:11px var(--mono)}.button{display:inline-flex;align-items:center;text-decoration:none;color:var(--lime)}.button:hover{background:#293522}
+    .summary{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}.pill{border:1px solid var(--line);border-radius:99px;padding:7px 10px;color:#b5c0ae;font:9px var(--mono);letter-spacing:.4px}.pill strong{color:var(--lime);font-weight:500}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px;background:#151b15;box-shadow:0 14px 45px #0003}table{width:100%;min-width:1050px;border-collapse:separate;border-spacing:0}thead th{position:sticky;top:0;z-index:3;background:#202920;border-bottom:1px solid #394436;color:#aab5a3;padding:13px 10px;text-align:left;font:9px var(--mono);letter-spacing:.7px}thead th:first-child{left:0;z-index:5;min-width:145px}thead th:not(:first-child){min-width:112px}.market-head{display:flex;flex-direction:column;gap:5px;color:#e4eadf;font:600 13px var(--sans);letter-spacing:0}.market-head small{color:#83917c;font:8px var(--mono);letter-spacing:.2px}tbody th{position:sticky;left:0;z-index:2;background:#192119;border-bottom:1px solid #293329;padding:12px 10px;text-align:left;white-space:nowrap}tbody td{min-width:112px;padding:10px;border-bottom:1px solid #293329;border-left:1px solid #222c22;vertical-align:middle}tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}.goods{display:flex;align-items:center;gap:9px}.glyph{display:grid;place-items:center;width:27px;height:27px;border-radius:7px;background:#c7f36b15;color:var(--lime);font-size:15px}.goods strong{display:block;font-size:12px}.goods small{display:block;margin-top:2px;color:#788574;font:8px var(--mono);text-transform:uppercase}.range{color:#eef2e8;font:10px var(--mono);white-space:nowrap}.rangebar{height:4px;margin-top:7px;border-radius:9px;background:#2b362a;overflow:hidden}.rangebar i{display:block;height:100%;min-width:3px;border-radius:9px;background:linear-gradient(90deg,#779955,var(--lime))}.table-note{display:flex;justify-content:space-between;gap:20px;padding:12px 14px;border-top:1px solid var(--line);color:#788574;font:9px var(--mono)}.error{display:none;margin:15px 0;padding:14px;border:1px solid #804c42;border-radius:7px;background:#321d1a;color:#ffd5cb;font-size:13px}.loading{padding:30px;color:#a5b09f;text-align:center;font:11px var(--mono)}
+    @media(max-width:700px){main{padding:25px 12px 32px}.heading{align-items:flex-start;flex-direction:column}.actions{width:100%}.select{flex:1}.topbar{padding:0 14px}.top-label{font-size:8px}.table-note{flex-direction:column;gap:5px}}
+  </style>
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="index.html">DJH<span>DEV</span></a><a class="back" href="borough-run.html">← Back to Borough Run</a><span class="top-label">MARKET TUNING</span></header>
+  <main>
+    <section class="heading"><div><p class="eyebrow">LONDON · PRICE RANGE REFERENCE</p><h1>Market <span>ranges</span></h1><p class="intro">Compare each item’s normal low-to-high price range across the boroughs. The bars are scaled within each item, so you can spot which markets tend to be cheaper or more expensive at a glance. Event prices can move outside these ranges.</p></div><div class="actions"><select class="select" id="sortMode" aria-label="Sort goods"><option value="order">Default item order</option><option value="low">Lowest base range first</option><option value="high">Highest base range first</option></select><a class="button" href="borough-run.html">Open game ↗</a></div></section>
+    <div class="summary" id="summary"></div>
+    <p class="error" id="error" role="alert"></p>
+    <div class="table-wrap"><div id="tableContent" class="loading">Loading market configuration…</div></div>
+  </main>
+  <script>
+    (async()=>{
+      const tableContent=document.getElementById('tableContent'),error=document.getElementById('error'),summary=document.getElementById('summary');
+      try{
+        const config=window.BOROUGH_RUN_CONFIG;
+        const response=await fetch('borough-run-markets.json?v=20261027-6');
+        if(!response.ok)throw new Error(`Market configuration returned ${response.status}.`);
+        const markets=await response.json();
+        const locations=config.locations.map(location=>({location,market:markets.locations[location.marketId]}));
+        if(locations.some(entry=>!entry.market))throw new Error('A borough is missing its market profile.');
+        summary.innerHTML=`<span class="pill"><strong>${config.goods.length}</strong> ITEMS</span><span class="pill"><strong>${locations.length}</strong> BOROUGHS</span><span class="pill">RUN VERSION <strong>${config.version}</strong></span><span class="pill">VALUES IN <strong>PLAY CREDITS</strong></span>`;
+        const format=value=>'£'+Math.round(value).toLocaleString('en-GB');
+        const render=()=>{
+          const goods=[...config.goods],mode=document.getElementById('sortMode').value;
+          if(mode==='low')goods.sort((a,b)=>a.base-b.base);if(mode==='high')goods.sort((a,b)=>b.base-a.base);
+          const rows=goods.map(good=>{
+            const ranges=locations.map(({market})=>market.ranges[good.id]);
+            const ceiling=Math.max(...ranges.map(range=>range.max));
+            const cells=ranges.map(range=>{const left=(range.min/ceiling)*100,width=Math.max(1,(range.max-range.min)/ceiling*100);return `<td><div class="range">${format(range.min)}–${format(range.max)}</div><div class="rangebar" aria-hidden="true"><i style="margin-left:${left}%;width:${width}%"></i></div></td>`;}).join('');
+            return `<tr><th scope="row"><div class="goods"><span class="glyph">${good.glyph}</span><span><strong>${good.name}</strong><small>${good.unit}</small></span></div></th>${cells}</tr>`;
+          }).join('');
+          tableContent.className='';tableContent.innerHTML=`<table><thead><tr><th scope="col">ITEM</th>${locations.map(({location,market})=>`<th scope="col"><span class="market-head">${location.name}<small>VOL ${market.volatilityScale.toFixed(1)}× · ↑ ${Math.round(market.hugeRiseChance*100)}% · ↓ ${Math.round(market.hugeDropChance*100)}%</small></span></th>`).join('')}</tr></thead><tbody>${rows}</tbody></table><div class="table-note"><span>RANGE BARS SHOW MIN → MAX, SCALED TO EACH ITEM’S HIGHEST BOROUGH PRICE</span><span>Event multipliers: borough-specific · may exceed normal range</span></div>`;
+        };
+        document.getElementById('sortMode').addEventListener('change',render);render();
+      }catch(err){tableContent.className='loading';tableContent.textContent='Market ranges could not be loaded.';error.style.display='block';error.textContent=`${err.message} Serve this page over HTTP so it can read the shared game data.`;}
+    })();
+  </script>
+</body>
+</html>
