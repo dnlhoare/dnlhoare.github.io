@@ -1,5 +1,5 @@
 {
-  "version": "0.9.0",
+  "version": "1.0.0",
   "locations": {
     "camden": {
       "name": "Camden",
@@ -15,49 +15,49 @@
         "max": 0.52
       },
       "ranges": {
-        "acid": {
-          "min": 169,
-          "max": 1175
-        },
-        "cocaine": {
-          "min": 17390,
-          "max": 47940
-        },
-        "crack": {
-          "min": 1175,
-          "max": 3666
-        },
-        "hashish": {
-          "min": 132,
-          "max": 893
-        },
-        "heroin": {
-          "min": 6392,
-          "max": 20680
-        },
-        "mda": {
-          "min": 893,
-          "max": 2726
-        },
-        "mushrooms": {
-          "min": 52,
-          "max": 404
-        },
-        "opium": {
-          "min": 38,
-          "max": 320
+        "speed": {
+          "min": 26,
+          "max": 41
         },
         "peyote": {
-          "min": 24,
-          "max": 235
-        },
-        "speed": {
-          "min": 9,
-          "max": 94
+          "min": 94,
+          "max": 147
         },
         "weed": {
-          "min": 19,
-          "max": 165
+          "min": 137,
+          "max": 215
+        },
+        "opium": {
+          "min": 591,
+          "max": 925
+        },
+        "mushrooms": {
+          "min": 1001,
+          "max": 1566
+        },
+        "hashish": {
+          "min": 1729,
+          "max": 2705
+        },
+        "acid": {
+          "min": 7343,
+          "max": 11486
+        },
+        "crack": {
+          "min": 9060,
+          "max": 14171
+        },
+        "mda": {
+          "min": 26704,
+          "max": 41767
+        },
+        "heroin": {
+          "min": 39579,
+          "max": 61905
+        },
+        "cocaine": {
+          "min": 116352,
+          "max": 181986
         }
       }
     },
@@ -75,49 +75,49 @@
         "max": 0.5
       },
       "ranges": {
-        "acid": {
-          "min": 185,
-          "max": 1288
-        },
-        "cocaine": {
-          "min": 19055,
-          "max": 52530
-        },
-        "crack": {
-          "min": 1288,
-          "max": 4017
-        },
-        "hashish": {
-          "min": 144,
-          "max": 979
-        },
-        "heroin": {
-          "min": 7004,
-          "max": 22660
-        },
-        "mda": {
-          "min": 979,
-          "max": 2987
-        },
-        "mushrooms": {
-          "min": 57,
-          "max": 443
-        },
-        "opium": {
-          "min": 41,
-          "max": 350
+        "speed": {
+          "min": 38,
+          "max": 59
         },
         "peyote": {
-          "min": 26,
-          "max": 258
-        },
-        "speed": {
-          "min": 10,
-          "max": 103
+          "min": 60,
+          "max": 93
         },
         "weed": {
-          "min": 21,
-          "max": 180
+          "min": 217,
+          "max": 340
+        },
+        "opium": {
+          "min": 377,
+          "max": 590
+        },
+        "mushrooms": {
+          "min": 1405,
+          "max": 2198
+        },
+        "hashish": {
+          "min": 2820,
+          "max": 4411
+        },
+        "acid": {
+          "min": 3809,
+          "max": 5957
+        },
+        "crack": {
+          "min": 14599,
+          "max": 22834
+        },
+        "mda": {
+          "min": 18852,
+          "max": 29486
+        },
+        "heroin": {
+          "min": 54716,
+          "max": 85581
+        },
+        "cocaine": {
+          "min": 68050,
+          "max": 106437
         }
       }
     },
@@ -135,49 +135,49 @@
         "max": 0.55
       },
       "ranges": {
-        "acid": {
-          "min": 225,
-          "max": 1563
-        },
-        "cocaine": {
-          "min": 23125,
-          "max": 63750
-        },
-        "crack": {
-          "min": 1563,
-          "max": 4875
-        },
-        "hashish": {
-          "min": 175,
-          "max": 1188
-        },
-        "heroin": {
-          "min": 8500,
-          "max": 27500
-        },
-        "mda": {
-          "min": 1188,
-          "max": 3625
-        },
-        "mushrooms": {
-          "min": 69,
-          "max": 538
-        },
-        "opium": {
-          "min": 50,
-          "max": 425
+        "speed": {
+          "min": 22,
+          "max": 35
         },
         "peyote": {
-          "min": 31,
-          "max": 313
-        },
-        "speed": {
-          "min": 13,
-          "max": 125
+          "min": 103,
+          "max": 161
         },
         "weed": {
-          "min": 25,
-          "max": 219
+          "min": 161,
+          "max": 251
+        },
+        "opium": {
+          "min": 551,
+          "max": 862
+        },
+        "mushrooms": {
+          "min": 828,
+          "max": 1295
+        },
+        "hashish": {
+          "min": 3188,
+          "max": 4987
+        },
+        "acid": {
+          "min": 4468,
+          "max": 6988
+        },
+        "crack": {
+          "min": 13310,
+          "max": 20819
+        },
+        "mda": {
+          "min": 15879,
+          "max": 24836
+        },
+        "heroin": {
+          "min": 63516,
+          "max": 99345
+        },
+        "cocaine": {
+          "min": 84999,
+          "max": 132947
         }
       }
     },
@@ -195,49 +195,49 @@
         "max": 0.42
       },
       "ranges": {
-        "acid": {
-          "min": 130,
-          "max": 900
-        },
-        "cocaine": {
-          "min": 13320,
-          "max": 36720
-        },
-        "crack": {
-          "min": 900,
-          "max": 2808
-        },
-        "hashish": {
-          "min": 101,
-          "max": 684
-        },
-        "heroin": {
-          "min": 4896,
-          "max": 15840
-        },
-        "mda": {
-          "min": 684,
-          "max": 2088
-        },
-        "mushrooms": {
-          "min": 40,
-          "max": 310
-        },
-        "opium": {
-          "min": 29,
-          "max": 245
+        "speed": {
+          "min": 39,
+          "max": 62
         },
         "peyote": {
-          "min": 18,
-          "max": 180
-        },
-        "speed": {
-          "min": 7,
-          "max": 72
+          "min": 63,
+          "max": 99
         },
         "weed": {
-          "min": 14,
-          "max": 126
+          "min": 225,
+          "max": 352
+        },
+        "opium": {
+          "min": 334,
+          "max": 522
+        },
+        "mushrooms": {
+          "min": 1220,
+          "max": 1908
+        },
+        "hashish": {
+          "min": 2115,
+          "max": 3308
+        },
+        "acid": {
+          "min": 6257,
+          "max": 9787
+        },
+        "crack": {
+          "min": 7887,
+          "max": 12336
+        },
+        "mda": {
+          "min": 28844,
+          "max": 45115
+        },
+        "heroin": {
+          "min": 32900,
+          "max": 51459
+        },
+        "cocaine": {
+          "min": 120785,
+          "max": 188920
         }
       }
     },
@@ -255,49 +255,49 @@
         "max": 0.53
       },
       "ranges": {
-        "acid": {
-          "min": 202,
-          "max": 1400
-        },
-        "cocaine": {
-          "min": 20720,
-          "max": 57120
-        },
-        "crack": {
-          "min": 1400,
-          "max": 4368
-        },
-        "hashish": {
-          "min": 157,
-          "max": 1064
-        },
-        "heroin": {
-          "min": 7616,
-          "max": 24640
-        },
-        "mda": {
-          "min": 1064,
-          "max": 3248
-        },
-        "mushrooms": {
-          "min": 62,
-          "max": 482
-        },
-        "opium": {
-          "min": 45,
-          "max": 381
+        "speed": {
+          "min": 27,
+          "max": 42
         },
         "peyote": {
-          "min": 28,
-          "max": 280
-        },
-        "speed": {
-          "min": 11,
-          "max": 112
+          "min": 87,
+          "max": 137
         },
         "weed": {
-          "min": 22,
-          "max": 196
+          "min": 237,
+          "max": 370
+        },
+        "opium": {
+          "min": 307,
+          "max": 480
+        },
+        "mushrooms": {
+          "min": 1285,
+          "max": 2011
+        },
+        "hashish": {
+          "min": 1975,
+          "max": 3089
+        },
+        "acid": {
+          "min": 6006,
+          "max": 9394
+        },
+        "crack": {
+          "min": 15240,
+          "max": 23837
+        },
+        "mda": {
+          "min": 17159,
+          "max": 26839
+        },
+        "heroin": {
+          "min": 56445,
+          "max": 88286
+        },
+        "cocaine": {
+          "min": 73153,
+          "max": 114419
         }
       }
     },
@@ -315,49 +315,49 @@
         "max": 0.5
       },
       "ranges": {
-        "acid": {
-          "min": 180,
-          "max": 1250
-        },
-        "cocaine": {
-          "min": 18500,
-          "max": 51000
-        },
-        "crack": {
-          "min": 1250,
-          "max": 3900
-        },
-        "hashish": {
-          "min": 140,
-          "max": 950
-        },
-        "heroin": {
-          "min": 6800,
-          "max": 22000
-        },
-        "mda": {
-          "min": 950,
-          "max": 2900
-        },
-        "mushrooms": {
-          "min": 55,
-          "max": 430
-        },
-        "opium": {
-          "min": 40,
-          "max": 340
+        "speed": {
+          "min": 35,
+          "max": 54
         },
         "peyote": {
-          "min": 25,
-          "max": 250
-        },
-        "speed": {
-          "min": 10,
-          "max": 100
+          "min": 54,
+          "max": 84
         },
         "weed": {
-          "min": 20,
-          "max": 175
+          "min": 165,
+          "max": 258
+        },
+        "opium": {
+          "min": 593,
+          "max": 928
+        },
+        "mushrooms": {
+          "min": 818,
+          "max": 1280
+        },
+        "hashish": {
+          "min": 2973,
+          "max": 4650
+        },
+        "acid": {
+          "min": 4511,
+          "max": 7055
+        },
+        "crack": {
+          "min": 13262,
+          "max": 20743
+        },
+        "mda": {
+          "min": 30120,
+          "max": 47111
+        },
+        "heroin": {
+          "min": 36414,
+          "max": 56956
+        },
+        "cocaine": {
+          "min": 100701,
+          "max": 157507
         }
       }
     },
@@ -375,49 +375,49 @@
         "max": 0.55
       },
       "ranges": {
-        "acid": {
-          "min": 148,
-          "max": 1025
-        },
-        "cocaine": {
-          "min": 15170,
-          "max": 41820
-        },
-        "crack": {
-          "min": 1025,
-          "max": 3198
-        },
-        "hashish": {
-          "min": 115,
-          "max": 779
-        },
-        "heroin": {
-          "min": 5576,
-          "max": 18040
-        },
-        "mda": {
-          "min": 779,
-          "max": 2378
-        },
-        "mushrooms": {
-          "min": 45,
-          "max": 353
-        },
-        "opium": {
-          "min": 33,
-          "max": 279
+        "speed": {
+          "min": 23,
+          "max": 36
         },
         "peyote": {
-          "min": 21,
-          "max": 205
-        },
-        "speed": {
-          "min": 8,
-          "max": 82
+          "min": 95,
+          "max": 149
         },
         "weed": {
-          "min": 16,
-          "max": 144
+          "min": 205,
+          "max": 320
+        },
+        "opium": {
+          "min": 396,
+          "max": 619
+        },
+        "mushrooms": {
+          "min": 1416,
+          "max": 2215
+        },
+        "hashish": {
+          "min": 1774,
+          "max": 2775
+        },
+        "acid": {
+          "min": 6398,
+          "max": 10008
+        },
+        "crack": {
+          "min": 10227,
+          "max": 15996
+        },
+        "mda": {
+          "min": 26522,
+          "max": 41483
+        },
+        "heroin": {
+          "min": 58888,
+          "max": 92107
+        },
+        "cocaine": {
+          "min": 62034,
+          "max": 97028
         }
       }
     },
@@ -435,49 +435,49 @@
         "max": 0.45
       },
       "ranges": {
-        "acid": {
-          "min": 173,
-          "max": 1200
-        },
-        "cocaine": {
-          "min": 17760,
-          "max": 48960
-        },
-        "crack": {
-          "min": 1200,
-          "max": 3744
-        },
-        "hashish": {
-          "min": 134,
-          "max": 912
-        },
-        "heroin": {
-          "min": 6528,
-          "max": 21120
-        },
-        "mda": {
-          "min": 912,
-          "max": 2784
-        },
-        "mushrooms": {
-          "min": 53,
-          "max": 413
-        },
-        "opium": {
-          "min": 38,
-          "max": 326
+        "speed": {
+          "min": 33,
+          "max": 51
         },
         "peyote": {
-          "min": 24,
-          "max": 240
-        },
-        "speed": {
-          "min": 10,
-          "max": 96
+          "min": 66,
+          "max": 103
         },
         "weed": {
-          "min": 19,
-          "max": 168
+          "min": 223,
+          "max": 349
+        },
+        "opium": {
+          "min": 501,
+          "max": 783
+        },
+        "mushrooms": {
+          "min": 731,
+          "max": 1144
+        },
+        "hashish": {
+          "min": 3041,
+          "max": 4757
+        },
+        "acid": {
+          "min": 3961,
+          "max": 6196
+        },
+        "crack": {
+          "min": 13277,
+          "max": 20766
+        },
+        "mda": {
+          "min": 19153,
+          "max": 29958
+        },
+        "heroin": {
+          "min": 50495,
+          "max": 78980
+        },
+        "cocaine": {
+          "min": 112308,
+          "max": 175661
         }
       }
     }

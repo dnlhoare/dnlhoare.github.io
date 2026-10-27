@@ -1,18 +1,18 @@
 /* Swap this configuration to create another edition. The engine reads only this data shape. */
 window.BOROUGH_RUN_CONFIG = {
-  title: 'Borough Run', version: '0.9.0', days: 30, startingCash: 2000, capacity: 100, currency: '£',
+  title: 'Borough Run', version: '1.0.0', days: 30, startingCash: 2000, capacity: 100, currency: '£',
   goods: [
-    { id:'acid', name:'Acid', unit:'tabs', base:520, min:180, max:1250, volatility:.58, glyph:'✳', tone:'violet' },
-    { id:'cocaine', name:'Cocaine', unit:'units', base:29954, min:18500, max:51000, volatility:.86, glyph:'◆', tone:'blue' },
-    { id:'crack', name:'Crack', unit:'units', base:2135, min:1250, max:3900, volatility:.8, glyph:'◇', tone:'coral' },
-    { id:'hashish', name:'Hashish', unit:'units', base:390, min:140, max:950, volatility:.5, glyph:'⬟', tone:'green' },
-    { id:'heroin', name:'Heroin', unit:'units', base:11716, min:6800, max:22000, volatility:.84, glyph:'⬢', tone:'pink' },
-    { id:'mda', name:'MDA', unit:'units', base:1621, min:950, max:2900, volatility:.68, glyph:'✦', tone:'amber' },
-    { id:'mushrooms', name:'Mushrooms', unit:'units', base:165, min:55, max:430, volatility:.95, glyph:'☘', tone:'lime' },
-    { id:'opium', name:'Opium', unit:'units', base:125, min:40, max:340, volatility:.72, glyph:'❋', tone:'orange' },
-    { id:'peyote', name:'Peyote', unit:'units', base:90, min:25, max:250, volatility:1.05, glyph:'♣', tone:'cyan' },
-    { id:'speed', name:'Speed', unit:'units', base:38, min:10, max:100, volatility:.9, glyph:'⚡', tone:'orange' },
-    { id:'weed', name:'Weed', unit:'units', base:65, min:20, max:175, volatility:.62, glyph:'♧', tone:'lime' }
+    { id:'speed', name:'Speed', unit:'units', base:40, min:31, max:49, volatility:.9, glyph:'⚡', tone:'orange' },
+    { id:'peyote', name:'Peyote', unit:'units', base:100, min:78, max:122, volatility:1.05, glyph:'♣', tone:'cyan' },
+    { id:'weed', name:'Weed', unit:'units', base:240, min:187, max:293, volatility:.62, glyph:'♧', tone:'lime' },
+    { id:'opium', name:'Opium', unit:'units', base:600, min:468, max:732, volatility:.72, glyph:'❋', tone:'orange' },
+    { id:'mushrooms', name:'Mushrooms', unit:'units', base:1400, min:1092, max:1708, volatility:.95, glyph:'☘', tone:'lime' },
+    { id:'hashish', name:'Hashish', unit:'units', base:3200, min:2496, max:3904, volatility:.5, glyph:'⬟', tone:'green' },
+    { id:'acid', name:'Acid', unit:'tabs', base:7000, min:5460, max:8540, volatility:.58, glyph:'✳', tone:'violet' },
+    { id:'crack', name:'Crack', unit:'units', base:15000, min:11700, max:18300, volatility:.8, glyph:'◇', tone:'coral' },
+    { id:'mda', name:'MDA', unit:'units', base:30000, min:23400, max:36600, volatility:.68, glyph:'✦', tone:'amber' },
+    { id:'heroin', name:'Heroin', unit:'units', base:60000, min:46800, max:73200, volatility:.84, glyph:'⬢', tone:'pink' },
+    { id:'cocaine', name:'Cocaine', unit:'units', base:120000, min:93600, max:146400, volatility:.86, glyph:'◆', tone:'blue' }
   ],
   locations: [
     {name:'Camden', marketId:'camden', district:'North London', contact:'Mags', avatar:'M', lines:['Camden’s humming today. Hashish and weed prices are worth a look.','Word is the market’s thin on acid. Check the board before you buy.']},

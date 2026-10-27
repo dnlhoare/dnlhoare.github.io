@@ -2,7 +2,7 @@
   const config = window.BOROUGH_RUN_CONFIG;
   let marketTuning;
   try {
-    const response=await fetch('borough-run-markets.json?v=20261027-5');
+    const response=await fetch('borough-run-markets.json?v=20261027-7');
     if(!response.ok) throw new Error(`Market settings returned ${response.status}`);
     marketTuning=await response.json();
   } catch(error) {
@@ -26,7 +26,7 @@
   function createRun() {
     const priceHistory={};
     config.goods.forEach(good=>{priceHistory[good.id]=Array.from({length:24},()=>samplePrice(good));});
-    return {day:0,locationIndex:0,nextLocation:0,lowOffers:{},available:[],costs:{},priceHistory,cash:config.startingCash,inventory:{},history:[],marketPrices:{},prices:{},trend:{},event:null,log:[],ended:false,capacityUpgrade:false,storageOffer:false};
+    return {day:0,locationIndex:0,nextLocation:0,lowOffers:{},available:[],costs:{},priceHistory,cash:config.startingCash,inventory:{},history:[],marketPrices:{},marketConfigVersion:marketTuning.version,prices:{},trend:{},event:null,log:[],ended:false,capacityUpgrade:false,storageOffer:false};
   }
   function save() { try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (_) {} }
   function note(message) {
@@ -90,6 +90,12 @@
         else saved.marketPrices[savedLocation.marketId] ||= {};
         if(Array.isArray(saved.lowOffers))saved.lowOffers={[savedLocation.marketId]:saved.lowOffers};
         config.goods.forEach(good=>{saved.marketPrices[savedLocation.marketId][good.id] ||= Math.round((firstMarket.ranges[good.id].min+firstMarket.ranges[good.id].max)/2);});
+        if(saved.marketConfigVersion!==marketTuning.version){
+          config.locations.forEach(location=>{const profile=marketTuning.locations[location.marketId],prices=saved.marketPrices[location.marketId]||(saved.marketPrices[location.marketId]={});config.goods.forEach(good=>{const range=profile.ranges[good.id];prices[good.id]=Math.round((range.min+range.max)/2);});});
+          const current=saved.marketPrices[savedLocation.marketId];config.goods.forEach(good=>{const multiplier=saved.event?.goods?.includes(good.id)?saved.event.multiplier:1;saved.prices[good.id]=Math.max(1,Math.round(current[good.id]*multiplier));});
+          saved.priceHistory={};config.goods.forEach(good=>{saved.priceHistory[good.id]=Array.from({length:24},()=>samplePrice(good));saved.priceHistory[good.id].push(saved.prices[good.id]);});
+          saved.marketConfigVersion=marketTuning.version;
+        }
         config.goods.forEach(good=>{if(!saved.priceHistory[good.id]){saved.priceHistory[good.id]=Array.from({length:24},()=>samplePrice(good));saved.priceHistory[good.id].push(saved.prices?.[good.id]||good.base);}else if(saved.priceHistory[good.id].length<24){const gap=24-saved.priceHistory[good.id].length;saved.priceHistory[good.id]=Array.from({length:gap},()=>samplePrice(good)).concat(saved.priceHistory[good.id]);}saved.priceHistory[good.id]=saved.priceHistory[good.id].slice(-40);});
         state=saved; return saved;
       }
