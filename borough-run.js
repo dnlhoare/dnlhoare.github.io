@@ -4,6 +4,8 @@
   const currency = value => config.currency + Math.max(0, Math.floor(value)).toLocaleString('en-GB');
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
   const storageKey = 'djhdev-borough-run-v3';
+  const upgradePrice=50000;
+  const bagCapacity=()=>state?.capacityUpgrade?200:config.capacity;
   const escapeHTML = value => String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const samplePrice = good => {
     const uniform=Math.random(), triangular=(Math.random()+Math.random())/2;
@@ -14,18 +16,19 @@
   function createRun() {
     const priceHistory={};
     config.goods.forEach(good=>{priceHistory[good.id]=Array.from({length:24},()=>samplePrice(good));});
-    return {day:0,locationIndex:0,nextLocation:0,lowOffers:[],available:[],costs:{},priceHistory,cash:config.startingCash,inventory:{},history:[],marketPrices:{},prices:{},trend:{},event:null,log:[],ended:false};
+    return {day:0,locationIndex:0,nextLocation:0,lowOffers:[],available:[],costs:{},priceHistory,cash:config.startingCash,inventory:{},history:[],marketPrices:{},prices:{},trend:{},event:null,log:[],ended:false,capacityUpgrade:false,storageOffer:false};
   }
   function save() { try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (_) {} }
   function note(message) {
     const line = {day:Math.min(state.day+1,config.days),text:message};
     state.log.unshift(line); state.log = state.log.slice(0,6);
   }
-  function addDay(locationIndex) {
+  function addDay(locationIndex, travelling=false) {
     state.day++;
     state.locationIndex = Number.isInteger(locationIndex) ? locationIndex : Math.floor(Math.random()*config.locations.length);
     const location = config.locations[state.locationIndex];
     state.nextLocation = (state.locationIndex+1+Math.floor(Math.random()*(config.locations.length-1)))%config.locations.length;
+    state.storageOffer=travelling&&!state.capacityUpgrade&&Math.random()<.2;
     state.available = config.goods.map(good=>good.id).sort(()=>Math.random()-.5).slice(0,5+Math.floor(Math.random()*3));
     state.event = Math.random() < .34 ? config.events[Math.floor(Math.random()*config.events.length)] : null;
     if (state.event) state.available = [...new Set([...state.available,...state.event.goods])];
@@ -82,8 +85,8 @@
     const price = state.prices[good.id], owned = state.inventory[good.id]||0, trend=state.trend[good.id]||0;
     const available = localAvailability(good, location);
     const delta = trend > 5 ? `<span class="up">↗ ${trend}%</span>` : trend < -5 ? `<span class="down">↘ ${Math.abs(trend)}%</span>` : '<span>→ steady</span>';
-    const qty = clamp(Math.floor(Number($(`qty-${good.id}`)?.value)||1),1,config.capacity);
-    const canBuy = available && qty*price <= state.cash && qty + stockCount() <= config.capacity && !state.ended;
+    const qty = clamp(Math.floor(Number($(`qty-${good.id}`)?.value)||1),1,bagCapacity());
+    const canBuy = available && qty*price <= state.cash && qty + stockCount() <= bagCapacity() && !state.ended;
     const canSell = owned > 0 && !state.ended;
     return `<article class="good-row" style="--good:${good.color||({violet:'#c299f5',blue:'#7cb9ff',amber:'#f1c978',green:'#94d786',coral:'#ff9a83',pink:'#f28cce',lime:'#c7f36b',orange:'#f5a36e',cyan:'#79d9d4'}[good.tone]||'#c7f36b')}"><div class="good-name"><span class="good-glyph">${escapeHTML(good.glyph)}</span><div><strong>${escapeHTML(good.name)}</strong><small>${available?`STOCK HERE · ${owned} ${escapeHTML(good.unit)} OWNED`:`NOT STOCKED HERE · ${owned} OWNED`}</small></div></div><div class="price">${currency(price)}<small>${delta}</small></div><div class="quantity"><button type="button" data-step="-1" data-id="${good.id}" aria-label="Decrease quantity for ${escapeHTML(good.name)}">−</button><input id="qty-${good.id}" type="number" min="1" max="${config.capacity}" value="1" aria-label="Quantity of ${escapeHTML(good.name)}" ${state.ended?'disabled':''}><button type="button" data-step="1" data-id="${good.id}" aria-label="Increase quantity for ${escapeHTML(good.name)}">+</button></div><div class="trade-actions"><button type="button" data-action="buy" data-id="${good.id}" ${canBuy?'':'disabled'}>BUY</button><button class="sell" type="button" data-action="sell" data-id="${good.id}" ${canSell?'':'disabled'}>SELL</button></div></article>`;
   }
@@ -92,7 +95,10 @@
   function wirePriceCharts(){
     $('marketList').querySelectorAll('.price').forEach(priceEl=>{
       const row=priceEl.closest('.good-row'), id=row.querySelector('[data-id]').dataset.id, good=config.goods.find(item=>item.id===id);
+      const values=state.priceHistory[id]||[], low=Math.min(...values), high=Math.max(...values), span=Math.max(1,high-low);
+      const sparkPoints=values.map((value,index)=>`${2+index*46/Math.max(1,values.length-1)},${19-(value-low)/span*16}`).join(' ');
       const button=document.createElement('button');button.type='button';button.className='price price-trigger';button.innerHTML=priceEl.innerHTML;button.setAttribute('aria-label',`${good.name} current price. Show price history.`);priceEl.replaceWith(button);
+      button.innerHTML=`<span class="price-value">${priceEl.innerHTML}</span><svg class="price-sparkline" viewBox="0 0 50 22" aria-hidden="true"><polyline points="${sparkPoints}"/></svg>`;
       button.addEventListener('click',event=>{
         event.stopPropagation();
         if(activeChart?.dataset.goodId===id){hidePriceChart();return;}
@@ -119,8 +125,8 @@
     $('placeStat').textContent = location.name;
     $('cashStat').textContent = currency(state.cash);
     $('worthStat').textContent = currency(netWorth());
-    $('capacityStat').textContent = `${stockCount()} / ${config.capacity}`;
-    $('capacityBar').style.width = `${Math.min(100,stockCount()/config.capacity*100)}%`;
+    $('capacityStat').textContent = `${stockCount()} / ${bagCapacity()}`;
+    $('capacityBar').style.width = `${Math.min(100,stockCount()/bagCapacity()*100)}%`;
     $('marketTitle').textContent = `${location.name} Market`;
     $('dayChip').textContent = `DAY ${String(state.day).padStart(2,'0')}`;
     $('locationIndex').textContent = String(state.day).padStart(2,'0');
@@ -139,8 +145,9 @@
     if (state.event) { event.classList.add('show'); $('eventText').textContent = `${state.event.title} — ${state.event.text}`; } else event.classList.remove('show');
     const visibleGoods=config.goods.filter(good=>localAvailability(good,location)||(state.inventory[good.id]||0)>0);
     $('marketList').innerHTML = finalDay ? `<div class="game-over"><p class="eyebrow">THE 30-DAY ROUTE IS COMPLETE</p><h2>Run complete</h2><p>${state.cash < netWorth() ? 'Your remaining stock is valued at today’s prices.' : 'You made it to the final borough with cash in hand.'}</p><div class="final-score"><small>FINAL NET WORTH</small>${currency(netWorth())}</div></div>` : visibleGoods.map(good=>marketHTML(good,location)).join('');
+    $('marketList').querySelectorAll('input[type=number]').forEach(input=>input.max=bagCapacity());
     wirePriceCharts();
-    $('marketList').querySelectorAll('[data-step]').forEach(button=>button.addEventListener('click',()=>{const input=$(`qty-${button.dataset.id}`);input.value=clamp((Number(input.value)||1)+Number(button.dataset.step),1,config.capacity);updateButtons();}));
+    $('marketList').querySelectorAll('[data-step]').forEach(button=>button.addEventListener('click',()=>{const input=$(`qty-${button.dataset.id}`);input.value=clamp((Number(input.value)||1)+Number(button.dataset.step),1,bagCapacity());updateButtons();}));
     $('marketList').querySelectorAll('input[type=number]').forEach(input=>input.addEventListener('input',updateButtons));
     $('marketList').querySelectorAll('[data-action]').forEach(button=>button.addEventListener('click',()=>trade(button.dataset.id,button.dataset.action)));
     $('marketList').querySelectorAll('.good-row').forEach(row=>{
@@ -152,6 +159,9 @@
     $('runLog').innerHTML = state.log.length ? state.log.map(item=>`<div class="log-line"><time>D${String(item.day).padStart(2,'0')}</time><span>${escapeHTML(item.text)}</span></div>`).join('') : '<span class="log-empty">Your deals and market news will show up here.</span>';
     $('endNote').textContent = finalDay ? 'Thanks for taking the route.' : 'Make it to day 30 and see where you stand.';
     $('buildVersion').textContent = `VERSION ${config.version}`;
+    $('storageModal').hidden=!state.storageOffer;
+    $('upgradeStorage').disabled=state.cash<upgradePrice;
+    $('storageCash').textContent=currency(state.cash);
     document.body.classList.toggle('is-final',finalDay);
     save();
   }
@@ -159,10 +169,10 @@
     const location=config.locations[state.locationIndex];
     config.goods.forEach(good=>{
       const row=$(`qty-${good.id}`)?.closest('.good-row'); if (!row) return;
-      const qty=clamp(Math.floor(Number($(`qty-${good.id}`).value)||1),1,config.capacity), price=state.prices[good.id], owned=state.inventory[good.id]||0;
-      row.querySelector('[data-action=buy]').disabled=state.ended||!localAvailability(good,location)||qty*price>state.cash||qty+stockCount()>config.capacity;
+      const qty=clamp(Math.floor(Number($(`qty-${good.id}`).value)||1),1,bagCapacity()), price=state.prices[good.id], owned=state.inventory[good.id]||0;
+      row.querySelector('[data-action=buy]').disabled=state.ended||!localAvailability(good,location)||qty*price>state.cash||qty+stockCount()>bagCapacity();
       row.querySelector('[data-action=sell]').disabled=state.ended||owned<1;
-      row.querySelector('[data-action=buymax]').disabled=state.ended||!localAvailability(good,location)||stockCount()>=config.capacity||state.cash<price;
+      row.querySelector('[data-action=buymax]').disabled=state.ended||!localAvailability(good,location)||stockCount()>=bagCapacity()||state.cash<price;
       row.querySelector('[data-action=sellall]').disabled=state.ended||owned<1;
     });
   }
@@ -170,9 +180,9 @@
   function toast(message) { const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2200); }
   function trade(id, action) {
     const good=config.goods.find(item=>item.id===id), price=state.prices[id];
-    const qty=action==='buymax'?Math.min(config.capacity-stockCount(),Math.floor(state.cash/price)):action==='sellall'?(state.inventory[id]||0):clamp(Math.floor(Number($(`qty-${id}`).value)||1),1,config.capacity);
+    const qty=action==='buymax'?Math.min(bagCapacity()-stockCount(),Math.floor(state.cash/price)):action==='sellall'?(state.inventory[id]||0):clamp(Math.floor(Number($(`qty-${id}`).value)||1),1,bagCapacity());
     if(action==='buy'||action==='buymax') {
-      if(qty<1||qty*price>state.cash||stockCount()+qty>config.capacity||!localAvailability(good,config.locations[state.locationIndex]))return;
+      if(qty<1||qty*price>state.cash||stockCount()+qty>bagCapacity()||!localAvailability(good,config.locations[state.locationIndex]))return;
       state.cash-=qty*price;
       const oldQty=state.inventory[id]||0, oldCost=state.costs[id]||0;
       state.inventory[id]=oldQty+qty;state.costs[id]=(oldQty*oldCost+qty*price)/(oldQty+qty);
@@ -184,7 +194,9 @@
     }
     render();
   }
-  $('travelButton').addEventListener('click',()=>{if(state.day<config.days)addDay(state.nextLocation);else if(!state.ended){state.ended=true;note(`Route complete · final worth ${currency(netWorth())}.`);render();}});
+  $('travelButton').addEventListener('click',()=>{if(state.day<config.days)addDay(state.nextLocation,true);else if(!state.ended){state.ended=true;note(`Route complete · final worth ${currency(netWorth())}.`);render();}});
+  $('upgradeStorage').addEventListener('click',()=>{if(!state.storageOffer||state.cash<upgradePrice)return;state.cash-=upgradePrice;state.capacityUpgrade=true;state.storageOffer=false;note('Bought a bag upgrade · storage limit is now 200.');render();toast('Bag upgraded to 200 spaces.');});
+  $('dismissStorage').addEventListener('click',()=>{state.storageOffer=false;render();});
   $('newGame').addEventListener('click',()=>{state=createRun();addDay();toast('A fresh 30-day route begins.');});
   load();render();
 })();

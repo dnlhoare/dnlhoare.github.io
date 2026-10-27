@@ -1,6 +1,6 @@
 /* Swap this configuration to create another edition. The engine reads only this data shape. */
 window.BOROUGH_RUN_CONFIG = {
-  title: 'Borough Run', version: '0.4.0', days: 30, startingCash: 2000, capacity: 100, currency: '£',
+  title: 'Borough Run', version: '0.6.0', days: 30, startingCash: 2000, capacity: 100, currency: '£',
   goods: [
     { id:'acid', name:'Acid', unit:'tabs', base:520, min:180, max:1250, volatility:.58, glyph:'✳', tone:'violet', locations:['Camden','Hackney','Tower Hamlets','Islington','Lambeth'] },
     { id:'cocaine', name:'Cocaine', unit:'units', base:29954, min:18500, max:51000, volatility:.86, glyph:'◆', tone:'blue', locations:['Hackney','Tower Hamlets','Newham','Lewisham','Greenwich'] },
