@@ -14,7 +14,7 @@
   function createRun() {
     const priceHistory={};
     config.goods.forEach(good=>{priceHistory[good.id]=Array.from({length:24},()=>samplePrice(good));});
-    return {day:0,locationIndex:0,nextLocation:0,available:[],costs:{},priceHistory,cash:config.startingCash,inventory:{},history:[],marketPrices:{},prices:{},trend:{},event:null,log:[],ended:false};
+    return {day:0,locationIndex:0,nextLocation:0,lowOffers:[],available:[],costs:{},priceHistory,cash:config.startingCash,inventory:{},history:[],marketPrices:{},prices:{},trend:{},event:null,log:[],ended:false};
   }
   function save() { try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (_) {} }
   function note(message) {
@@ -29,12 +29,21 @@
     state.available = config.goods.map(good=>good.id).sort(()=>Math.random()-.5).slice(0,5+Math.floor(Math.random()*3));
     state.event = Math.random() < .34 ? config.events[Math.floor(Math.random()*config.events.length)] : null;
     if (state.event) state.available = [...new Set([...state.available,...state.event.goods])];
+    const previousLowOffers=state.lowOffers||[];
+    const lowCandidates=config.goods.map(good=>good.id).filter(id=>!previousLowOffers.includes(id)&&!state.event?.goods.includes(id)).sort(()=>Math.random()-.5);
+    const lowOfferCount=1+(Math.random()<.7?1:0);
+    state.lowOffers=lowCandidates.slice(0,lowOfferCount);
     const previousPrices=state.prices;
     state.prices = {}; state.trend = {};
     config.goods.forEach(good => {
       const previousVisible=previousPrices[good.id];
       const previous = state.marketPrices[good.id] || null;
-      let basePrice = previous === null ? samplePrice(good) : previous + (Math.random()-.5)*(good.max-good.min)*good.volatility;
+      const middle=(good.min+good.max)/2, range=good.max-good.min;
+      let basePrice;
+      if(state.lowOffers.includes(good.id)) basePrice=good.min+range*(.1+Math.random()*.25);
+      else if(previous===null) basePrice=samplePrice(good);
+      else if(previousLowOffers.includes(good.id)) basePrice=previous+(middle-previous)*(.68+Math.random()*.2)+(Math.random()-.5)*range*.12;
+      else basePrice=previous+(middle-previous)*.22+(Math.random()-.5)*range*good.volatility*.42;
       if (!good.locations.includes(location.name)) basePrice *= (.82+Math.random()*.2);
       basePrice=Math.round(Math.max(good.min,Math.min(good.max,basePrice)));
       state.marketPrices[good.id]=basePrice;
@@ -57,7 +66,7 @@
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey));
       if (saved && saved.day >= 1 && saved.day <= config.days && saved.log && saved.inventory && saved.history) {
-        saved.costs ||= {}; saved.nextLocation ??= (saved.locationIndex+1)%config.locations.length; saved.priceHistory ||= {}; saved.marketPrices ||= {};
+        saved.costs ||= {}; saved.nextLocation ??= (saved.locationIndex+1)%config.locations.length; saved.priceHistory ||= {}; saved.marketPrices ||= {}; saved.lowOffers ||= [];
         config.goods.forEach(good=>{if(!saved.marketPrices[good.id]){const multiplier=saved.event?.goods?.includes(good.id)?saved.event.multiplier:1;saved.marketPrices[good.id]=Math.round((saved.prices?.[good.id]||good.base)/multiplier);}});
         config.goods.forEach(good=>{if(!saved.priceHistory[good.id]){saved.priceHistory[good.id]=Array.from({length:24},()=>samplePrice(good));saved.priceHistory[good.id].push(saved.prices?.[good.id]||good.base);}else if(saved.priceHistory[good.id].length<24){const gap=24-saved.priceHistory[good.id].length;saved.priceHistory[good.id]=Array.from({length:gap},()=>samplePrice(good)).concat(saved.priceHistory[good.id]);}saved.priceHistory[good.id]=saved.priceHistory[good.id].slice(-40);});
         state=saved; return saved;
