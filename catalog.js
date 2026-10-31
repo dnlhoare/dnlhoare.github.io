@@ -1,6 +1,20 @@
 /* Add a demo by copying an entry. Set enabled:false to keep it out of the public catalog. */
 window.DJHDEV_CATALOG = [
   {
+    id: 'message-vault',
+    title: 'Message Vault',
+    subtitle: 'Hash or encrypt a message with a shared keyword',
+    description: 'Create a SHA-256 fingerprint or encrypt a message in your browser with a shared keyword.',
+    category: 'Tools',
+    href: 'message-vault.html',
+    enabled: true,
+    featured: false,
+    badge: 'PRIVATE BY DESIGN',
+    meta: 'Web Crypto · Runs in your browser',
+    art: 'shaders',
+    image: ''
+  },
+  {
     id: 'borough-run',
     title: 'Borough Run',
     subtitle: 'A 30-day London market trading game',

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#090909" />
+  <meta name="description" content="Hash or encrypt a message locally in your browser with Message Vault." />
+  <title>Message Vault — DJHDEV</title>
+  <link rel="stylesheet" href="styles.css?v=20261031-1" />
+  <link rel="stylesheet" href="message-vault.css?v=20261031-1" />
+  <script src="message-vault.js?v=20261031-1" defer></script>
+</head>
+<body class="vault-page">
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="DJHDEV home">DJH<span>DEV</span></a>
+    <nav class="main-nav" aria-label="Main navigation"><a href="index.html#home">Home</a><a href="index.html#catalog">Demos</a><a href="index.html#about">About</a></nav>
+    <div class="nav-tools"><a class="vault-home-link" href="index.html#catalog">← All demos</a><span class="profile-mark" aria-label="DJHDEV">D</span></div>
+  </header>
+  <main class="vault-main">
+    <header class="vault-heading"><p class="section-kicker">A SMALL TOOL FOR PRIVATE MESSAGES</p><h1>Message <span>Vault</span></h1><p>Create a one-way SHA-256 fingerprint, or encrypt a message with a shared keyword.</p></header>
+    <section class="vault-panel" aria-labelledby="modeHeading">
+      <div class="vault-tabs" role="tablist" aria-label="Message operation">
+        <button class="vault-tab active" id="encryptTab" type="button" role="tab" aria-selected="true" aria-controls="toolPanel" data-mode="encrypt">Encrypt</button>
+        <button class="vault-tab" id="decryptTab" type="button" role="tab" aria-selected="false" aria-controls="toolPanel" data-mode="decrypt">Decrypt</button>
+        <button class="vault-tab" id="hashTab" type="button" role="tab" aria-selected="false" aria-controls="toolPanel" data-mode="hash">SHA-256 hash</button>
+      </div>
+      <div id="toolPanel" role="tabpanel" aria-labelledby="encryptTab">
+        <h2 id="modeHeading">Encrypt a message</h2>
+        <p class="vault-intro" id="modeIntro">Choose a shared keyword, then send the encrypted result to the person who knows it.</p>
+        <label class="vault-label" for="messageInput">Message</label>
+        <textarea id="messageInput" rows="5" spellcheck="false" placeholder="Write or paste your message"></textarea>
+        <div class="keyword-row" id="keywordRow"><label class="vault-label" for="keywordInput">Shared keyword</label><input id="keywordInput" type="password" autocomplete="new-password" placeholder="Use a long, private phrase" /><p class="vault-help">Both people need the same keyword. Use a long phrase that you have shared privately.</p></div>
+        <div class="vault-actions"><button id="primaryAction" class="vault-primary" type="button">Encrypt message</button><button id="clearButton" class="vault-secondary" type="button">Clear</button></div>
+        <div class="result-wrap" id="resultWrap" hidden><div class="result-head"><label class="vault-label" for="resultOutput">Result</label><button type="button" class="copy-button" id="copyButton">Copy</button></div><textarea id="resultOutput" rows="5" readonly spellcheck="false" aria-live="polite"></textarea></div>
+        <p class="vault-status" id="statusMessage" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+    <section class="vault-notes" aria-label="How this tool works">
+      <article><h2>Hashing and encryption are different</h2><p>A SHA-256 hash is a one-way fingerprint. It cannot be decrypted. Use encryption when you need to get the original message back.</p></article>
+      <article><h2>A shared keyword is symmetric encryption</h2><p>This tool uses AES-GCM with a key derived from your keyword. Both people use the same secret. This is not public-key encryption: for that, the recipient would publish a public key and keep a separate private key.</p></article>
+      <article><h2>What you can trust</h2><p>Message text and keywords are processed in this browser and are not sent to a server by this tool. Anyone can inspect the page code, but that alone does not prove the site or hosting account cannot be changed. For sensitive use, verify the source and deployment independently, and exchange the keyword through a separate trusted channel. This is not a substitute for a reviewed, audited messaging service.</p></article>
+    </section>
+  </main>
+  <footer class="site-footer"><a class="brand footer-brand" href="index.html">DJH<span>DEV</span></a><p>Small apps and experiments by DJH.</p><span>© <span id="year"></span> DJHDEV</span></footer>
+</body>
+</html>
