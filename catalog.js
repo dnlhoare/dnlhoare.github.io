@@ -12,7 +12,7 @@ window.DJHDEV_CATALOG = [
     badge: 'PRIVATE BY DESIGN',
     meta: 'Web Crypto · Runs in your browser',
     art: 'shaders',
-    image: ''
+    image: 'images/message-vault-launcher.jpg'
   },
   {
     id: 'borough-run',
@@ -26,7 +26,7 @@ window.DJHDEV_CATALOG = [
     badge: 'NEW DEMO',
     meta: 'Strategy · Play credits only',
     art: 'shaders',
-    image: ''
+    image: 'images/borough-run-launcher.jpg'
   },
   {
     id: 'skid-pan',
