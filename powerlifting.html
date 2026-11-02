@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#090909" />
+  <meta name="description" content="Compare estimated one rep maxes and equivalent working weights for squat, bench press and deadlift." />
+  <title>Rep & Load Lab — DJHDEV</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=20261016-1" />
+  <link rel="stylesheet" href="powerlifting.css?v=20261102-1" />
+  <script src="powerlifting.js?v=20261102-1" defer></script>
+</head>
+<body class="lift-page">
+  <header class="topbar"><a class="brand" href="index.html" aria-label="DJHDEV home">DJH<span>DEV</span></a><nav class="main-nav" aria-label="Main navigation"><a href="index.html#home">Home</a><a href="index.html#catalog">Demos</a><a href="index.html#about">About</a></nav><div class="nav-tools"><a class="lift-home-link" href="index.html#catalog">← All demos</a><span class="profile-mark" aria-label="DJHDEV">D</span></div></header>
+  <main class="lift-main">
+    <header class="lift-heading"><p class="section-kicker">SQUAT · BENCH · DEADLIFT</p><h1>Rep &amp; Load <span>Lab</span></h1><p>See how a set translates into an estimated max, then compare the weights that land in your target rep ranges.</p></header>
+    <section class="lift-workspace" aria-label="Lift comparison calculator">
+      <form class="lift-controls" id="liftForm">
+        <div class="lift-controls-head"><div><p class="lift-kicker">SET YOUR BASELINE</p><h2>Start with a set you know</h2></div><span class="live-chip"><i></i> LIVE</span></div>
+        <label class="lift-label" for="liftSelect">Lift</label><select id="liftSelect"><option>Bench press</option><option>Squat</option><option>Deadlift</option></select>
+        <div class="field-pair"><div><label class="lift-label" for="weightInput">Weight lifted</label><div class="unit-field"><input id="weightInput" type="number" min="1" step="0.5" value="100" inputmode="decimal" /><select id="unitSelect" aria-label="Weight unit"><option value="kg">kg</option><option value="lb">lb</option></select></div></div><div><label class="lift-label" for="repsInput">Reps completed</label><input id="repsInput" type="number" min="1" max="15" step="1" value="5" inputmode="numeric" /></div></div>
+        <div class="field-pair"><div><label class="lift-label" for="formulaSelect">Estimate formula</label><select id="formulaSelect"><option value="epley">Epley</option><option value="brzycki">Brzycki</option></select></div><div><label class="lift-label" for="roundSelect">Round loads to</label><select id="roundSelect"><option value="2.5,5">2.5 kg / 5 lb</option><option value="1.25,2.5">1.25 kg / 2.5 lb</option><option value="1,2">1 kg / 2 lb</option><option value="5,10">5 kg / 10 lb</option></select></div></div>
+        <div class="range-fields"><label class="lift-label">Compare rep range</label><div class="field-pair"><div><label class="sr-only" for="minReps">First rep count</label><select id="minReps"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option><option>6</option><option>7</option><option>8</option></select></div><span class="range-separator">to</span><div><label class="sr-only" for="maxReps">Last rep count</label><select id="maxReps"><option>5</option><option>6</option><option>7</option><option>8</option><option selected>10</option><option>12</option></select></div><span class="range-suffix">reps</span></div></div>
+        <p class="input-hint">Use a hard set with consistent technique. The estimate is most useful for sets of 1–10 reps.</p>
+      </form>
+      <div class="lift-results" aria-live="polite">
+        <section class="max-card"><div><p class="lift-kicker">ESTIMATED ONE REP MAX</p><strong id="oneRm">—</strong><span class="max-unit" id="maxUnit">kg</span><p class="max-context" id="maxContext">From 100 kg × 5 reps · Epley</p></div><div class="max-mark" aria-hidden="true"><span>1</span><i>RM</i></div></section>
+        <section class="compare-card"><div class="card-heading"><div><p class="lift-kicker">EQUIVALENT WORKING WEIGHTS</p><h2 id="compareTitle">Bench press · 5–10 reps</h2></div><span class="range-badge" id="formulaBadge">EPLEY</span></div>
+          <p class="compare-intro">Estimated loads with a similar predicted max to your input set. Choose a rep count to see its equivalent weight.</p>
+          <div class="chart-wrap"><div class="chart-y-label" id="chartUnit">kg</div><div class="load-chart" id="loadChart" role="img" aria-label="Estimated equivalent loads by rep count"></div><div class="chart-x-label">TARGET REPS</div></div>
+          <div class="table-wrap"><table><thead><tr><th scope="col">Reps</th><th scope="col">Equivalent load</th><th scope="col">% of estimated 1RM</th><th scope="col">From your set</th></tr></thead><tbody id="loadRows"></tbody></table></div>
+          <p class="table-note">Numbers are estimates, not a promise that a given set will feel equally hard. Real rep capacity varies between people, lifts, and days.</p>
+        </section>
+      </div>
+    </section>
+    <section class="lift-notes"><article><span class="note-number">01</span><div><h2>Two directions, one estimate</h2><p>Enter a set to estimate its 1RM. The table then works backwards to show loads likely to correspond to each target rep count.</p></div></article><article><span class="note-number">02</span><div><h2>How the estimate works</h2><p>Epley and Brzycki are common rep-max equations. Both become less reliable as reps climb, so this tool caps the input at 15 and highlights the 1–10 rep range.</p></div></article><article><span class="note-number">03</span><div><h2>Use your own judgement</h2><p>These are planning guides. Warm up, use safeties or a spotter where appropriate, and let technique and how you feel set the limit.</p></div></article></section>
+  </main>
+  <footer class="site-footer"><a class="brand footer-brand" href="index.html">DJH<span>DEV</span></a><p>Small apps and experiments by DJH.</p><span>© <span id="year"></span> DJHDEV</span></footer>
+</body>
+</html>

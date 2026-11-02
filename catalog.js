@@ -1,6 +1,20 @@
 /* Add a demo by copying an entry. Set enabled:false to keep it out of the public catalog. */
 window.DJHDEV_CATALOG = [
   {
+    id: 'rep-load-lab',
+    title: 'Rep & Load Lab',
+    subtitle: 'Compare estimated maxes and working weights',
+    description: 'Estimate a one rep max and compare equivalent rep-range weights for bench press, squat and deadlift.',
+    category: 'Tools',
+    href: 'powerlifting.html',
+    enabled: true,
+    featured: false,
+    badge: 'NEW TOOL',
+    meta: 'Strength · Rep max estimates',
+    art: 'shaders',
+    image: ''
+  },
+  {
     id: 'message-vault',
     title: 'Message Vault',
     subtitle: 'Hash or encrypt a message with a shared keyword',
