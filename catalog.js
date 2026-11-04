@@ -1,6 +1,20 @@
 /* Add a demo by copying an entry. Set enabled:false to keep it out of the public catalog. */
 window.DJHDEV_CATALOG = [
   {
+    id: 'pace-projector',
+    title: 'Pace Projector',
+    subtitle: 'Convert a race effort into equivalent paces',
+    description: 'Explore race time predictions from 100 m to marathon, with a VDOT performance estimate and age and weight scenarios.',
+    category: 'Tools',
+    href: 'running-pace.html',
+    enabled: true,
+    featured: false,
+    badge: 'NEW TOOL',
+    meta: 'Running · Pace and race estimates',
+    art: 'skidpan',
+    image: ''
+  },
+  {
     id: 'rep-load-lab',
     title: 'Rep & Load Lab',
     subtitle: 'Compare estimated maxes and working weights',
