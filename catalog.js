@@ -11,7 +11,7 @@ window.DJHDEV_CATALOG = [
     featured: false,
     badge: 'NEW TOOL',
     meta: 'Running · Pace and race estimates',
-    art: 'skidpan',
+    art: 'pace',
     image: ''
   },
   {
