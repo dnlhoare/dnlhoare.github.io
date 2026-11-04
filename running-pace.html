@@ -27,11 +27,16 @@
         <div class="result-highlight"><div><span class="eyebrow">PERFORMANCE ESTIMATE</span><strong id="vdotValue">—</strong><span class="result-unit">VDOT · equivalent to estimated running VO₂</span></div><div class="result-side"><span>Current effort pace</span><strong id="effortPace">—</strong></div></div>
         <p class="notice" id="vdotNotice">VDOT is inferred from race performance. It is not a laboratory measurement of VO₂max.</p>
       </div>
-      <div class="panel scenario-panel"><div class="panel-heading"><div><p class="eyebrow">WHAT-IF VIEW</p><h2>Age &amp; weight</h2></div><span class="scenario-tag">ESTIMATE</span></div>
-        <div class="slider-field"><div class="slider-label"><label for="age">Age</label><output id="ageOut">35</output></div><input id="age" type="range" min="16" max="80" value="35"><div class="range-ends"><span>16</span><span>80 years</span></div></div>
-        <div class="slider-field"><div class="slider-label"><label for="weight">Body weight</label><output id="weightOut">70 kg</output></div><input id="weight" type="range" min="40" max="140" value="70"><div class="range-ends"><span>40 kg</span><span>140 kg</span></div></div>
+      <div class="panel scenario-panel"><div class="panel-heading"><div><p class="eyebrow">PERSONAL BASELINE &amp; WHAT-IF</p><h2>Your age &amp; weight</h2></div><span class="scenario-tag">EDIT BASELINE</span></div>
+        <div class="form-grid profile-grid">
+          <label>Your age at race<input id="baseAge" type="number" min="16" max="100" value="35"></label>
+          <label>Your weight at race (kg)<input id="baseWeight" type="number" min="30" max="250" value="70"></label>
+        </div>
+        <p class="field-hint">Enter the age and weight you had for the race result above. These values are the baseline for the what-if comparisons.</p>
+        <div class="slider-field"><div class="slider-label"><label for="ageChange">Adjust age from baseline</label><output id="ageOut">35 years</output></div><input id="ageChange" type="range" min="-30" max="30" value="0"><div class="range-ends"><span>−30 years</span><span>+30 years</span></div></div>
+        <div class="slider-field"><div class="slider-label"><label for="weightChange">Adjust weight from baseline</label><output id="weightOut">70 kg</output></div><input id="weightChange" type="range" min="-40" max="40" value="0"><div class="range-ends"><span>−40 kg</span><span>+40 kg</span></div></div>
         <div class="scenario-results"><div><span>Scenario VDOT</span><strong id="scenarioVdot">—</strong></div><div><span>Equivalent 5 km</span><strong id="scenario5k">—</strong></div><div><span>Equivalent marathon</span><strong id="scenarioMarathon">—</strong></div></div>
-        <p class="field-hint">Illustrative model: weight changes relative VO₂ assuming the same absolute oxygen capacity; age applies a broad 0.5% per year trend after 30. Neither predicts an individual's response. Adjusting these sliders does not change the race result above.</p>
+        <p class="field-hint">Illustrative model: weight changes relative VO₂ assuming the same absolute oxygen capacity; age applies a broad 0.5% per year trend after 30. Neither predicts an individual's response. These adjustments only change the scenario results.</p>
       </div>
     </section>
     <section class="panel chart-panel"><div class="chart-heading"><div><p class="eyebrow">RACE EQUIVALENCIES</p><h2>Projected time by distance</h2></div><div class="chart-legend"><span></span> Riegel estimate</div></div><div class="chart-wrap"><svg id="paceChart" role="img" aria-label="Chart of predicted race times by distance"></svg></div><div class="chart-ticks" id="chartTicks"></div><div class="table-wrap"><table><thead><tr><th>Distance</th><th>Predicted time</th><th>Avg pace / km</th><th>Confidence note</th></tr></thead><tbody id="distanceRows"></tbody></table></div></section>

@@ -2,7 +2,7 @@
   const distances = [100,200,400,800,1000,1500,1609.344,3000,5000,10000,15000,21097.5,30000,42195];
   const names = ['100 m','200 m','400 m','800 m','1 km','1500 m','1 mile','3 km','5 km','10 km','15 km','Half marathon','30 km','Marathon'];
   const $ = id => document.getElementById(id);
-  const inputIds = ['raceDistance','hours','minutes','seconds','age','weight'];
+  const inputIds = ['raceDistance','hours','minutes','seconds','baseAge','baseWeight','ageChange','weightChange'];
   const clamp = (n,min,max) => Math.min(max,Math.max(min,n));
   const formatTime = seconds => { if (!Number.isFinite(seconds)||seconds<=0) return '—'; let n=Math.round(seconds), h=Math.floor(n/3600), m=Math.floor(n%3600/60), s=n%60; return h ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${m}:${String(s).padStart(2,'0')}`; };
   const pace = (sec, metres) => formatTime(sec*1000/metres);
@@ -17,13 +17,13 @@
   }
   function update(){
     const distance=Number($('raceDistance').value); const h=clamp(Number($('hours').value)||0,0,99),m=clamp(Number($('minutes').value)||0,0,59),s=clamp(Number($('seconds').value)||0,0,59); const t=h*3600+m*60+s;
-    $('ageOut').textContent=$('age').value; $('weightOut').textContent=$('weight').value+' kg';
+    const baseAge=clamp(Number($("baseAge").value)||35,16,100),baseWeight=clamp(Number($("baseWeight").value)||70,30,250); const scenarioAge=clamp(baseAge+Number($("ageChange").value),16,100),scenarioWeight=clamp(baseWeight+Number($("weightChange").value),30,250); $("ageOut").textContent=scenarioAge+" years"; $("weightOut").textContent=scenarioWeight+" kg";
     if(t<=0){$('vdotValue').textContent='—';$('effortPace').textContent='—';$('distanceRows').innerHTML='';return;}
     const predicted=distances.map((d,i)=>({distance:d,name:names[i],time:t*Math.pow(d/distance,1.06)}));
     $('effortPace').textContent=pace(t,distance); const vdot=vdotFor(distance,t); const valid=distance>=1500;
     $('vdotValue').textContent=valid?vdot.toFixed(1):'N/A'; $('vdotNotice').textContent=valid?'VDOT is inferred from race performance. It is not a laboratory measurement of VO₂max.':'This effort is shorter than 1500 m. A VDOT estimate is omitted because sprint performance is not well represented by the model.';
     $('distanceRows').innerHTML=predicted.map((p,i)=>`<tr><td>${p.name}</td><td>${formatTime(p.time)}</td><td>${pace(p.time,p.distance)}</td><td>${i<3?'Very rough sprint equivalency':i===13?'Preparation dependent':'Riegel power law'}</td></tr>`).join(''); renderChart(predicted);
-    if(valid){const age=Number($('age').value),weight=Number($('weight').value); const multiplier=Math.pow(0.995,Math.max(0,age-30))/Math.pow(0.995,Math.max(0,35-30))*70/weight;const projected=vdot*multiplier;$('scenarioVdot').textContent=projected.toFixed(1);$('scenario5k').textContent=formatTime(scenarioTime(5000,projected));$('scenarioMarathon').textContent=formatTime(scenarioTime(42195,projected));} else {$('scenarioVdot').textContent='—';$('scenario5k').textContent='—';$('scenarioMarathon').textContent='—';}
+    if(valid){const multiplier=Math.pow(0.995,Math.max(0,scenarioAge-30)-Math.max(0,baseAge-30))*baseWeight/scenarioWeight;const projected=vdot*multiplier;$("scenarioVdot").textContent=projected.toFixed(1);$("scenario5k").textContent=formatTime(scenarioTime(5000,projected));$("scenarioMarathon").textContent=formatTime(scenarioTime(42195,projected));} else {$("scenarioVdot").textContent="—";$("scenario5k").textContent="—";$("scenarioMarathon").textContent="—";}
   }
   inputIds.forEach(id=>$(id).addEventListener('input',update));inputIds.forEach(id=>$(id).addEventListener('change',update));update();
 })();
