@@ -1,6 +1,20 @@
 /* Add a demo by copying an entry. Set enabled:false to keep it out of the public catalog. */
 window.DJHDEV_CATALOG = [
   {
+    id: 'wac-club-races',
+    title: 'Wallasey club races',
+    subtitle: 'Fixtures and member race plans',
+    description: 'Browse upcoming Wallasey Athletic Club fixtures, register as definitely going, maybe, or unable to attend, and add your own races.',
+    category: 'Tools',
+    href: 'wac-races.html',
+    enabled: true,
+    featured: false,
+    badge: 'NEW TOOL',
+    meta: 'Running · Club fixtures and plans',
+    art: 'pace',
+    image: ''
+  },
+  {
     id: 'pace-projector',
     title: 'Pace Projector',
     subtitle: 'Convert a race effort into equivalent paces',

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b120f"><meta name="description" content="Upcoming Wallasey Athletic Club fixtures and the races you're interested in.">
+  <title>Club races — Wallasey Athletic Club</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="wac-races.css?v=20261105-4">
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+  <script>window.WAC_TURNSTILE_SITE_KEY = '0x4AAAAAAF1WZtVGc-nmx2rv';</script>
+  <script type="module" src="wac-races.js?v=20261105-4"></script>
+</head>
+<body><div class="race-page">
+  <header class="race-top"><a class="race-brand" href="wac-races.html"><img src="https://www.wallaseyathleticclub.co.uk/WAC_files/images/badge.jpg" alt="Wallasey Athletic Club embroidered badge"><span>WALLASEY<br>ATHLETIC CLUB</span></a><a href="index.html">← DJHDEV home</a></header>
+  <main class="race-main">
+    <section class="race-hero"><div><div class="overline">Run together · Season 2026–27</div><h1>Club races</h1><p>See what’s coming up, let the club know where you’re heading, and keep your own race plans in one place.</p></div>
+      <div class="member-box"><label for="memberSelect">Choose your runner profile</label><input id="runnerSearch" type="search" placeholder="Search 1,207 club profiles" aria-label="Search runner profiles"><select id="memberSelect" aria-label="Choose your runner profile"></select><p class="member-note">This is the club’s archived profile directory, which includes former runners. Your selection is remembered on this device.</p></div>
+    </section>
+    <section aria-labelledby="upcomingTitle"><div class="race-toolbar"><h2 id="upcomingTitle">Upcoming races</h2><span class="race-count" id="raceCount"></span></div><div class="race-list" id="raceList" aria-live="polite"></div></section>
+    <section class="add-race"><div class="add-head"><h2>Add a race</h2><p>Shared with everyone using this page.</p></div>
+      <form class="race-form" id="raceForm"><label><span class="form-label">Race name</span><input name="name" required maxlength="80" placeholder="e.g. Liverpool Half Marathon"></label><label><span class="form-label">Date</span><input name="date" type="date" required></label><label><span class="form-label">Location</span><input name="location" maxlength="80" placeholder="City or venue"></label><label><span class="form-label">Link (optional)</span><input name="url" type="url" placeholder="https://…"></label><button type="submit">Add race +</button></form>
+    </section>
+    <div id="turnstile-widget" class="turnstile-widget" aria-label="Spam protection"></div><p id="actionMessage" class="action-message" role="status" aria-live="polite"></p>
+    <aside class="demo-disclaimer"><strong>Shared club board:</strong> race responses and personal races are stored in the club database and visible to visitors. There is no sign-in, so responses are self-reported and a visitor could select another runner’s profile.</aside>
+  </main>
+  <footer class="race-footer">Fixtures transcribed from the <a href="https://www.wallaseyathleticclub.co.uk/WAC_files/html/results/fixtures.htm" target="_blank" rel="noopener">Wallasey Athletic Club fixture list</a>. Check the club site for updates.</footer>
+</div></body></html>
