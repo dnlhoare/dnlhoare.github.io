@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#090909" />
+  <meta name="description" content="A scroll-led, immersive tour of DJHDEV demos and experiments." />
+  <title>DJHDEV — Immersive demo gallery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=20261104-2" />
+  <link rel="stylesheet" href="immersive.css?v=20261109-1" />
+  <script src="catalog.js?v=20261104-1" defer></script>
+  <script src="immersive.js?v=20261109-1" defer></script>
+</head>
+<body class="immersive-page">
+  <header class="topbar immersive-topbar">
+    <a class="brand" href="#home" aria-label="DJHDEV home">DJH<span>DEV</span></a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a class="active" href="#home">Home</a>
+      <a href="#collection">Demos</a>
+      <a href="#about">About</a>
+    </nav>
+    <div class="nav-tools"><a class="classic-link" href="index.html">Classic view <span aria-hidden="true">↗</span></a></div>
+  </header>
+  <main id="home">
+    <section class="immersion-intro" aria-labelledby="introTitle">
+      <div class="intro-orbit" aria-hidden="true"><i></i><i></i><i></i><b></b></div>
+      <p class="section-kicker">A SMALL COLLECTION OF BIG IDEAS</p>
+      <h1 id="introTitle">Made to<br /><span>move you.</span></h1>
+      <p class="intro-description">Little tools. Playful experiments. Things worth a closer look.</p>
+      <a class="scroll-cue" href="#collection"><span>SCROLL TO EXPLORE</span><i aria-hidden="true">↓</i></a>
+      <span class="intro-index" aria-hidden="true">DJHDEV / 2026</span>
+    </section>
+    <section class="immersive-collection" id="collection" aria-labelledby="collectionTitle">
+      <div class="immersive-heading"><div><p class="section-kicker">THE COLLECTION</p><h2 id="collectionTitle">A few things in progress.</h2></div><div class="immersive-controls"><label for="immersiveSearch">Find a demo</label><input id="immersiveSearch" type="search" placeholder="Search" autocomplete="off" /><div class="immersive-filters" role="group" aria-label="Filter demos"><button class="active" type="button" data-filter="all">All</button><button type="button" data-filter="Games">Games</button><button type="button" data-filter="Tools">Tools</button></div></div></div>
+      <div class="immersive-list" id="immersiveList" aria-live="polite"></div>
+      <p class="immersive-empty" id="immersiveEmpty" hidden>No demos match that search.</p>
+    </section>
+    <section class="immersive-about" id="about"><span class="about-mark">D</span><div><p class="section-kicker">ABOUT THIS SPACE</p><h2>Built to try things out.</h2><p>DJHDEV is a home for small apps, experiments and ideas in progress. New projects will appear here as they’re ready to play with.</p></div><a href="index.html">See the classic front page <span aria-hidden="true">↗</span></a></section>
+  </main>
+  <footer class="site-footer"><a class="brand footer-brand" href="#home">DJH<span>DEV</span></a><p>A changing collection of things made by DJH.</p><span>© <span id="year"></span> DJHDEV</span></footer>
+</body>
+</html>
