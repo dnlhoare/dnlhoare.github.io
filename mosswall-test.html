@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#090d09" />
+  <meta name="description" content="A procedural Three.js moss wall, warm rope lighting and textured glass study." />
+  <title>Moss Wall / Three.js material study</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="mosswall-test.css?v=20261112-1" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+  <script src="mosswall-test.js?v=20261112-1" defer></script>
+</head>
+<body class="moss-study">
+  <div class="moss-render" id="mossRender" aria-hidden="true"></div>
+  <div class="scene-vignette" aria-hidden="true"></div>
+  <header class="study-header"><a href="index-immersive.html" class="study-brand">DJH<span>DEV</span><i> / MATERIAL STUDY</i></a><div class="render-status"><i></i><span id="textureStatus">Generating moss surface</span></div></header>
+  <aside class="study-controls" aria-label="Scene controls">
+    <p class="control-heading">LIGHT &amp; GLASS</p>
+    <label for="ledColor">Rope light colour <output id="ledColorValue">#fff0d1</output></label><input id="ledColor" type="color" value="#fff0d1" />
+    <label for="ledPower">Glow <output id="ledPowerValue">1.4</output></label><input id="ledPower" type="range" min="0.2" max="3" step="0.1" value="1.4" />
+    <label for="glassBlur">Glass diffusion <output id="glassBlurValue">18px</output></label><input id="glassBlur" type="range" min="0" max="32" step="1" value="18" />
+    <small>Procedural 3D wall · scroll to travel</small>
+  </aside>
+  <main id="pageFlow">
+    <section class="study-hero">
+      <div class="hero-text"><p class="eyebrow">PROCEDURAL ENVIRONMENT / 01</p><h1>A living<br /><span>surface.</span></h1><p>A moss wall, generated in real time. Scroll through the texture, then step behind a pane of diffused glass.</p><a href="#glassStudy" class="down-link">SCROLL INTO THE WALL <b>↓</b></a></div>
+      <div class="hero-index">THREE.JS<br />MOSS STUDY</div>
+    </section>
+    <section class="glass-study" id="glassStudy">
+      <div class="glass-study-note"><span>02 — DIFFUSION STUDY</span><h2>Glass, between<br />you and the wall.</h2><p>Adjust the blur control and watch the live moss surface soften through the textured translucent pane.</p><i class="glass-measure">ROUGH · ETCHED · LIGHTLY FROSTED</i></div>
+      <div class="glass-panel" id="glassPanel"><div class="glass-grain"></div><div class="glass-highlight"></div><div class="glass-panel-label"><span>TRANSLUCENT GLASS</span><b>18<small>MM</small></b><i></i><i></i><i></i></div></div>
+      <span class="glass-edge" aria-hidden="true"></span>
+    </section>
+    <section class="endless-note"><p class="eyebrow">03 — ENDLESS CANVAS</p><h2>Keep going.</h2><p>The wall recycles as you scroll. Its procedural surface carries on beyond this page.</p><span class="scroll-position" id="scrollPosition">WALL SEGMENT 01</span></section>
+    <div id="scrollSentinel" aria-hidden="true"></div>
+  </main>
+  <noscript>This Three.js study needs JavaScript enabled.</noscript>
+</body>
+</html>
