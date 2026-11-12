@@ -12,7 +12,8 @@
   const chunkCount = 4;
   const lowSize = 256;
   const highSize = 2048;
-  const clumpCount = matchMedia('(max-width: 700px)').matches ? 9000 : 18000;
+  const smallScreen = matchMedia('(max-width: 700px)').matches;
+  const clumpCount = smallScreen ? 6400 : 13800;
   const chunks = [];
   const materials = [];
   const temp = new T.Object3D();
@@ -124,7 +125,7 @@
 
   function makeHighResInWorker() {
     try {
-      const worker = new Worker('mosswall-texture-worker.js?v=20261112-2');
+      const worker = new Worker('mosswall-texture-worker.js?v=20261112-3');
       worker.onmessage = event => {
         const {size, color, height, normal} = event.data;
         const highColor = new T.DataTexture(new Uint8Array(color), size, size, T.RGBAFormat);
@@ -139,8 +140,8 @@
           material.displacementMap = highHeight;
           material.normalMap = highNormal;
           material.normalScale.set(.72, .72);
-          material.bumpScale = .28;
-          material.displacementScale = .43;
+          material.bumpScale = .20;
+          material.displacementScale = .10;
           material.needsUpdate = true;
         });
         status.textContent = '2048² · colour · bump · normal · displacement';
@@ -156,39 +157,16 @@
     }
   }
 
-  function createFrondTuftGeometry() {
-    const positions = [];
-    const indices = [];
-    const random = randomSource(518);
-    const frondCount = 7;
-    const segments = 5;
-    for (let blade = 0; blade < frondCount; blade++) {
-      const angle = (blade / frondCount) * Math.PI * 2 + random() * .28;
-      const directionX = Math.cos(angle), directionY = Math.sin(angle);
-      const sideX = -directionY, sideY = directionX;
-      const root = random() * .08;
-      const lean = .12 + random() * .28;
-      const bladeHeight = .72 + random() * .42;
-      const bladeWidth = .055 + random() * .045;
-      const startIndex = positions.length / 3;
-      for (let step = 0; step <= segments; step++) {
-        const t = step / segments;
-        const centerRadius = root + lean * t + Math.sin(t * Math.PI) * .055;
-        const centerX = directionX * centerRadius;
-        const centerY = directionY * centerRadius;
-        const centerZ = bladeHeight * t;
-        const width = bladeWidth * Math.pow(Math.sin(Math.PI * (t * .92 + .04)), .72) * (1 - .58 * t);
-        positions.push(centerX + sideX * width, centerY + sideY * width, centerZ);
-        positions.push(centerX - sideX * width, centerY - sideY * width, centerZ);
-      }
-      for (let step = 0; step < segments; step++) {
-        const a = startIndex + step * 2;
-        indices.push(a, a + 2, a + 1, a + 1, a + 2, a + 3);
-      }
+  function createMossCushionGeometry() {
+    const geometry = new T.IcosahedronGeometry(1, 3);
+    const positions = geometry.attributes.position;
+    for (let i = 0; i < positions.count; i++) {
+      const x = positions.getX(i), y = positions.getY(i), z = positions.getZ(i);
+      const lobe = Math.sin(x * 13 + y * 7) * Math.sin(y * 11 - z * 8);
+      const grain = Math.sin(z * 21 + x * 17) * Math.cos(y * 19 - x * 9);
+      const radius = 1 + lobe * .075 + grain * .025;
+      positions.setXYZ(i, x * radius, y * radius, z * radius);
     }
-    const geometry = new T.BufferGeometry();
-    geometry.setAttribute('position', new T.Float32BufferAttribute(positions, 3));
-    geometry.setIndex(indices);
     geometry.computeVertexNormals();
     return geometry;
   }
@@ -214,8 +192,8 @@
       normalMap: setupTexture(maps.normalMap),
       displacementMap: maps.heightMap,
       normalScale: new T.Vector2(.72, .72),
-      bumpScale: .32,
-      displacementScale: .39,
+      bumpScale: .22,
+      displacementScale: .10,
       roughness: .94,
       metalness: 0,
       color: 0xcbd0bc,
@@ -228,15 +206,23 @@
 
     const random = randomSource(seed);
     const mossMaterial = new T.MeshStandardMaterial({color:0xffffff,roughness:.91,vertexColors:true,side:T.DoubleSide});
-    const moss = new T.InstancedMesh(createFrondTuftGeometry(), mossMaterial, clumpCount);
+    const moss = new T.InstancedMesh(createMossCushionGeometry(), mossMaterial, clumpCount);
+    // A lightly jittered grid keeps cushions touching, like the reference's packed moss mat.
+    const columns = Math.ceil(Math.sqrt(clumpCount * wallWidth / tileHeight));
+    const rows = Math.ceil(clumpCount / columns);
+    const cellX = wallWidth / columns, cellY = tileHeight / rows;
     for (let i = 0; i < clumpCount; i++) {
-      const size = .075 + Math.pow(random(), 1.35) * .15;
-      temp.position.set((random() - .5) * (wallWidth + .08), (random() - .5) * tileHeight, -.015 + random() * .09);
-      temp.rotation.set((random() - .5) * .42, (random() - .5) * .42, random() * Math.PI * 2);
-      temp.scale.set(size * (.78 + random() * .46), size * (.78 + random() * .46), size * (.84 + random() * .55));
+      const col = i % columns, row = Math.floor(i / columns);
+      const sizeX = cellX * (.56 + random() * .27);
+      const sizeY = cellY * (.56 + random() * .27);
+      const px = -wallWidth / 2 + (col + .5 + (random() - .5) * .32) * cellX;
+      const py = tileHeight / 2 - (row + .5 + (random() - .5) * .32) * cellY;
+      temp.position.set(px, py, .13 + random() * .025);
+      temp.rotation.set((random() - .5) * .18, (random() - .5) * .18, random() * Math.PI * 2);
+      temp.scale.set(sizeX, sizeY, .12 + random() * .07);
       temp.updateMatrix();
       moss.setMatrixAt(i, temp.matrix);
-      tint.setHSL(.215 + random() * .085, .52 + random() * .3, .11 + random() * .17);
+      tint.setHSL(.215 + random() * .065, .56 + random() * .25, .13 + random() * .09);
       moss.setColorAt(i, tint);
     }
     moss.instanceMatrix.needsUpdate = true;
