@@ -11,8 +11,8 @@
   const tileHeight = 15;
   const chunkCount = 4;
   const lowSize = 256;
-  const highSize = 1024;
-  const clumpCount = matchMedia('(max-width: 700px)').matches ? 900 : 1700;
+  const highSize = 2048;
+  const clumpCount = matchMedia('(max-width: 700px)').matches ? 9000 : 18000;
   const chunks = [];
   const materials = [];
   const temp = new T.Object3D();
@@ -34,18 +34,19 @@
     };
   }
 
-  function makeNoiseTables(seed) {
+  function makeNoiseTables(seed, size) {
     const random = randomSource(seed);
-    return [3, 6, 12, 24, 48, 96, 192].map(size => {
-      const table = new Float32Array(size * size);
+    return [3, 6, 12, 24, 48, 96, 192, 384, 768].filter(grid => grid <= size / 2).map(grid => {
+      const table = new Float32Array(grid * grid);
       for (let i = 0; i < table.length; i++) table[i] = random();
-      return {size, table};
+      return {size:grid, table};
     });
   }
 
   function tileNoise(tables, u, v) {
-    const weights = [.37,.24,.16,.105,.065,.038,.022];
+    const weights = [.32,.22,.16,.115,.078,.05,.031,.016,.008];
     let value = 0;
+    let totalWeight = 0;
     for (let octave = 0; octave < tables.length; octave++) {
       const {size, table} = tables[octave];
       const x = u * size, y = v * size;
@@ -56,14 +57,17 @@
       const a = at(ix, iy) + (at(ix + 1, iy) - at(ix, iy)) * sx;
       const b = at(ix, iy + 1) + (at(ix + 1, iy + 1) - at(ix, iy + 1)) * sx;
       value += (a + (b - a) * sy) * weights[octave];
+      totalWeight += weights[octave];
     }
-    return Math.max(0, Math.min(1, value));
+    return Math.max(0, Math.min(1, value / totalWeight));
   }
 
   function buildMaps(size, seed = 71) {
-    const tables = makeNoiseTables(seed);
+    const tables = makeNoiseTables(seed, size);
     const colorPixels = new Uint8Array(size * size * 4);
     const heightPixels = new Uint8Array(size * size * 4);
+    const normalPixels = new Uint8Array(size * size * 4);
+    const heightValues = new Float32Array(size * size);
     for (let y = 0; y < size; y++) {
       const v = y / size;
       for (let x = 0; x < size; x++) {
@@ -71,22 +75,38 @@
         const macro = tileNoise(tables, u, v);
         const fine = tileNoise(tables, (u * 2 + .31) % 1, (v * 2 + .07) % 1);
         const micro = tileNoise(tables, (u * 5 + .63) % 1, (v * 5 + .19) % 1);
-        const clump = Math.max(0, Math.min(1, (macro * .67 + fine * .33 - .31) * 2.05));
-        const pits = Math.max(0, Math.min(1, (macro - .43) * 1.7));
-        const green = 20 + clump * 96 + pits * 19 + (micro - .5) * 20;
+        const clump = Math.max(0, Math.min(1, (macro * .64 + fine * .36 - .29) * 2.25));
+        const pits = Math.max(0, Math.min(1, (macro - .42) * 1.9));
+        const fiber = (micro - .5) * 27;
+        const green = 20 + clump * 104 + pits * 18 + fiber;
         const i = (y * size + x) * 4;
-        colorPixels[i] = Math.max(8, Math.min(255, 17 + clump * 34 + micro * 15));
+        colorPixels[i] = Math.max(6, Math.min(255, 13 + clump * 32 + micro * 13));
         colorPixels[i + 1] = Math.max(12, Math.min(255, green));
-        colorPixels[i + 2] = Math.max(7, Math.min(255, 12 + clump * 15 + pits * 8));
+        colorPixels[i + 2] = Math.max(5, Math.min(255, 9 + clump * 13 + pits * 8));
         colorPixels[i + 3] = 255;
-        const h = Math.round(28 + clump * 174 + (micro - .5) * 38);
+        const h = Math.round(24 + clump * 196 + (micro - .5) * 48);
+        heightValues[y * size + x] = h / 255;
         heightPixels[i] = heightPixels[i + 1] = heightPixels[i + 2] = h;
         heightPixels[i + 3] = 255;
       }
     }
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+      const left = heightValues[y * size + (x + size - 1) % size];
+      const right = heightValues[y * size + (x + 1) % size];
+      const up = heightValues[((y + size - 1) % size) * size + x];
+      const down = heightValues[((y + 1) % size) * size + x];
+      let nx = (left - right) * 5.2, ny = (up - down) * 5.2, nz = 1;
+      const length = Math.hypot(nx, ny, nz); nx /= length; ny /= length; nz /= length;
+      const i = (y * size + x) * 4;
+      normalPixels[i] = Math.round((nx * .5 + .5) * 255);
+      normalPixels[i + 1] = Math.round((ny * .5 + .5) * 255);
+      normalPixels[i + 2] = Math.round((nz * .5 + .5) * 255);
+      normalPixels[i + 3] = 255;
+    }
     return {
       colorMap: new T.DataTexture(colorPixels, size, size, T.RGBAFormat),
-      heightMap: new T.DataTexture(heightPixels, size, size, T.RGBAFormat)
+      heightMap: new T.DataTexture(heightPixels, size, size, T.RGBAFormat),
+      normalMap: new T.DataTexture(normalPixels, size, size, T.RGBAFormat)
     };
   }
 
@@ -103,54 +123,72 @@
   }
 
   function makeHighResInWorker() {
-    const workerCode = `
-      const randomSource=seed=>{let s=seed>>>0;return()=>{s+=0x6D2B79F5;let v=s;v=Math.imul(v^v>>>15,v|1);v^=v+Math.imul(v^v>>>7,v|61);return((v^v>>>14)>>>0)/4294967296}};
-      const tablesFor=seed=>{const r=randomSource(seed);return[3,6,12,24,48,96,192].map(size=>{const table=new Float32Array(size*size);for(let i=0;i<table.length;i++)table[i]=r();return{size,table}})};
-      const noise=(tables,u,v)=>{const weights=[.37,.24,.16,.105,.065,.038,.022];let value=0;for(let o=0;o<tables.length;o++){const{size,table}=tables[o],x=u*size,y=v*size,ix=Math.floor(x),iy=Math.floor(y),fx=x-ix,fy=y-iy,sx=fx*fx*(3-2*fx),sy=fy*fy*(3-2*fy),at=(px,py)=>table[((py%size+size)%size)*size+(px%size+size)%size],a=at(ix,iy)+(at(ix+1,iy)-at(ix,iy))*sx,b=at(ix,iy+1)+(at(ix+1,iy+1)-at(ix,iy+1))*sx;value+=(a+(b-a)*sy)*weights[o]}return Math.max(0,Math.min(1,value))};
-      self.onmessage=({data})=>{const size=data.size,tables=tablesFor(71),c=new Uint8Array(size*size*4),h=new Uint8Array(size*size*4);for(let y=0;y<size;y++){const v=y/size;for(let x=0;x<size;x++){const u=x/size,macro=noise(tables,u,v),fine=noise(tables,(u*2+.31)%1,(v*2+.07)%1),micro=noise(tables,(u*5+.63)%1,(v*5+.19)%1),clump=Math.max(0,Math.min(1,(macro*.67+fine*.33-.31)*2.05)),pits=Math.max(0,Math.min(1,(macro-.43)*1.7)),green=20+clump*96+pits*19+(micro-.5)*20,i=(y*size+x)*4;c[i]=Math.max(8,Math.min(255,17+clump*34+micro*15));c[i+1]=Math.max(12,Math.min(255,green));c[i+2]=Math.max(7,Math.min(255,12+clump*15+pits*8));c[i+3]=255;const z=Math.round(28+clump*174+(micro-.5)*38);h[i]=h[i+1]=h[i+2]=z;h[i+3]=255}}self.postMessage({size,color:c.buffer,height:h.buffer},[c.buffer,h.buffer])};
-    `;
-    let url;
     try {
-      url = URL.createObjectURL(new Blob([workerCode], {type:'text/javascript'}));
-      const worker = new Worker(url);
+      const worker = new Worker('mosswall-texture-worker.js?v=20261112-2');
       worker.onmessage = event => {
-        const {size, color, height} = event.data;
+        const {size, color, height, normal} = event.data;
         const highColor = new T.DataTexture(new Uint8Array(color), size, size, T.RGBAFormat);
         const highHeight = new T.DataTexture(new Uint8Array(height), size, size, T.RGBAFormat);
+        const highNormal = new T.DataTexture(new Uint8Array(normal), size, size, T.RGBAFormat);
         setupTexture(highColor, true);
         setupTexture(highHeight);
+        setupTexture(highNormal);
         materials.forEach(material => {
           material.map = highColor;
           material.bumpMap = highHeight;
           material.displacementMap = highHeight;
+          material.normalMap = highNormal;
+          material.normalScale.set(.72, .72);
           material.bumpScale = .28;
-          material.displacementScale = .37;
+          material.displacementScale = .43;
           material.needsUpdate = true;
         });
-        status.textContent = 'High resolution moss maps · 1024²';
+        status.textContent = '2048² · colour · bump · normal · displacement';
         worker.terminate();
-        URL.revokeObjectURL(url);
       };
       worker.onerror = () => {
         status.textContent = 'Procedural moss maps · 256²';
         worker.terminate();
-        URL.revokeObjectURL(url);
       };
       worker.postMessage({size:highSize});
     } catch (error) {
       status.textContent = 'Procedural moss maps · 256²';
-      if (url) URL.revokeObjectURL(url);
     }
   }
 
-  function createClumpGeometry() {
-    const geometry = new T.IcosahedronGeometry(1, 1);
-    const positions = geometry.attributes.position;
-    for (let i = 0; i < positions.count; i++) {
-      const x = positions.getX(i), y = positions.getY(i), z = positions.getZ(i);
-      const bump = 1 + .11 * Math.sin(x * 8 + y * 5) * Math.cos(z * 7 - y * 3);
-      positions.setXYZ(i, x * bump, y * bump, z * bump);
+  function createFrondTuftGeometry() {
+    const positions = [];
+    const indices = [];
+    const random = randomSource(518);
+    const frondCount = 7;
+    const segments = 5;
+    for (let blade = 0; blade < frondCount; blade++) {
+      const angle = (blade / frondCount) * Math.PI * 2 + random() * .28;
+      const directionX = Math.cos(angle), directionY = Math.sin(angle);
+      const sideX = -directionY, sideY = directionX;
+      const root = random() * .08;
+      const lean = .12 + random() * .28;
+      const bladeHeight = .72 + random() * .42;
+      const bladeWidth = .055 + random() * .045;
+      const startIndex = positions.length / 3;
+      for (let step = 0; step <= segments; step++) {
+        const t = step / segments;
+        const centerRadius = root + lean * t + Math.sin(t * Math.PI) * .055;
+        const centerX = directionX * centerRadius;
+        const centerY = directionY * centerRadius;
+        const centerZ = bladeHeight * t;
+        const width = bladeWidth * Math.pow(Math.sin(Math.PI * (t * .92 + .04)), .72) * (1 - .58 * t);
+        positions.push(centerX + sideX * width, centerY + sideY * width, centerZ);
+        positions.push(centerX - sideX * width, centerY - sideY * width, centerZ);
+      }
+      for (let step = 0; step < segments; step++) {
+        const a = startIndex + step * 2;
+        indices.push(a, a + 2, a + 1, a + 1, a + 2, a + 3);
+      }
     }
+    const geometry = new T.BufferGeometry();
+    geometry.setAttribute('position', new T.Float32BufferAttribute(positions, 3));
+    geometry.setIndex(indices);
     geometry.computeVertexNormals();
     return geometry;
   }
@@ -169,14 +207,16 @@
     const group = new T.Group();
     group.position.y = -row * tileHeight;
 
-    const wallGeometry = new T.PlaneGeometry(wallWidth, tileHeight, 100, 92);
+    const wallGeometry = new T.PlaneGeometry(wallWidth, tileHeight, 180, 150);
     const wallMaterial = new T.MeshStandardMaterial({
       map: setupTexture(maps.colorMap, true),
       bumpMap: setupTexture(maps.heightMap),
+      normalMap: setupTexture(maps.normalMap),
       displacementMap: maps.heightMap,
-      bumpScale: .21,
-      displacementScale: .29,
-      roughness: 1,
+      normalScale: new T.Vector2(.72, .72),
+      bumpScale: .32,
+      displacementScale: .39,
+      roughness: .94,
       metalness: 0,
       color: 0xcbd0bc,
       side: T.DoubleSide
@@ -187,15 +227,16 @@
     group.add(wall);
 
     const random = randomSource(seed);
-    const moss = new T.InstancedMesh(createClumpGeometry(), new T.MeshStandardMaterial({color:0xffffff,roughness:.96,vertexColors:true}), clumpCount);
+    const mossMaterial = new T.MeshStandardMaterial({color:0xffffff,roughness:.91,vertexColors:true,side:T.DoubleSide});
+    const moss = new T.InstancedMesh(createFrondTuftGeometry(), mossMaterial, clumpCount);
     for (let i = 0; i < clumpCount; i++) {
-      const size = .055 + Math.pow(random(), 1.65) * .3;
-      temp.position.set((random() - .5) * (wallWidth + .1), (random() - .5) * tileHeight, -.025 + random() * .26);
-      temp.rotation.set(random() * Math.PI, random() * Math.PI * 2, random() * Math.PI);
-      temp.scale.set(size * (.72 + random() * .72), size * (.33 + random() * .66), size * (.42 + random() * .78));
+      const size = .075 + Math.pow(random(), 1.35) * .15;
+      temp.position.set((random() - .5) * (wallWidth + .08), (random() - .5) * tileHeight, -.015 + random() * .09);
+      temp.rotation.set((random() - .5) * .42, (random() - .5) * .42, random() * Math.PI * 2);
+      temp.scale.set(size * (.78 + random() * .46), size * (.78 + random() * .46), size * (.84 + random() * .55));
       temp.updateMatrix();
       moss.setMatrixAt(i, temp.matrix);
-      tint.setHSL(.22 + random() * .075, .36 + random() * .34, .14 + random() * .2);
+      tint.setHSL(.215 + random() * .085, .52 + random() * .3, .11 + random() * .17);
       moss.setColorAt(i, tint);
     }
     moss.instanceMatrix.needsUpdate = true;
@@ -334,7 +375,7 @@
 
     const maps = buildMaps(lowSize);
     for (let row = -1; row < chunkCount - 1; row++) makeChunk(row, 631 + row * 1207, maps);
-    status.textContent = 'Moss surface · refining to 1024²';
+    status.textContent = 'Moss surface · refining to 2048² maps';
     setTimeout(makeHighResInWorker, 400);
     installControls(lights);
     addScrollContent();
