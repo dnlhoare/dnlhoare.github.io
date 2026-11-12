@@ -11,14 +11,15 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="mosswall-test.css?v=20261112-2" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
-  <script src="mosswall-test.js?v=20261112-3" defer></script>
+  <script src="mosswall-test.js?v=20261112-4" defer></script>
 </head>
 <body class="moss-study">
   <div class="moss-render" id="mossRender" aria-hidden="true"></div>
   <div class="scene-vignette" aria-hidden="true"></div>
   <header class="study-header"><a href="index-immersive.html" class="study-brand">DJH<span>DEV</span><i> / MATERIAL STUDY</i></a><div class="render-status"><i></i><span id="textureStatus">Generating moss surface</span></div></header>
   <aside class="study-controls" aria-label="Scene controls">
-    <p class="control-heading">LIGHT &amp; GLASS</p>
+    <p class="control-heading">MOSS, LIGHT &amp; GLASS</p>
+    <label for="mossSize">Cushion size <output id="mossSizeValue">1.5×</output></label><input id="mossSize" type="range" min="0.8" max="2.2" step="0.05" value="1.5" />
     <label for="ledColor">Rope light colour <output id="ledColorValue">#fff0d1</output></label><input id="ledColor" type="color" value="#fff0d1" />
     <label for="ledPower">Glow <output id="ledPowerValue">1.4</output></label><input id="ledPower" type="range" min="0.2" max="3" step="0.1" value="1.4" />
     <label for="glassBlur">Glass diffusion <output id="glassBlurValue">18px</output></label><input id="glassBlur" type="range" min="0" max="32" step="1" value="18" />

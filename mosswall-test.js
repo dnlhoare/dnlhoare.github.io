@@ -16,6 +16,7 @@
   const clumpCount = smallScreen ? 6400 : 13800;
   const chunks = [];
   const materials = [];
+  const mossInstances = [];
   const temp = new T.Object3D();
   const tint = new T.Color();
   let renderer;
@@ -78,12 +79,12 @@
         const micro = tileNoise(tables, (u * 5 + .63) % 1, (v * 5 + .19) % 1);
         const clump = Math.max(0, Math.min(1, (macro * .64 + fine * .36 - .29) * 2.25));
         const pits = Math.max(0, Math.min(1, (macro - .42) * 1.9));
-        const fiber = (micro - .5) * 27;
-        const green = 20 + clump * 104 + pits * 18 + fiber;
+      const fiber = (micro - .5) * 38;
+      const green = 90 + clump * 88 + pits * 18 + fiber;
         const i = (y * size + x) * 4;
-        colorPixels[i] = Math.max(6, Math.min(255, 13 + clump * 32 + micro * 13));
+        colorPixels[i] = Math.max(12, Math.min(255, 22 + clump * 28 + micro * 18));
         colorPixels[i + 1] = Math.max(12, Math.min(255, green));
-        colorPixels[i + 2] = Math.max(5, Math.min(255, 9 + clump * 13 + pits * 8));
+        colorPixels[i + 2] = Math.max(8, Math.min(255, 12 + clump * 18 + pits * 10));
         colorPixels[i + 3] = 255;
         const h = Math.round(24 + clump * 196 + (micro - .5) * 48);
         heightValues[y * size + x] = h / 255;
@@ -143,6 +144,12 @@
           material.bumpScale = .20;
           material.displacementScale = .10;
           material.needsUpdate = true;
+        });
+        mossInstances.forEach(instance => {
+          instance.material.map = highColor;
+          instance.material.bumpMap = highHeight;
+          instance.material.normalMap = highNormal;
+          instance.material.needsUpdate = true;
         });
         status.textContent = '2048² · colour · bump · normal · displacement';
         worker.terminate();
@@ -205,29 +212,42 @@
     group.add(wall);
 
     const random = randomSource(seed);
-    const mossMaterial = new T.MeshStandardMaterial({color:0xffffff,roughness:.91,vertexColors:true,side:T.DoubleSide});
+    const mossMaterial = new T.MeshStandardMaterial({map:maps.colorMap,bumpMap:maps.heightMap,normalMap:maps.normalMap,normalScale:new T.Vector2(.22,.22),bumpScale:.055,color:0xffffff,roughness:.96,vertexColors:true,side:T.DoubleSide});
     const moss = new T.InstancedMesh(createMossCushionGeometry(), mossMaterial, clumpCount);
-    // A lightly jittered grid keeps cushions touching, like the reference's packed moss mat.
+    // A jittered scaffold keeps the moss packed without exposing a visible lattice.
     const columns = Math.ceil(Math.sqrt(clumpCount * wallWidth / tileHeight));
     const rows = Math.ceil(clumpCount / columns);
     const cellX = wallWidth / columns, cellY = tileHeight / rows;
+    const colorGrid = Array.from({length:19}, () => Array.from({length:25}, () => random()));
+    const sizeData = new Float32Array(clumpCount * 9);
     for (let i = 0; i < clumpCount; i++) {
       const col = i % columns, row = Math.floor(i / columns);
-      const sizeX = cellX * (.56 + random() * .27);
-      const sizeY = cellY * (.56 + random() * .27);
-      const px = -wallWidth / 2 + (col + .5 + (random() - .5) * .32) * cellX;
-      const py = tileHeight / 2 - (row + .5 + (random() - .5) * .32) * cellY;
+      const sizeX = cellX * (.68 + random() * .5);
+      const sizeY = cellY * (.68 + random() * .5);
+      const px = -wallWidth / 2 + (col + .5 + (random() - .5) * .78) * cellX;
+      const py = tileHeight / 2 - (row + .5 + (random() - .5) * .78) * cellY;
       temp.position.set(px, py, .13 + random() * .025);
-      temp.rotation.set((random() - .5) * .18, (random() - .5) * .18, random() * Math.PI * 2);
+      const rotX = (random() - .5) * .18, rotY = (random() - .5) * .18, rotZ = random() * Math.PI * 2;
+      temp.rotation.set(rotX, rotY, rotZ);
       temp.scale.set(sizeX, sizeY, .12 + random() * .07);
+      const base = i * 9;
+      sizeData.set([px,py,temp.position.z,rotX,rotY,rotZ,sizeX,sizeY,temp.scale.z], base);
       temp.updateMatrix();
       moss.setMatrixAt(i, temp.matrix);
-      tint.setHSL(.215 + random() * .065, .56 + random() * .25, .13 + random() * .09);
+      const gx = (col / columns) * 23, gy = (row / rows) * 17;
+      const x0 = Math.floor(gx), y0 = Math.floor(gy), tx = gx - x0, ty = gy - y0;
+      const smoothX = tx * tx * (3 - 2 * tx), smoothY = ty * ty * (3 - 2 * ty);
+      const c00 = colorGrid[y0][x0], c10 = colorGrid[y0][x0 + 1], c01 = colorGrid[y0 + 1][x0], c11 = colorGrid[y0 + 1][x0 + 1];
+      const patchTone = (c00 + (c10 - c00) * smoothX) * (1 - smoothY) + (c01 + (c11 - c01) * smoothX) * smoothY;
+      tint.setHSL(.245 + (random() - .5) * .06, .74 + random() * .2, .40 + patchTone * .12 + (random() - .5) * .055);
       moss.setColorAt(i, tint);
     }
     moss.instanceMatrix.needsUpdate = true;
     if (moss.instanceColor) moss.instanceColor.needsUpdate = true;
     group.add(moss);
+    mossInstances.push(moss);
+    group.userData.moss = moss;
+    group.userData.mossSizeData = sizeData;
 
     const led = new T.Color(document.getElementById('ledColor').value);
     const ropeCore = new T.MeshBasicMaterial({color:led});
@@ -263,8 +283,10 @@
     const colorInput = document.getElementById('ledColor');
     const powerInput = document.getElementById('ledPower');
     const blurInput = document.getElementById('glassBlur');
+    const sizeInput = document.getElementById('mossSize');
     const glassPanel = document.getElementById('glassPanel');
     const blurOutput = document.getElementById('glassBlurValue');
+    const sizeOutput = document.getElementById('mossSizeValue');
     const applyLed = () => {
       const nextColor = new T.Color(colorInput.value);
       const power = Number(powerInput.value);
@@ -282,11 +304,31 @@
       glassPanel.style.setProperty('--blur', value + 'px');
       blurOutput.textContent = value + 'px';
     };
+    const applyMossSize = () => {
+      const factor = Number(sizeInput.value);
+      sizeOutput.textContent = factor.toFixed(1) + '×';
+      chunks.forEach(chunk => {
+        const data = chunk.userData.mossSizeData;
+        const moss = chunk.userData.moss;
+        for (let i = 0; i < clumpCount; i++) {
+          const base = i * 9;
+          temp.position.set(data[base], data[base + 1], data[base + 2]);
+          temp.rotation.set(data[base + 3], data[base + 4], data[base + 5]);
+          temp.scale.set(data[base + 6] * factor, data[base + 7] * factor, data[base + 8] * factor);
+          temp.updateMatrix();
+          moss.setMatrixAt(i, temp.matrix);
+        }
+        moss.instanceMatrix.needsUpdate = true;
+        moss.computeBoundingSphere();
+      });
+    };
     colorInput.addEventListener('input', applyLed);
     powerInput.addEventListener('input', applyLed);
     blurInput.addEventListener('input', applyBlur);
+    sizeInput.addEventListener('input', applyMossSize);
     applyLed();
     applyBlur();
+    applyMossSize();
   }
 
   function addScrollContent() {
@@ -339,18 +381,18 @@
     camera = new T.PerspectiveCamera(47, window.innerWidth / window.innerHeight, .1, 150);
     camera.position.set(0, 0, 10.5);
     camera.lookAt(0, 0, -.2);
-    scene.add(new T.HemisphereLight(0xd7e4bf, 0x141a12, 1.28));
-    const wash = new T.DirectionalLight(0xc1d2a9, 1.05);
+    scene.add(new T.HemisphereLight(0xd7e4bf, 0x24231a, 1.65));
+    const wash = new T.DirectionalLight(0xd5e4b6, 1.35);
     wash.position.set(-3, 4, 9);
     scene.add(wash);
-    const edgeFill = new T.DirectionalLight(0x91a578, .55);
+    const edgeFill = new T.DirectionalLight(0xaabd79, .72);
     edgeFill.position.set(5, -1, 5);
     scene.add(edgeFill);
 
     const lights = [];
     for (const x of [-wallWidth / 2 + .23, wallWidth / 2 - .23]) {
-      for (const offset of [-2.8, 2.8]) {
-        const light = new T.PointLight(new T.Color(document.getElementById('ledColor').value), 6.3, 7.5, 1.65);
+      for (const offset of [-5.4, 0, 5.4]) {
+        const light = new T.PointLight(new T.Color(document.getElementById('ledColor').value), 5.6, 12, 1.45);
         light.position.set(x, offset, .4);
         light.userData.offset = offset;
         scene.add(light);
