@@ -9,9 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="mosswall-test.css?v=20261112-2" />
+  <link rel="stylesheet" href="mosswall-test.css?v=20261112-5" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
-  <script src="mosswall-test.js?v=20261112-4" defer></script>
+  <script src="mosswall-test.js?v=20261112-19" defer></script>
 </head>
 <body class="moss-study">
   <div class="moss-render" id="mossRender" aria-hidden="true"></div>
@@ -19,15 +19,18 @@
   <header class="study-header"><a href="index-immersive.html" class="study-brand">DJH<span>DEV</span><i> / MATERIAL STUDY</i></a><div class="render-status"><i></i><span id="textureStatus">Generating moss surface</span></div></header>
   <aside class="study-controls" aria-label="Scene controls">
     <p class="control-heading">MOSS, LIGHT &amp; GLASS</p>
-    <label for="mossSize">Cushion size <output id="mossSizeValue">1.5×</output></label><input id="mossSize" type="range" min="0.8" max="2.2" step="0.05" value="1.5" />
+    <label for="mossScale">Texture scale <output id="mossScaleValue">5.0m</output></label><input id="mossScale" type="range" min="1.4" max="7.5" step="0.1" value="5.0" />
+    <label for="mossRelief">Surface relief <output id="mossReliefValue">0.80</output></label><input id="mossRelief" type="range" min="0" max="2.0" step="0.01" value="0.80" />
+    <label for="ambientLight">Ambient light <output id="ambientLightValue">1.00</output></label><input id="ambientLight" type="range" min="0" max="1.5" step="0.01" value="1.00" />
+    <label for="lowPoint">Low-point darkening <output id="lowPointValue">0.45</output></label><input id="lowPoint" type="range" min="0" max="1" step="0.01" value="0.45" />
     <label for="ledColor">Rope light colour <output id="ledColorValue">#fff0d1</output></label><input id="ledColor" type="color" value="#fff0d1" />
     <label for="ledPower">Glow <output id="ledPowerValue">1.4</output></label><input id="ledPower" type="range" min="0.2" max="3" step="0.1" value="1.4" />
     <label for="glassBlur">Glass diffusion <output id="glassBlurValue">18px</output></label><input id="glassBlur" type="range" min="0" max="32" step="1" value="18" />
-    <small>Procedural 3D wall · scroll to travel</small>
+    <small>Seamless PBR wall · scroll to travel</small>
   </aside>
   <main id="pageFlow">
     <section class="study-hero">
-      <div class="hero-text"><p class="eyebrow">PROCEDURAL ENVIRONMENT / 01</p><h1>A living<br /><span>surface.</span></h1><p>A continuous carpet of packed moss cushions over a mapped, finely textured surface. Scroll the wall, then step behind a pane of diffused glass.</p><a href="#glassStudy" class="down-link">SCROLL INTO THE WALL <b>↓</b></a></div>
+      <div class="hero-text"><p class="eyebrow">TILEABLE PBR ENVIRONMENT / 01</p><h1>A living<br /><span>surface.</span></h1><p>One continuous moss surface with colour, normal, height, roughness and ambient occlusion maps. Scroll the wall, then step behind a pane of diffused glass.</p><a href="#glassStudy" class="down-link">SCROLL INTO THE WALL <b>↓</b></a></div>
       <div class="hero-index">THREE.JS<br />MOSS STUDY</div>
     </section>
     <section class="glass-study" id="glassStudy">
@@ -35,7 +38,7 @@
       <div class="glass-panel" id="glassPanel"><div class="glass-grain"></div><div class="glass-highlight"></div><div class="glass-panel-label"><span>TRANSLUCENT GLASS</span><b>18<small>MM</small></b><i></i><i></i><i></i></div></div>
       <span class="glass-edge" aria-hidden="true"></span>
     </section>
-    <section class="endless-note"><p class="eyebrow">03 — ENDLESS CANVAS</p><h2>Keep going.</h2><p>The wall recycles as you scroll. Its procedural surface carries on beyond this page.</p><span class="scroll-position" id="scrollPosition">WALL SEGMENT 01</span></section>
+    <section class="endless-note"><p class="eyebrow">03 — ENDLESS CANVAS</p><h2>Keep going.</h2><p>The seamless PBR surface repeats as you scroll, with its map detail and edge lighting carried through the page.</p><span class="scroll-position" id="scrollPosition">WALL SEGMENT 01</span></section>
     <div id="scrollSentinel" aria-hidden="true"></div>
   </main>
   <noscript>This Three.js study needs JavaScript enabled.</noscript>
