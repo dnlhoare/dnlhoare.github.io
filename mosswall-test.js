@@ -13,7 +13,13 @@
   const maps = {};
   const scrollingMaps = [];
   let renderer, scene, camera, wallMaterial, wallMesh, scrollFrame = 0;
+  let cursorLight, heightField, pointerOnPage = false;
   let ambientLight, washLight, fillLight;
+  let lastTextureOffset = NaN;
+  const pointerNdc = new T.Vector2();
+  const pointerRaycaster = new T.Raycaster();
+  const wallPlane = new T.Plane(new T.Vector3(0, 0, 1), .18);
+  const wallHit = new T.Vector3();
   const lowPointUniform = {value:0};
 
   function startRenderer() {
@@ -40,7 +46,47 @@
     if (colorMap) texture.encoding = T.sRGBEncoding;
     texture.needsUpdate = true;
     scrollingMaps.push(texture);
+    lastTextureOffset = NaN;
     return texture;
+  }
+
+  function cacheHeightField(texture) {
+    try {
+      const size = 512;
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = size;
+      const context = canvas.getContext('2d', {willReadFrequently:true});
+      context.drawImage(texture.image, 0, 0, size, size);
+      heightField = {data:context.getImageData(0, 0, size, size).data, width:size, height:size};
+    } catch (error) {
+      heightField = null;
+    }
+  }
+
+  function sampleHeightAt(x, y) {
+    if (!heightField || !maps.height) return .5;
+    const texture = maps.height;
+    texture.updateMatrix();
+    const uv = new T.Vector2(x / wallWidth + .5, .5 - y / wallHeight).applyMatrix3(texture.matrix);
+    const u = ((uv.x % 1) + 1) % 1;
+    const v = ((uv.y % 1) + 1) % 1;
+    const px = Math.min(heightField.width - 1, Math.floor(u * heightField.width));
+    const py = Math.min(heightField.height - 1, Math.floor((1 - v) * heightField.height));
+    return heightField.data[(py * heightField.width + px) * 4] / 255;
+  }
+
+  function updateCursorLight() {
+    if (!cursorLight || !pointerOnPage) return;
+    pointerRaycaster.setFromCamera(pointerNdc, camera);
+    if (!pointerRaycaster.ray.intersectPlane(wallPlane, wallHit) ||
+        Math.abs(wallHit.x) > wallWidth / 2 || Math.abs(wallHit.y) > wallHeight / 2) {
+      cursorLight.visible = false;
+      return;
+    }
+    const relief = wallMaterial ? wallMaterial.displacementScale : 0;
+    const height = sampleHeightAt(wallHit.x, wallHit.y);
+    cursorLight.position.set(wallHit.x, wallHit.y, wallMesh.position.z + height * relief + .12 + relief * .035);
+    cursorLight.visible = true;
   }
 
   function setTextureScale(worldSize) {
@@ -58,11 +104,28 @@
   function updateTextureOffset() {
     const worldTravel = window.scrollY * .008;
     const worldSize = Number(document.getElementById('mossScale').value);
-    const offset = -(worldTravel / worldSize);
+    const cycles = worldTravel / worldSize;
+    const wrappedCycles = ((cycles % 1) + 1) % 1;
+    const offset = -wrappedCycles;
+    if (Math.abs(offset - lastTextureOffset) < 0.000001) return;
     scrollingMaps.forEach(texture => {
       texture.offset.y = offset;
-      texture.updateMatrix();
     });
+    lastTextureOffset = offset;
+  }
+
+  function setCameraAngle(value) {
+    if (!camera) return;
+    const angle = value * Math.PI / 180;
+    const targetZ = -.2;
+    const distance = cameraZ - targetZ;
+    const sine = Math.sin(angle);
+    const cosine = Math.cos(angle);
+    const frontClearance = .35 * sine * sine;
+    camera.up.set(0, cosine, -sine);
+    camera.position.set(0, sine * distance, targetZ + cosine * distance + frontClearance);
+    camera.lookAt(0, 0, targetZ);
+    document.getElementById('cameraAngleValue').textContent = (value > 0 ? '+' : '') + value + '°';
   }
 
   function setRelief(value) {
@@ -102,6 +165,7 @@
       maps.height = height;
       maps.roughness = roughness;
       maps.ao = ao;
+      cacheHeightField(height);
       wallMaterial.map = color;
       wallMaterial.normalMap = normal;
       wallMaterial.bumpMap = height;
@@ -117,7 +181,7 @@
           .replace('#include <begin_vertex>', '#include <begin_vertex>\nvMossUv = uv;');
         shader.fragmentShader = shader.fragmentShader
           .replace('#include <common>', '#include <common>\nuniform sampler2D mossHeightMap;\nuniform mat3 mossHeightTransform;\nuniform float mossLowPointDarkening;\nvarying vec2 vMossUv;')
-          .replace('#include <color_fragment>', '#include <color_fragment>\nvec2 mossHeightUv = (mossHeightTransform * vec3(vMossUv, 1.0)).xy;\nfloat mossHeight = texture2D(mossHeightMap, mossHeightUv).r;\nfloat mossCrevice = 1.0 - smoothstep(0.30, 0.68, mossHeight);\ndiffuseColor.rgb *= 1.0 - mossCrevice * mossLowPointDarkening * 0.82;');
+          .replace('#include <color_fragment>', '#include <color_fragment>\nvec2 mossHeightUv = (mossHeightTransform * vec3(vMossUv, 1.0)).xy;\nfloat mossHeight = texture2D(mossHeightMap, mossHeightUv).r;\nfloat mossCrevice = 1.0 - smoothstep(0.30, 0.68, mossHeight);\ndiffuseColor.rgb *= max(0.08, 1.0 - mossCrevice * mossLowPointDarkening * 0.92);');
       };
       wallMaterial.needsUpdate = true;
       setTextureScale(Number(document.getElementById('mossScale').value));
@@ -183,6 +247,9 @@
         lights.push(light);
       }
     }
+    cursorLight = new T.PointLight(new T.Color(document.getElementById('cursorLightColor').value), 18, 8, 2);
+    cursorLight.visible = false;
+    scene.add(cursorLight);
 
     function applyLed() {
       const color = new T.Color(document.getElementById('ledColor').value);
@@ -199,24 +266,52 @@
 
     function applyBlur() {
       const value = Number(document.getElementById('glassBlur').value);
-      document.getElementById('glassPanel').style.setProperty('--blur', value + 'px');
+      document.documentElement.style.setProperty('--blur', value + 'px');
       document.getElementById('glassBlurValue').textContent = value + 'px';
+    }
+
+    function applyCursorLightColor() {
+      const input = document.getElementById('cursorLightColor');
+      cursorLight.color.set(input.value);
+      document.getElementById('cursorLightColorValue').textContent = input.value;
     }
 
     document.getElementById('ledColor').addEventListener('input', applyLed);
     document.getElementById('ledPower').addEventListener('input', applyLed);
     document.getElementById('glassBlur').addEventListener('input', applyBlur);
+    document.getElementById('cursorLightColor').addEventListener('input', applyCursorLightColor);
     document.getElementById('mossScale').addEventListener('input', event => setTextureScale(Number(event.target.value)));
     document.getElementById('mossRelief').addEventListener('input', event => setRelief(Number(event.target.value)));
     document.getElementById('ambientLight').addEventListener('input', event => setAmbient(Number(event.target.value)));
     document.getElementById('lowPoint').addEventListener('input', event => setLowPointDarkening(Number(event.target.value)));
+    document.getElementById('cameraAngle').addEventListener('input', event => setCameraAngle(Number(event.target.value)));
+    const controlsToggle = document.getElementById('controlsToggle');
+    controlsToggle.addEventListener('click', () => {
+      const expanded = controlsToggle.getAttribute('aria-expanded') === 'true';
+      controlsToggle.setAttribute('aria-expanded', String(!expanded));
+      controlsToggle.textContent = expanded ? 'Show settings' : 'Hide settings';
+      document.body.classList.toggle('controls-hidden', expanded);
+    });
     applyLed();
     applyBlur();
+    applyCursorLightColor();
     setTextureScale(Number(document.getElementById('mossScale').value));
     setRelief(Number(document.getElementById('mossRelief').value));
     setAmbient(Number(document.getElementById('ambientLight').value));
     setLowPointDarkening(Number(document.getElementById('lowPoint').value));
+    setCameraAngle(Number(document.getElementById('cameraAngle').value));
     loadMaterial();
+
+    window.addEventListener('pointermove', event => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      pointerNdc.set(((event.clientX - rect.left) / rect.width) * 2 - 1, -((event.clientY - rect.top) / rect.height) * 2 + 1);
+      pointerOnPage = true;
+      updateCursorLight();
+    }, {passive:true});
+    window.addEventListener('pointerleave', () => {
+      pointerOnPage = false;
+      cursorLight.visible = false;
+    }, {passive:true});
 
     const flow = document.getElementById('pageFlow');
     const sentinel = document.getElementById('scrollSentinel');
@@ -238,7 +333,6 @@
     window.addEventListener('scroll', () => {
       if (scrollFrame) return;
       scrollFrame = requestAnimationFrame(() => {
-        updateTextureOffset();
         const segment = Math.floor(window.scrollY / Math.max(window.innerHeight * .9, 1)) + 1;
         document.getElementById('scrollPosition').textContent = 'WALL SEGMENT ' + String(segment).padStart(2, '0');
         scrollFrame = 0;
@@ -254,6 +348,8 @@
 
     const render = () => {
       requestAnimationFrame(render);
+      updateTextureOffset();
+      updateCursorLight();
       renderer.render(scene, camera);
     };
     render();
