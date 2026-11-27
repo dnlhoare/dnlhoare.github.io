@@ -6,11 +6,11 @@
   const TireModels = {
     linear(slip, normalLoad, grip) {
       const peak = normalLoad * grip;
-      return -clamp(slip * 8.2, -1, 1) * peak;
+      return -clamp(slip * 6.2, -1, 1) * peak;
     },
     pacejka(slip, normalLoad, grip) {
       // Simplified Magic Formula lateral force: D*sin(C*atan(B*a - E*(B*a-atan(B*a))).
-      const B = 7.4, C = 1.28, E = -0.65, D = normalLoad * grip;
+      const B = 6.0, C = 1.28, E = -0.65, D = normalLoad * grip;
       const x = B * slip;
       return -D * Math.sin(C * Math.atan(x - E * (x - Math.atan(x))));
     }
@@ -33,9 +33,12 @@
       const model = TireModels[this.model] || TireModels.linear;
       const loadEach = tune.mass * 9.81 * 0.5;
       const frontForce = model(frontSlip, loadEach, tune.grip * 1.04);
-      const rearForce = model(rearSlip, loadEach, tune.grip * (input.handbrake ? 0.58 : 0.98));
+      const throttleBreakaway = 1 - 0.24 * clamp(input.throttle, 0, 1);
+      const rearGripScale = (input.handbrake ? 0.32 : 0.78) * throttleBreakaway;
+      const rearForce = model(rearSlip, loadEach, tune.grip * rearGripScale);
       const drive = input.throttle * tune.power * (input.throttle < 0 ? 0.62 : 1);
-      const brake = Math.min(input.brake * 9000 + (input.handbrake ? 8500 : 0), Math.abs(speed) * tune.mass / Math.max(dt, 0.001));
+      const handbrakeBrake = input.handbrake ? (input.throttle > 0 ? 900 : 4200) : 0;
+      const brake = Math.min(input.brake * 9000 + handbrakeBrake, Math.abs(speed) * tune.mass / Math.max(dt, 0.001));
       const drag = 0.018 * speed * Math.abs(speed);
       const totalForward = drive - Math.sign(speed || 1) * brake - drag;
 
@@ -44,7 +47,7 @@
       this.vx += ax * dt; this.vz += az * dt;
       this.vx *= Math.pow(0.999, dt * 60); this.vz *= Math.pow(0.999, dt * 60);
       this.yawRate += ((frontForce * 1.15 - rearForce * 1.25) / tune.inertia) * dt;
-      this.yawRate *= Math.pow(input.handbrake ? 0.997 : 0.985, dt * 60);
+      this.yawRate *= Math.pow(input.handbrake ? 0.998 : 0.993, dt * 60);
       this.heading += this.yawRate * dt;
       this.x += this.vx * dt; this.z += this.vz * dt;
       const newSpeed = Math.hypot(this.vx, this.vz);

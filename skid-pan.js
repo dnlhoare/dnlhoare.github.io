@@ -11,7 +11,7 @@
   }
   const car = new window.DriftPhysics.DriftCar();
   const controls = { throttle: 0, brake: 0, steer: 0, handbrake: false };
-  const tune = { mass: 1120, inertia: 2050, power: 6200, steering: 0.56, grip: 0.88 };
+  const tune = { mass: 1120, inertia: 1780, power: 9000, steering: 0.66, grip: 0.88 };
   const keys = new Set();
   const clamp = window.DriftPhysics.clamp;
   let scene, camera, renderer, carRig, wheelMeshes = [], rearSmoke, trailPositions, trailGeometry, trailLine;
